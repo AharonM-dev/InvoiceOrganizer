@@ -9,4 +9,6 @@ public class Invoice
     public int InvoiceNumber { get; set; }
     public DateOnly InvoiceDate { get; set; }
     public virtual Supplier Supplier { get; set; } = null!;
+    public int UserId { get; set; }
+    public virtual Users User { get; set; } = new();
 }
