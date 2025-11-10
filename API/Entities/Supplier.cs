@@ -12,5 +12,6 @@ public class Supplier
     public string? Address { get; set; }
     public int UserId { get; set; }
     public virtual Users User { get; set; } = new();
+     public ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
 
 }
