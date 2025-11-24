@@ -32,8 +32,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IOcrEngine, DummyOcrEngine>();   
-builder.Services.AddCors();
+
 
 var app = builder.Build();
 

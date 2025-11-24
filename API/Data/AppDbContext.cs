@@ -11,4 +11,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<InvoiceItem> InvoiceItems { set; get; } 
     public DbSet<Category> Categories { set; get; }
     public DbSet<Users> Users { set; get; }
+    public DbSet<UploadedDocument> UploadedDocuments { set; get; } = null!;
 }
