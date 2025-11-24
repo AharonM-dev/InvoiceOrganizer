@@ -12,8 +12,8 @@ public class Invoice
     public int SupplierId { get; set; }
     public virtual Supplier Supplier { get; set; } = null!;
 
-    public int UserId { get; set; }
-    public virtual Users User { get; set; } = new();
+    public string UserId { get; set; } = string.Empty;
+    public virtual Users User { get; set; } = null!;
 
     public virtual ICollection<InvoiceItem> Items { get; set; } = new List<InvoiceItem>();
 
