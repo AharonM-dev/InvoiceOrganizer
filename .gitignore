@@ -486,3 +486,6 @@ $RECYCLE.BIN/
 # Local SQLite database (not tracked)
 API/InvoiceOrganizer.db
 
+invoice_figma/
+
+
