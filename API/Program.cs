@@ -5,6 +5,7 @@ using API.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using API.Services.DocumentAI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,6 +13,9 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.Configure<DocumentAiOptions>(builder.Configuration.GetSection("DocumentAI"));
+builder.Services.AddScoped<IInvoiceOcrService, GoogleDocumentAiInvoiceParser>();
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ITokenService, TokenService>();
