@@ -19,10 +19,13 @@ namespace API.Controllers
     }
 
     [HttpPost]
+    [Consumes("multipart/form-data")]
     public async Task<ActionResult<object>> UploadFile(
-        [FromForm] IFormFile file,
-        [FromForm] string userId)
-    {
+        [FromForm] UploadInvoiceRequest request)
+        {
+        var file = request.File;
+            var userId = request.UserId;
+        
         if (file == null || file.Length == 0)
             return BadRequest("File is empty");
 
@@ -75,4 +78,9 @@ namespace API.Controllers
         return (relativePath, storedFileName);
     }
     }
+}
+public class UploadInvoiceRequest
+{
+    public IFormFile File { get; set; } = default!;
+    public string UserId { get; set; } = default!;
 }

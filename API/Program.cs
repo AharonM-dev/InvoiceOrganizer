@@ -18,6 +18,10 @@ builder.Services.Configure<DocumentAiOptions>(builder.Configuration.GetSection("
 builder.Services.AddScoped<IInvoiceOcrService, GoogleDocumentAiInvoiceParser>();
 
 builder.Services.AddControllers();
+
+//builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddSwaggerGen();
+
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -34,16 +38,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+//builder.Services.AddOpenApi();
 
-
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+//if (app.Environment.IsDevelopment())
+//{
+//   
+//}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    //app.MapOpenApi();
 }
 
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod());
