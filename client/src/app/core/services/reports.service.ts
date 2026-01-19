@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ReportsService {
-  private apiUrl = 'http://localhost:5000/api/reports';
+  private apiUrl = '/api/reports';
   constructor(private http: HttpClient) {}
   getReports(filters: any): Observable<any> {
     let params = new HttpParams();

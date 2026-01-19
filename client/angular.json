@@ -57,6 +57,7 @@
               "buildTarget": "InvoiceOrganizer_client:build:production"
             },
             "development": {
+              "proxyConfig": "proxy.conf.json",
               "buildTarget": "InvoiceOrganizer_client:build:development"
             }
           },

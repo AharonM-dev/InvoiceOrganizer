@@ -7,7 +7,7 @@ import { Invoice, InvoiceStatus } from '../models/invoice.model';
   providedIn: 'root',
 })
 export class InvoiceService {
-  private apiUrl = 'http://localhost:5042/api/invoices';
+  private apiUrl = '/api/invoices';
 
   // We keep a signal for state management if needed, but primarily work with Observables now
   private _invoices = signal<Invoice[]>([]);

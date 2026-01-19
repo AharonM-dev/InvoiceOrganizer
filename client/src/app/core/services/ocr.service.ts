@@ -7,7 +7,7 @@ import { ExtractedData } from '../models/invoice.model';
   providedIn: 'root',
 })
 export class OCRService {
-  private apiUrl = 'http://localhost:5042/api/ocr';
+  private apiUrl = '/api/ocr';
 
   constructor(private http: HttpClient) {}
 
