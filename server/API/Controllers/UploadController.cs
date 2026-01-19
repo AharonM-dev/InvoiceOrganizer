@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using API.Data;
 using API.Entities;
@@ -10,76 +9,70 @@ namespace API.Controllers
     public class UploadController : ControllerBase
     {
         private readonly AppDbContext _context;
-    private readonly IWebHostEnvironment _env;
+        private readonly IWebHostEnvironment _env;
 
-    public UploadController(AppDbContext context, IWebHostEnvironment env)
-    {
-        _context = context;
-        _env = env;
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<object>> UploadFile([FromForm] FileUploadDto upload)
-    {
-        var file = upload.File;
-        var userId = upload.UserId;
-
-        if (file == null || file.Length == 0)
-            return BadRequest("File is empty");
-
-        // 1. שמירת הקובץ בדיסק
-        var (relativePath, storedFileName) = await SaveFileAsync(file);
-
-        // 2. יצירת UploadedDocument
-        var doc = new UploadedDocument
+        public UploadController(AppDbContext context, IWebHostEnvironment env)
         {
-            FilePath = relativePath,
-            UploadedAt = DateTime.UtcNow,
-            UserId = userId,
-            OcrStatus = "Pending"
-        };
-
-        _context.UploadedDocuments.Add(doc);
-        await _context.SaveChangesAsync();
-
-        // 3. מחזירים ללקוח מזהה – ה-UI ישתמש בזה לקריאת /api/ocr/process
-        return Ok(new
-        {
-            UploadedDocumentId = doc.Id,
-            doc.OcrStatus,
-            doc.FilePath
-        });
-    }
-
-    public class FileUploadDto
-    {
-        public IFormFile File { get; set; }
-        public string UserId { get; set; }
-    }
-
-    private async Task<(string RelativePath, string StoredFileName)> SaveFileAsync(IFormFile file)
-    {
-        var uploadsFolder = Path.Combine("uploads", "invoices");
-        var webRootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-        var targetFolder = Path.Combine(webRootPath, uploadsFolder);
-
-        Directory.CreateDirectory(targetFolder);
-
-        var originalFileName = Path.GetFileName(file.FileName);
-        var extension = Path.GetExtension(originalFileName);
-        var storedFileName = $"{Guid.NewGuid()}{extension}";
-        var fullPath = Path.Combine(targetFolder, storedFileName);
-
-        using (var stream = new FileStream(fullPath, FileMode.Create))
-        {
-           await file.CopyToAsync(stream);
+            _context = context;
+            _env = env;
         }
 
-        var relativePath = Path
-            .Combine(uploadsFolder, storedFileName)
-            .Replace("\\", "/");
+        [HttpPost]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<object>> UploadFile(
+            IFormFile file,
+            string userId)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File is empty");
 
-        return (relativePath, storedFileName);
-    }
+            // 1) שמירת הקובץ בדיסק
+            var (relativePath, storedFileName) = await SaveFileAsync(file);
+
+            // 2) יצירת UploadedDocument
+            var doc = new UploadedDocument
+            {
+                FilePath = relativePath,
+                UploadedAt = DateTime.UtcNow,
+                UserId = userId,
+                OcrStatus = "Pending"
+            };
+
+            _context.UploadedDocuments.Add(doc);
+            await _context.SaveChangesAsync();
+
+            // 3) מחזירים ללקוח מזהה
+            return Ok(new
+            {
+                UploadedDocumentId = doc.Id,
+                doc.OcrStatus,
+                doc.FilePath
+            });
+        }
+
+        private async Task<(string RelativePath, string StoredFileName)> SaveFileAsync(IFormFile file)
+        {
+            var uploadsFolder = Path.Combine("uploads", "invoices");
+            var webRootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+            var targetFolder = Path.Combine(webRootPath, uploadsFolder);
+
+            Directory.CreateDirectory(targetFolder);
+
+            var originalFileName = Path.GetFileName(file.FileName);
+            var extension = Path.GetExtension(originalFileName);
+            var storedFileName = $"{Guid.NewGuid()}{extension}";
+            var fullPath = Path.Combine(targetFolder, storedFileName);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativePath = Path
+                .Combine(uploadsFolder, storedFileName)
+                .Replace("\\", "/");
+
+            return (relativePath, storedFileName);
+        }
     }
 }
