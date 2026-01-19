@@ -38,7 +38,7 @@ bld/
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
+server/API/wwwroot/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
@@ -64,6 +64,9 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+**/bin/
+**/obj/
+.vs/
 
 # Tye
 .tye/
@@ -484,7 +487,12 @@ $RECYCLE.BIN/
 *.swp
 
 # Local SQLite database (not tracked)
-API/InvoiceOrganizer.db
+Server/API/InvoiceOrganizer.db
+*.db
+# Angular
+client/node_modules/
+client/dist/
+client/.angular/
 
 invoice_figma/
 

@@ -1,0 +1,180 @@
+<div class="dashboard-page">
+
+  <nav class="top-nav">
+
+    <div class="logo-area">
+
+      <div class="logo-icon">IH</div> <span class="logo-text">InvoiceHub</span>
+
+    </div>
+
+    <div class="nav-actions">
+
+        <!-- Actions moved to sidebar -->
+
+    </div>
+
+  </nav>
+
+  <div class="glass-header">
+
+    <div class="title-area">
+
+      <h1>סקירה כללית  <span class="badge">PRO</span></h1>
+
+      <div class="subtitle text-500">לוח בקרה של הוצאות ותקציב</div>
+
+    </div>
+
+   
+
+    <div class="search-wrapper">
+
+        <i class="pi pi-search"></i>
+
+        <input type="text" pInputText placeholder="חיפוש...">
+
+    </div>
+
+
+
+    <!-- Actions placeholder if needed -->
+
+    <div class="actions">
+
+       <p-button label="הורד דוח" icon="pi pi-download" styleClass="p-button-outlined"></p-button>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="main-grid">
+
+    <!-- Main Trend Chart -->
+
+    <div class="card main-chart">
+
+      <div class="flex-between">
+
+        <h3>מגמת הוצאות</h3>
+
+        <span>חצי שנתי</span>
+
+      </div>
+
+      <p-chart type="line" [data]="expenseTrendChart" [options]="expenseTrendOptions" height="300px"></p-chart>
+
+    </div>
+
+
+
+    <!-- Category Doughnut Chart -->
+
+    <div class="card donut-section">
+
+      <h3>התפלגות תקציב</h3>
+
+      <div class="chart-relative">
+
+        <p-chart type="doughnut" [data]="categoryChart" [options]="categoryOptions" height="250px"></p-chart>
+
+        <div class="chart-center-label">
+
+          <strong>85%</strong>
+
+          <span class="text-sm text-500">ניצול תקציב</span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Expenses Table -->
+
+    <div class="table-container">
+
+      <div class="card">
+
+        <h3>הוצאות אחרונות</h3>
+
+        <p-table [value]="expenses" [rows]="5" [paginator]="false" responsiveLayout="scroll" styleClass="p-datatable-sm">
+
+          <ng-template pTemplate="header">
+
+            <tr>
+
+              <th>ספק</th>
+
+              <th>קטגוריה</th>
+
+              <th>תאריך</th>
+
+              <th>סכום</th>
+
+              <th>סטטוס</th>
+
+              <th></th>
+
+            </tr>
+
+          </ng-template>
+
+          <ng-template pTemplate="body" let-expense>
+
+            <tr class="table-row">
+
+              <td>
+
+                <div class="vendor-info">
+
+                  <p-avatar *ngIf="expense.logo; else iconAvatar" [image]="expense.logo" shape="circle"></p-avatar>
+
+                  <ng-template #iconAvatar>
+
+                     <p-avatar [icon]="expense.icon" shape="circle" styleClass="bg-blue-100 text-blue-600"></p-avatar>
+
+                  </ng-template>
+
+                  <span class="font-medium">{{expense.vendor}}</span>
+
+                </div>
+
+              </td>
+
+              <td><p-tag [value]="expense.category" severity="info" [rounded]="true"></p-tag></td>
+
+              <td>{{expense.date | date:'dd/MM/yyyy'}}</td>
+
+              <td class="amount">{{expense.amount | currency:'ILS':'symbol':'1.0-0'}}</td>
+
+              <td>
+
+                <p-tag [value]="expense.status" [severity]="getSeverity(expense.status)"></p-tag>
+
+              </td>
+
+              <td>
+
+                <button pButton icon="pi pi-angle-left" class="p-button-text p-button-rounded p-button-secondary"></button>
+
+              </td>
+
+            </tr>
+
+          </ng-template>
+
+        </p-table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+

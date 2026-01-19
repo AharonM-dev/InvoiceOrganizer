@@ -1,0 +1,25 @@
+<div class="upload-page-container">
+    <h1>Upload Invoices</h1>
+
+    <div class="upload-section">
+        <app-file-upload (filesSelected)="onFilesSelected($event)"></app-file-upload>
+
+        <div class="actions">
+            <button class="upload-btn" (click)="onUpload()" [disabled]="files.length === 0 || isUploading">
+                <span *ngIf="!isUploading">Upload {{ files.length > 0 ? files.length + ' Files' : '' }}</span>
+                <span *ngIf="isUploading">Processing...</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="status-list" *ngIf="uploadStatuses.length > 0">
+        <h3>Upload Status</h3>
+        <div class="status-item" *ngFor="let item of uploadStatuses" [ngClass]="item.status">
+            <div class="status-info">
+                <span class="file-name" [title]="item.fileName">{{ item.fileName }}</span>
+                <span class="status-badge">{{ item.status }}</span>
+            </div>
+            <div class="status-message" *ngIf="item.message">{{ item.message }}</div>
+        </div>
+    </div>
+</div>

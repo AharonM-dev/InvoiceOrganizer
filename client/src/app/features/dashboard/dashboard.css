@@ -1,0 +1,493 @@
+.dashboard-page {
+
+  padding: 0 2rem 2rem 2rem;
+
+  background: #f1f5f9;
+
+  min-height: 100vh;
+
+  direction: rtl;
+
+  position: relative;
+
+}
+
+
+
+.glass-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 2rem;
+
+}
+
+
+
+.title-area h1 {
+
+  font-size: 2rem;
+
+  color: #0f172a;
+
+  margin: 0;
+
+}
+
+.badge {
+
+  font-size: 0.8rem;
+
+  background: #fb7185;
+
+  color: white;
+
+  padding: 4px 8px;
+
+  border-radius: 6px;
+
+  vertical-align: middle;
+
+}
+
+
+
+.main-grid {
+
+  display: grid;
+
+  grid-template-columns: 2fr 1fr;
+
+  gap: 1.5rem;
+
+}
+
+
+
+.card {
+
+  background: white;
+
+  border-radius: 20px;
+
+  padding: 1.5rem;
+
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+
+  border: 1px solid #e2e8f0;
+
+}
+
+
+
+.main-chart {
+
+  grid-column: 1 / 2;
+
+}
+
+.donut-section {
+
+  grid-column: 2 / 3;
+
+  position: relative;
+
+}
+
+.table-container {
+
+  grid-column: 1 / 3;
+
+}
+
+
+
+.chart-relative {
+
+  position: relative;
+
+  margin-top: 1rem;
+
+}
+
+
+
+.chart-center-label {
+
+  position: absolute;
+
+  top: 65%;
+
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  text-align: center;
+
+}
+
+
+
+.chart-center-label strong {
+
+  font-size: 1.4rem;
+
+  display: block;
+
+  color: #0f172a;
+
+}
+
+
+
+.budget-bar {
+
+  height: 8px !important;
+
+  border-radius: 10px;
+
+  background: #e2e8f0 !important;
+
+}
+
+::ng-deep .p-progressbar-value {
+
+  background: #6366f1 !important;
+
+}
+
+
+
+.vendor-info {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+}
+
+.amount {
+
+  font-weight: 700;
+
+  color: #1e293b;
+
+}
+
+
+
+.table-row:hover {
+
+  background: #f8fafc;
+
+  cursor: pointer;
+
+}
+
+
+
+.flex-between {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-bottom: 0.5rem;
+
+  color: #64748b;
+
+  font-size: 0.9rem;
+
+}
+
+
+
+@media (max-width: 1024px) {
+
+  .main-grid {
+
+    grid-template-columns: 1fr;
+
+  }
+
+  .main-chart,
+
+  .donut-section,
+
+  .table-container {
+
+    grid-column: 1 / 2;
+
+  }
+
+}
+
+
+
+@media (max-width: 640px) {
+
+  .dashboard-page {
+
+    padding: 85px 1rem 1rem 1rem; /* Reduced side padding, keep top for nav */
+
+  }
+
+ 
+
+  .glass-header {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 1rem;
+
+  }
+
+
+
+  .search-wrapper {
+
+    width: 100%; /* Full width search on mobile */
+
+  }
+
+
+
+  .title-area h1 {
+
+    font-size: 1.5rem;
+
+  }
+
+
+
+  .card {
+
+    padding: 1rem;
+
+  }
+
+}
+
+
+
+/* Search Box Styling */
+
+.search-wrapper {
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 50px;
+
+  padding: 0.5rem 1rem;
+
+  display: flex;
+
+  align-items: center;
+
+  transition: all 0.2s;
+
+  width: 280px;
+
+}
+
+
+
+.search-wrapper:focus-within {
+
+  border-color: #6366f1;
+
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+
+  background: white;
+
+}
+
+
+
+.search-wrapper input {
+
+  border: none;
+
+  background: transparent;
+
+  outline: none;
+
+  width: 100%;
+
+  color: #0f172a;
+
+  font-size: 0.95rem;
+
+  padding-right: 0.5rem; /* Since direction is RTL */
+
+  font-family: inherit;
+
+}
+
+
+
+.search-wrapper i {
+
+  color: #94a3b8;
+
+  font-size: 1.1rem;
+
+}
+
+
+
+/* Reduce table cell padding */
+
+::ng-deep .table-container .p-datatable .p-datatable-tbody > tr > td {
+
+  padding: 0.5rem 0.5rem !important; /* From default ~1rem to 0.5rem */
+
+}
+
+
+
+/* Reduce table header padding as well for consistency */
+
+::ng-deep .table-container .p-datatable .p-datatable-thead > tr > th {
+
+  padding: 0.5rem 0.5rem !important;
+
+}
+
+
+
+/* Force avatar size to be small */
+
+::ng-deep .vendor-info .p-avatar {
+
+  width: 32px !important;
+
+  height: 32px !important;
+
+  min-width: 32px !important;
+
+}
+
+
+
+::ng-deep .vendor-info .p-avatar .p-avatar-text,
+
+::ng-deep .vendor-info .p-avatar .p-avatar-icon {
+
+  font-size: 1rem !important;
+
+}
+
+/* Navbar Styles */
+
+.top-nav {
+
+  position: absolute;
+
+  top: 0;
+
+  left: 0;
+
+  width: 100%;
+
+  display: flex;
+
+  flex-direction: row-reverse; /* Start from left */
+
+  align-items: center;
+
+  padding: 20px 40px;
+
+  box-sizing: border-box;
+
+  z-index: 20;
+
+}
+
+
+
+.logo-area {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  direction: ltr; /* Ensure Icon is Left, Text is Right */
+
+}
+
+
+
+.logo-icon {
+
+  width: 40px;
+
+  height: 40px;
+
+  background-color: #4f46e5;
+
+  border-radius: 8px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 24px;
+
+  color: white;
+
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+
+}
+
+
+
+.logo-text {
+
+  font-size: 1.25rem;
+
+  font-weight: bold;
+
+  color: #1e293b;
+
+}
+
+
+
+.nav-links {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 20px;
+
+}
+
+
+
+
+
+
+
+/* Adjust page padding to account for navbar */
+
+.dashboard-page {
+
+    padding-top: 100px; /* Navbar height + spacing */
+
+}
