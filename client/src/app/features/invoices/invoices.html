@@ -1,0 +1,86 @@
+<div class="space-y-4">
+  <!-- כותרת + חיפוש -->
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <h1 class="text-2xl font-semibold">חשבוניות</h1>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <input
+        type="text"
+        placeholder="חיפוש לפי ספק / מספר חשבונית / קטגוריה"
+        class="border rounded-lg px-3 py-2 text-sm w-full sm:w-64"
+        [value]="search()"
+        (input)="onSearchChange($any($event.target).value)"
+      />
+
+      <select
+        class="border rounded-lg px-2 py-2 text-sm"
+        [value]="statusFilter()"
+        (change)="onStatusChange($any($event.target).value)"
+      >
+        <option value="all">כל הסטטוסים</option>
+        <option [value]="InvoiceStatus.Pending">ממתין</option>
+        <option [value]="InvoiceStatus.Processing">בעיבוד</option>
+        <option [value]="InvoiceStatus.Processed">הושלם</option>
+        <option [value]="InvoiceStatus.Verified">מאומת</option>
+        <option [value]="InvoiceStatus.Error">שגיאה</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- טבלה -->
+  <div class="overflow-x-auto bg-white border rounded-xl shadow-sm">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr>
+          <th class="px-4 py-2 text-right font-medium">מס' חשבונית</th>
+          <th class="px-4 py-2 text-right font-medium">ספק</th>
+          <th class="px-4 py-2 text-right font-medium">תאריך</th>
+          <th class="px-4 py-2 text-right font-medium">קטגוריה</th>
+          <th class="px-4 py-2 text-right font-medium">סכום</th>
+          <th class="px-4 py-2 text-right font-medium">סטטוס</th>
+          <th class="px-4 py-2 text-right font-medium"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let inv of filteredInvoices()"
+          class="border-b last:border-b-0 hover:bg-gray-50"
+        >
+          <td class="px-4 py-2">{{ inv.invoiceNumber }}</td>
+          <td class="px-4 py-2">{{ inv.vendor }}</td>
+          <td class="px-4 py-2">{{ inv.date }}</td>
+          <td class="px-4 py-2">{{ inv.category }}</td>
+          <td class="px-4 py-2">{{ inv.amount | number : '1.2-2' }} {{ inv.currency }}</td>
+          <td class="px-4 py-2">
+            <span
+              class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-800': inv.status === InvoiceStatus.Pending,
+                'bg-blue-100 text-blue-800': inv.status === InvoiceStatus.Processing,
+                'bg-green-100 text-green-800': inv.status === InvoiceStatus.Verified,
+                'bg-gray-100 text-gray-700': inv.status === InvoiceStatus.Processed,
+                'bg-red-100 text-red-800': inv.status === InvoiceStatus.Error
+              }"
+            >
+              {{ inv.status }}
+            </span>
+          </td>
+          <td class="px-4 py-2 text-left">
+            <button
+              class="text-xs text-red-600 hover:underline"
+              (click)="deleteInvoice(inv.id)"
+            >
+              מחיקה
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredInvoices().length === 0">
+          <td class="px-4 py-4 text-center text-gray-500" colspan="7">
+            אין חשבוניות תואמות לחיפוש.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

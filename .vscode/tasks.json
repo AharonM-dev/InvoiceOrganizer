@@ -1,0 +1,61 @@
+{
+  // For more information, visit: https://go.microsoft.com/fwlink/?LinkId=733558
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "client: start (Angular)",
+      "type": "npm",
+      "script": "start",
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": { "regexp": "(.*?)" },
+          "endsPattern": { "regexp": "bundle generation complete" }
+        }
+      }
+    },
+    {
+      "label": "client: test (Angular)",
+      "type": "npm",
+      "script": "test",
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": { "regexp": "(.*?)" },
+          "endsPattern": { "regexp": "bundle generation complete" }
+        }
+      }
+    },
+    {
+      "label": "server: build (.NET)",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/server/InvoiceOrganizer.sln"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "server: run API (.NET)",
+  	"type": "process",
+  	"command": "dotnet",
+  	"args": ["run", "--project", "${workspaceFolder}/server/API/API.csproj"],
+  	"problemMatcher": "$msCompile"
+    },
+    {
+      "label": "dev: run client + server",
+      "dependsOn": ["server: run API (.NET)", "client: start (Angular)"],
+      "dependsOrder": "parallel"
+    }
+  ]
+}

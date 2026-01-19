@@ -1,0 +1,46 @@
+<div class="page-container">
+      <nav>
+        <div class="logo-area">
+          <div class="logo-icon">IH</div> <span class="logo-text">InvoiceHub</span>
+        </div>
+
+        <div class="nav-links">
+          <a routerLink="/login" class="link-login">כניסה לחשבון</a>
+        </div>
+      </nav>
+        
+      <div class="auth-card" style="margin-top: 3.2rem">
+        
+        <div class="text-center">
+          <h2>יצירת חשבון חדש</h2>
+          <p class="subtitle">הצטרף למהפכת הניהול הפיננסי החכם</p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label>שם מלא</label>
+            <input type="text" formControlName="fullName" placeholder="ישראל ישראלי">
+          </div>
+
+          <div class="form-group">
+            <label>כתובת אימייל</label>
+            <input type="email" formControlName="email" placeholder="name@example.com" dir="ltr">
+          </div>
+
+          <div class="form-group">
+            <label>סיסמה</label>
+            <input type="password" formControlName="password" placeholder="••••••••" dir="ltr">
+            <p style="text-align: right; font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">לפחות 6 תווים</p>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            ליצירת חשבון חינם
+          </button>
+        </form>
+
+        <div class="footer-links">
+          כבר רשום במערכת? 
+          <a routerLink="/login" class="link">התחבר כאן</a>
+        </div>
+      </div>
+    </div>
