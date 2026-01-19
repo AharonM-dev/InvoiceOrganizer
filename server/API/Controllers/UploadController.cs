@@ -19,10 +19,11 @@ namespace API.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult<object>> UploadFile(
-        [FromForm] IFormFile file,
-        [FromForm] string userId)
+    public async Task<ActionResult<object>> UploadFile([FromForm] FileUploadDto upload)
     {
+        var file = upload.File;
+        var userId = upload.UserId;
+
         if (file == null || file.Length == 0)
             return BadRequest("File is empty");
 
@@ -48,6 +49,12 @@ namespace API.Controllers
             doc.OcrStatus,
             doc.FilePath
         });
+    }
+
+    public class FileUploadDto
+    {
+        public IFormFile File { get; set; }
+        public string UserId { get; set; }
     }
 
     private async Task<(string RelativePath, string StoredFileName)> SaveFileAsync(IFormFile file)
