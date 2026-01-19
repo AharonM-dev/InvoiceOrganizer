@@ -4,11 +4,12 @@ using API.Entities;
 
 namespace API.Data;
 
-public class AppDbContext(DbContextOptions options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<Supplier> Suppliers { set; get; }
     public DbSet<Invoice> Invoices { set; get; }
     public DbSet<InvoiceItem> InvoiceItems { set; get; } 
     public DbSet<Category> Categories { set; get; }
     public DbSet<Users> Users { set; get; }
+    public DbSet<UploadedDocument> UploadedDocuments { set; get; } = null!;
 }
