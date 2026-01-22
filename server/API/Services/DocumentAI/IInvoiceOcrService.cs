@@ -1,8 +1,8 @@
-using Google.Cloud.DocumentAI.V1;
+using Azure.AI.DocumentIntelligence;
 
 namespace API.Services.DocumentAI;
 
 public interface IInvoiceOcrService
 {
-    Task<Document> ParseInvoiceAsync(byte[] fileBytes, string mimeType, CancellationToken ct = default);
+    Task<AnalyzeResult> ParseInvoiceAsync(byte[] fileBytes, string mimeType, CancellationToken ct = default);
 }
