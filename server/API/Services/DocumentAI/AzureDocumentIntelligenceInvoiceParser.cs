@@ -20,9 +20,9 @@ public class AzureDocumentIntelligenceInvoiceParser : IInvoiceOcrService
             throw new InvalidOperationException("AzureDocumentIntelligence:Endpoint is required.");
         }
 
-        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+        if (string.IsNullOrWhiteSpace(_options.Key))
         {
-            throw new InvalidOperationException("AzureDocumentIntelligence:ApiKey is required.");
+            throw new InvalidOperationException("AzureDocumentIntelligence:Key is required.");
         }
 
         if (string.IsNullOrWhiteSpace(_options.ModelId))
@@ -31,7 +31,7 @@ public class AzureDocumentIntelligenceInvoiceParser : IInvoiceOcrService
         }
 
         var endpoint = BuildEndpointUri(_options.Endpoint);
-        var client = new DocumentIntelligenceClient(endpoint, new AzureKeyCredential(_options.ApiKey));
+        var client = new DocumentIntelligenceClient(endpoint, new AzureKeyCredential(_options.Key));
         var content = new BinaryData(fileBytes);
 
         var response = await client.AnalyzeDocumentAsync(

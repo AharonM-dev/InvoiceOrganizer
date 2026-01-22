@@ -15,7 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 });
 
 builder.Services.Configure<AzureDocumentIntelligenceOptions>(
-    builder.Configuration.GetSection("AzureDocumentIntelligence"));
+    builder.Configuration.GetSection("Azure:DocumentIntelligence"));
 builder.Services.AddScoped<IInvoiceOcrService, AzureDocumentIntelligenceInvoiceParser>();
 
 builder.Services.AddControllers();
