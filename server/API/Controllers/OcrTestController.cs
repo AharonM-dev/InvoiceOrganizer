@@ -32,7 +32,7 @@ public class OcrTestController : ControllerBase
             Fields = document.Fields.Select(field => new
             {
                 Name = field.Key,
-                field.Value.ValueType,
+                field.Value.FieldType,
                 field.Value.Content,
                 field.Value.Confidence
             })
