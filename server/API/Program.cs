@@ -14,8 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.Configure<DocumentAiOptions>(builder.Configuration.GetSection("DocumentAI"));
-builder.Services.AddScoped<IInvoiceOcrService, GoogleDocumentAiInvoiceParser>();
+builder.Services.Configure<AzureDocumentIntelligenceOptions>(
+    builder.Configuration.GetSection("AzureDocumentIntelligence"));
+builder.Services.AddScoped<IInvoiceOcrService, AzureDocumentIntelligenceInvoiceParser>();
 
 builder.Services.AddControllers();
 
