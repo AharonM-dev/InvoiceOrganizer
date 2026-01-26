@@ -1,37 +1,58 @@
-<button class="mobile-toggle-btn" (click)="toggleSidebar()">
-  <i class="pi pi-bars"></i>
+<button class="mobile-toggle-btn"
+ type="button"
+ (click)="toggleSidebar()"
+ [attr.aria-expanded]="isOpen()"
+ aria-controls="sidebar-nav"
+ [attr.aria-label]="isOpen() ? 'פתח תפריט' : 'סגור תפריט'"
+ >
+  <i class="pi" [ngClass]="isOpen() ? 'pi-times' : 'pi-bars'"></i>
 </button>
 
-<div class="sidebar-overlay" [class.show]="isOpen" (click)="closeSidebar()"></div>
+<div class="sidebar-overlay" [class.show]="isOpen()" (click)="closeSidebar()"></div>
 
-<nav class="sidebar-nav" [class.open]="isOpen">
+<nav id="sidebar-nav" class="sidebar-nav" [class.open]="isOpen()">
   
-  <button class="close-sidebar-btn" (click)="closeSidebar()">
+  <button class="close-sidebar-btn" type="button" (click)="closeSidebar()">
     <i class="pi pi-times"></i>
   </button>
 
+  <div class="sidebar-logo-area">
+    <div class="logo-icon">IH</div>
+    <span class="logo-text">InvoiceHub</span>
+  </div>
+  
   <div class="menu-list">
     <a *ngFor="let item of menuItems" 
        [routerLink]="item.route" 
        routerLinkActive="active-link" 
        class="menu-item"
-       (click)="closeSidebar()"> <i [class]="item.icon"></i>
+       (click)="closeSidebar()"
+       > 
+       <i [class]="item.icon"></i>
       <span class="label">{{ item.label }}</span>
     </a>
   </div>
 
   <div class="sidebar-actions">
-    <button class="logout-btn" (click)="logout()">
+    <button class="logout-btn" type="button" (click)="logout()">
       <i class="pi pi-sign-out"></i>
       <span>יציאה</span>
     </button>
   </div>
 
   <div class="user-profile" *ngIf="user$ | async as user">
-    <div class="user-avatar">YB</div>
+    <div class="user-avatar"><svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="50" fill="#E2E8F0"/>
+  
+  <circle cx="50" cy="40" r="15" fill="#94A3B8"/>
+  
+  <path d="M20 85C20 71.1929 31.1929 60 45 60H55C68.8071 60 80 71.1929 80 85V90H20V85Z" fill="#94A3B8"/>
+</svg></div>
     <div class="user-info">
       <span class="name">{{ user.username }}</span>
-      <span class="role">מנהל מערכת</span>
+      <span class="role">
+        {{ user.isAdmin ? 'מנהל מערכת' : 'משתמש' }}
+      </span>
     </div>
   </div>
 </nav>
