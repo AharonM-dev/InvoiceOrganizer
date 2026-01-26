@@ -3,6 +3,7 @@ import { MainLayout } from './layout/main-layout/main-layout';
 import { HomeComponent } from './home/home';
 import { RegisterComponent } from './register/register';
 import { LoginComponent } from './login/login';
+import { authGuard } from './core/guards/auth.guard';
 // אם המסכים עדיין לא קיימים – ניצור אותם עוד רגע
 import { DashboardComponent } from './features/dashboard/dashboard';
 import { Upload } from './features/upload/upload';
@@ -17,6 +18,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayout,
+    canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'upload', component: Upload },
