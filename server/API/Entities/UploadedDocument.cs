@@ -12,8 +12,8 @@ public int Id { get; set; }
     public DateTime UploadedAt { get; set; }
 
     // מי המשתמש שהעלה
-    public string UserId { get; set; } = string.Empty;
-    public virtual Users User { get; set; } = null!;
+    public string? UserId { get; set; }
+    public virtual Users? User { get; set; }
 
     // סטטוס של OCR (לא חובה אבל נחמד)
     public string OcrStatus { get; set; } = "Pending"; // Pending / Success / Failed
