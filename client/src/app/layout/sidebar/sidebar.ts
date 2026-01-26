@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,6 +12,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class SidebarComponent {
   isOpen = false; // משתנה לניהול מצב התפריט במובייל
+  private auth = inject(AuthService);
+  user$ = this.auth.currentUser$;
   menuItems = [
     { label: 'דשבורד', icon: 'pi pi-home', route: '' },
     { label: 'העלאת חשבוניות', icon: 'pi pi-cloud-upload', route: '/upload' },
@@ -24,5 +27,9 @@ export class SidebarComponent {
   
   closeSidebar() {
     this.isOpen = false;
+  }
+
+  logout() {
+    this.auth.logout();
   }
 }

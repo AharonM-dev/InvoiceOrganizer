@@ -21,16 +21,16 @@
   </div>
 
   <div class="sidebar-actions">
-    <button class="logout-btn">
+    <button class="logout-btn" (click)="logout()">
       <i class="pi pi-sign-out"></i>
       <span>יציאה</span>
     </button>
   </div>
 
-  <div class="user-profile">
+  <div class="user-profile" *ngIf="user$ | async as user">
     <div class="user-avatar">YB</div>
     <div class="user-info">
-      <span class="name">ישראל ישראלי</span>
+      <span class="name">{{ user.username }}</span>
       <span class="role">מנהל מערכת</span>
     </div>
   </div>
