@@ -10,6 +10,6 @@ public class RegisterDTO
     [EmailAddress]
     public string Email { get; set; } = "";
     [Required]
-    [MinLength(4)]
+    [MinLength(6)]
     public string Password { get; set; } = "";
 }

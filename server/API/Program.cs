@@ -14,8 +14,10 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.Configure<DocumentAiOptions>(builder.Configuration.GetSection("DocumentAI"));
-builder.Services.AddScoped<IInvoiceOcrService, GoogleDocumentAiInvoiceParser>();
+builder.Services.Configure<AzureDocumentIntelligenceOptions>(
+    builder.Configuration.GetSection("Azure:DocumentIntelligence"));
+builder.Services.AddScoped<IInvoiceOcrService, AzureDocumentIntelligenceInvoiceParser>();
+builder.Services.AddScoped<IOcrEngine, OcrEngine>();
 
 builder.Services.AddControllers();
 
@@ -27,7 +29,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var tokenKey = builder.Configuration["TokenKey"]
-            ?? throw new Exception("TokenKey not found - Program.cs");
+            ?? throw new Exception("TokenKey not found in configuration. Please set TokenKey in appsettings.json or as an environment variable.");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,

@@ -23,16 +23,21 @@ public class OcrTestController : ControllerBase
         await file.CopyToAsync(ms, ct);
 
         var mimeType = file.ContentType; // בד"כ application/pdf
-        var doc = await _ocr.ParseInvoiceAsync(ms.ToArray(), mimeType, ct);
+        var result = await _ocr.ParseInvoiceAsync(ms.ToArray(), mimeType, ct);
 
-        // מחזיר ישויות כדי לראות מה DocumentAI מוציא בפועל
-        var entities = doc.Entities.Select(e => new
+        var documents = result.Documents.Select(document => new
         {
-            e.Type,
-            e.MentionText,
-            e.Confidence
+            document.DocumentType,
+            document.Confidence,
+            Fields = document.Fields.Select(field => new
+            {
+                Name = field.Key,
+                field.Value.FieldType,
+                field.Value.Content,
+                field.Value.Confidence
+            })
         });
 
-        return Ok(entities);
+        return Ok(documents);
     }
 }

@@ -24,8 +24,6 @@ export class Upload {
   files: File[] = [];
   uploadStatuses: UploadStatus[] = [];
   isUploading = false;
-  // TODO: Replace with actual logged-in user ID
-  private readonly userId = '961770ba-9ef9-4a79-b6b0-4fc87cb26602';
 
   constructor(
     private uploadService: UploadService,
@@ -72,16 +70,38 @@ export class Upload {
     this.cdr.detectChanges(); // Force update
 
     return new Promise<void>((resolve) => {
-      this.uploadService.upload(file, this.userId).subscribe({
+      this.uploadService.upload(file, null).subscribe({
         next: (response) => {
             // Upload success, start OCR
             status.status = 'processing';
+            this.cdr.detectChanges();
+            
             this.ocrService.process(response.uploadedDocumentId).subscribe({
-                next: (ocrResult) => {
-                    status.status = 'completed';
-                    status.message = 'Processed successfully';
+                next: (extractedData) => {
+                    // OCR success, now validate and save to DB
+                    status.message = 'Validating and saving...';
                     this.cdr.detectChanges();
-                    resolve();
+                    
+                    this.ocrService.validate(extractedData).subscribe({
+                        next: (validationResult) => {
+                            if (validationResult.isValid) {
+                                status.status = 'completed';
+                                status.message = `Saved successfully (Invoice ID: ${validationResult.invoiceId})`;
+                            } else {
+                                status.status = 'error';
+                                status.message = `Validation failed: ${validationResult.errors.map((e: any) => e.message).join(', ')}`;
+                            }
+                            this.cdr.detectChanges();
+                            resolve();
+                        },
+                        error: (err) => {
+                            console.error('Validation Error:', err);
+                            status.status = 'error';
+                            status.message = 'Validation Failed';
+                            this.cdr.detectChanges();
+                            resolve();
+                        }
+                    });
                 },
                 error: (err) => {
                     console.error('OCR Error:', err);

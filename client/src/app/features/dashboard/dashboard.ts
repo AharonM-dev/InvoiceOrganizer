@@ -1,5 +1,7 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, inject, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Routes } from '@angular/router';
+import { routes } from '../../app.routes';
 // PrimeNG Imports
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -9,6 +11,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-dashboard',
@@ -37,6 +40,12 @@ export class DashboardComponent implements OnInit {
   }
 
   initMockData() {
+    
+   // let loggedUser = JSON.parse(localStorage.getItem("user") ?? "")
+     // this.http.get("http://localhost:5042/api/invoices", {headers:{'Authorization': loggedUser.token}})
+      //  .subscribe((arrayOfInvoices:any) => {
+        //  this.expenses = arrayOfInvoices;
+        //})
     this.expenses = [
       { id: 'EXP-101', vendor: 'Amazon AWS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg', category: 'Infrastructure', date: '2024-05-20', amount: 4500, status: 'approved' },
       { id: 'EXP-102', vendor: 'Cibus / 10Bis', logo: '', icon: 'pi pi-shopping-cart', category: 'Welfare', date: '2024-05-19', amount: 1200, status: 'pending' },
