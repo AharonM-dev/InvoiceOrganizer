@@ -1,6 +1,6 @@
 .dashboard-page {
 
-  padding: 0 2rem 2rem 2rem;
+  padding: 100px 2rem 2rem 2rem;
 
   background: #f1f5f9;
 
@@ -484,10 +484,3 @@
 
 
 
-/* Adjust page padding to account for navbar */
-
-.dashboard-page {
-
-    padding-top: 100px; /* Navbar height + spacing */
-
-}
