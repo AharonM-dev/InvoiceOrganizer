@@ -29,7 +29,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var tokenKey = builder.Configuration["TokenKey"]
-            ?? throw new Exception("TokenKey not found - Program.cs");
+            ?? throw new Exception("TokenKey not found in configuration. Please set TokenKey in appsettings.json or as an environment variable.");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
