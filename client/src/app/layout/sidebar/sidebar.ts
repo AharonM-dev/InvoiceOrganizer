@@ -26,7 +26,7 @@ export class SidebarComponent {
     { label: 'העלאת חשבוניות', icon: 'pi pi-cloud-upload', route: '/upload' },
     { label: 'חשבוניות', icon: 'pi pi-file', route: '/invoices' },
     { label: 'דוחות', icon: 'pi pi-chart-bar', route: '/reports' },
-    { label: 'הגדרות', icon: 'pi pi-cog', route: '/settings' }
+    { label: 'אזור אישי', icon: 'pi pi-cog', route: '/settings' }
   ];
 
   constructor() {
