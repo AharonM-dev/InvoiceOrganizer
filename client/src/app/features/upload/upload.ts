@@ -5,6 +5,7 @@ import { UploadService } from '../../core/services/upload.service';
 import { OcrNotificationService } from '../../core/services/ocr-notification.service'; // השירות החדש
 import { AuthService } from '../../core/services/auth.service';
 import { Subscription } from 'rxjs';
+
 interface UploadStatus {
   fileName: string;
   documentId?: number;
@@ -21,7 +22,7 @@ interface UploadStatus {
   templateUrl: './upload.html',
   styleUrl: './upload.css',
 })
-export class Upload implements OnInit, OnDestroy{
+export class Upload implements OnInit, OnDestroy {
   @ViewChild(FileUpload) fileUploadComponent!: FileUpload;
   files: File[] = [];
   uploadStatuses: UploadStatus[] = [];
