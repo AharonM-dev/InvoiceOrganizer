@@ -1,0 +1,37 @@
+<button class="mobile-toggle-btn" (click)="toggleSidebar()">
+  <i class="pi pi-bars"></i>
+</button>
+
+<div class="sidebar-overlay" [class.show]="isOpen" (click)="closeSidebar()"></div>
+
+<nav class="sidebar-nav" [class.open]="isOpen">
+  
+  <button class="close-sidebar-btn" (click)="closeSidebar()">
+    <i class="pi pi-times"></i>
+  </button>
+
+  <div class="menu-list">
+    <a *ngFor="let item of menuItems" 
+       [routerLink]="item.route" 
+       routerLinkActive="active-link" 
+       class="menu-item"
+       (click)="closeSidebar()"> <i [class]="item.icon"></i>
+      <span class="label">{{ item.label }}</span>
+    </a>
+  </div>
+
+  <div class="sidebar-actions">
+    <button class="logout-btn">
+      <i class="pi pi-sign-out"></i>
+      <span>יציאה</span>
+    </button>
+  </div>
+
+  <div class="user-profile">
+    <div class="user-avatar">YB</div>
+    <div class="user-info">
+      <span class="name">ישראל ישראלי</span>
+      <span class="role">מנהל מערכת</span>
+    </div>
+  </div>
+</nav>
