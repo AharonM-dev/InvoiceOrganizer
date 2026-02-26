@@ -1,0 +1,210 @@
+:host {
+  display: block;
+  /* גובה ומיקום הוסרו מפה כדי לאפשר גמישות במובייל */
+}
+
+/* הגדרות בסיס לדסקטופ */
+.sidebar-nav {
+  background: white;
+  width: 260px;
+  height: 100vh; /* שינוי ל-vh כדי לתפוס את כל הגובה */
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.02);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000; /* שיהיה מעל תוכן אחר */
+}
+
+/* הסתרת אלמנטים של מובייל בדסקטופ */
+.mobile-toggle-btn,
+.close-sidebar-btn,
+.sidebar-overlay {
+  display: none;
+}
+
+/* --- Responsive Styles (iPad & Mobile) --- */
+@media (max-width: 1024px) {
+  
+  /* כפתור ההמבורגר הצף */
+  .mobile-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 1rem;
+    right: 1rem; /* ממוקם בצד ימין למעלה */
+    z-index: 999;
+    background: white;
+    border: 1px solid #e2e8f0;
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #475569;
+  }
+
+  /* שינוי התפריט ל-Fixed ומוסתר כברירת מחדל */
+  .sidebar-nav {
+    position: fixed;
+    top: 0;
+    right: 0; /* נצמד לימין */
+    height: 100%;
+    transform: translateX(100%); /* מוסתר ימינה (RTL) */
+    box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+  }
+
+  /* מצב פתוח */
+  .sidebar-nav.open {
+    transform: translateX(0);
+  }
+
+  /* כפתור סגירה בתוך התפריט */
+  .close-sidebar-btn {
+    display: flex;
+    align-self: flex-end; /* ממקם אותו בצד שמאל של התפריט (RTL context) */
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* רקע כהה מאחורי התפריט */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none; /* כדי שלא יפריע כשהוא לא נראה */
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* --- שאר ה-CSS המקורי שלך (ללא שינוי מהותי) --- */
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  color: #64748b;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: #f8fafc;
+  color: #334155;
+  transform: translateX(-4px);
+}
+
+.menu-item i {
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.menu-item:hover i {
+  transform: scale(1.1);
+}
+
+.menu-item.active-link {
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.sidebar-actions {
+  margin-top: auto;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.8rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  color: #ef4444;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #fee2e2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.1);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info .name {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.user-info .role {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
