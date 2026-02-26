@@ -139,9 +139,11 @@ namespace API.Controllers
         var invoice = new Invoice
         {
             SupplierId = supplier.Id,
-            UserId = doc.UserId,
-            InvoiceNumber = data.InvoiceNumber!.Value,
-            InvoiceDate = data.InvoiceDate!.Value,
+            UserId = doc.UserId ?? string.Empty,
+            //InvoiceNumber = data.InvoiceNumber!.Value,
+            //InvoiceDate = data.InvoiceDate!.Value,
+            InvoiceNumber = data.InvoiceNumber ?? 0,
+            InvoiceDate = data.InvoiceDate ?? DateOnly.FromDateTime(DateTime.Now),
             FilePath = doc.FilePath
         };
         if (data.Items != null)

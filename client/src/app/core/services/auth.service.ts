@@ -14,6 +14,7 @@ export interface UserDto {
 }
 
 interface StoredUser {
+  id: string;
   username: string;
   token: string;
   isAdmin: boolean;
@@ -60,11 +61,19 @@ export class AuthService {
   }
 
   private setCurrentUser(user: UserDto): void {
-    const loggedUser: StoredUser = { username: user.username, token: user.token, isAdmin: user.isAdmin };
+    const loggedUser: StoredUser = {
+      id: user.id,
+      username: user.username,
+      token: user.token,
+      isAdmin: user.isAdmin
+    };
     localStorage.setItem('user', JSON.stringify(loggedUser));
     this.currentUserSubject.next(loggedUser);
   }
-
+  getCurrentUserId(): string | null {
+  const user = this.getCurrentUser();
+  return user ? user.id : null;
+  }
   private getUserFromStorage(): StoredUser | null {
     const userJson = localStorage.getItem('user');
     return userJson ? JSON.parse(userJson) : null;

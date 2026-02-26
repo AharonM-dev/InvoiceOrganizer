@@ -1,6 +1,7 @@
 using API.DTOs.Ocr;
 using API.Services.DocumentAI;
 using Azure.AI.DocumentIntelligence;
+using System.Text.RegularExpressions;
 
 namespace API.Services;
 
@@ -21,7 +22,6 @@ public class OcrEngine : IOcrEngine
 
         // 2. קריאה לשירות OCR (Azure Document Intelligence)
         var analyzeResult = await _invoiceOcrService.ParseInvoiceAsync(fileBytes, mimeType);
-
         // 3. מיפוי התוצאה ל-ExtractedData
         var extractedData = MapToExtractedData(analyzeResult, uploadedDocumentId);
 
@@ -32,7 +32,8 @@ public class OcrEngine : IOcrEngine
     {
         var extractedData = new ExtractedData
         {
-            UploadedDocumentId = uploadedDocumentId
+            UploadedDocumentId = uploadedDocumentId,
+            Items = new List<ExtractedItemDto>()
         };
 
         // בדיקה שיש לנו מסמך מנותח
@@ -46,6 +47,7 @@ public class OcrEngine : IOcrEngine
         // מיפוי שדות החשבונית
         if (document.Fields != null)
         {
+            
             // תאריך חשבונית
             if (document.Fields.TryGetValue("InvoiceDate", out var invoiceDateField))
             {
@@ -73,13 +75,25 @@ public class OcrEngine : IOcrEngine
                 extractedData.SupplierName = vendorNameField.Content;
             }
 
-            // מספר ספק
-            if (document.Fields.TryGetValue("VendorTaxId", out var vendorTaxIdField))
+            // 4. מספר ספק (חילוץ משופר)
+            // ניסיון א': שדות מובנים של Azure
+            if (document.Fields.TryGetValue("VendorTaxId", out var vendorTaxIdField) || 
+                document.Fields.TryGetValue("CompanyNumber", out vendorTaxIdField))
             {
-                var taxIdStr = vendorTaxIdField.Content;
-                if (!string.IsNullOrWhiteSpace(taxIdStr) && int.TryParse(taxIdStr, out var supNum))
+                extractedData.SupplierSupNum = ExtractDigitsToInt(vendorTaxIdField.Content);
+            }
+
+            // ניסיון ב': Regex על תוכן גולמי (למקרה שהשדה לא תוייג, כמו ב-JSON שלך)
+            if (extractedData.SupplierSupNum == null && !string.IsNullOrEmpty(analyzeResult.Content))
+            {
+                // מחפש מילת מפתח ואז רצף של 9 ספרות
+                var supNumRegex = new Regex(@"(?:ח\.פ|ע\.מ|עוסק|ע\.ר|מספר)\s*[:\-\.]*\s*(\d{9})", RegexOptions.IgnoreCase);
+                var match = supNumRegex.Match(analyzeResult.Content);
+
+                if (match.Success && int.TryParse(match.Groups[1].Value, out var parsedSupNum))
                 {
-                    extractedData.SupplierSupNum = supNum;
+                    extractedData.SupplierSupNum = parsedSupNum;
+                    Console.WriteLine($"======= DEBUG: SupNum found via Regex: {parsedSupNum} =======");
                 }
             }
 
@@ -142,7 +156,13 @@ public class OcrEngine : IOcrEngine
 
         return extractedData;
     }
-
+    // פונקציית עזר לניקוי תווים והמרה בטוחה
+    private int? ExtractDigitsToInt(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return null;
+        var clean = new string(input.Where(char.IsDigit).ToArray());
+        return int.TryParse(clean, out var result) ? result : null;
+    }
     private string GetMimeType(string filePath)
     {
         var extension = Path.GetExtension(filePath).ToLowerInvariant();
