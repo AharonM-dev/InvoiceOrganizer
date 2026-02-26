@@ -1,3 +1,66 @@
-<p>settings works!</p>
-
-
+<div class="settings-container fade-in">
+    <div class="header-section">
+      <h1>אזור אישי</h1>
+      <p>נהל את פרטי החשבון והגדרות המערכת שלך</p>
+    </div>
+  
+    <div class="grid-layout">
+      <!-- פרטים אישיים -->
+      <div class="card-wrapper">
+        <p-card header="פרטים אישיים" styleClass="premium-card h-full">
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="form-grid">
+            
+            <div class="field">
+              <label for="fullName">שם מלא</label>
+              <input pInputText id="fullName" formControlName="fullName" placeholder="הכנס שם מלא" />
+            </div>
+  
+            <div class="field">
+              <label for="email">אימייל</label>
+              <input pInputText id="email" formControlName="email" placeholder="example@email.com" />
+            </div>
+  
+            <div class="field">
+              <label for="phone">טלפון</label>
+              <input pInputText id="phone" formControlName="phone" placeholder="050-0000000" />
+            </div>
+  
+            <div class="field">
+              <label for="address">כתובת</label>
+              <input pInputText id="address" formControlName="address" placeholder="רחוב, עיר, מיקוד" />
+            </div>
+  
+            <div class="actions">
+              <p-button label="שמור שינויים" icon="pi pi-check" type="submit" styleClass="p-button-primary"></p-button>
+            </div>
+          </form>
+        </p-card>
+      </div>
+  
+      <!-- ניהול קטגוריות -->
+      <div class="card-wrapper">
+        <p-card header="ניהול קטגוריות" styleClass="premium-card h-full">
+          <div class="categories-content">
+            <p>הוסף או הסר קטגוריות להוצאות שלך.</p>
+            
+            <div class="add-category-box">
+              <input type="text" pInputText [(ngModel)]="newCategoryName" placeholder="שם קטגוריה חדשה" />
+              <p-button icon="pi pi-plus" (onClick)="addCategory()" [disabled]="!newCategoryName" styleClass="p-button-outlined"></p-button>
+            </div>
+  
+            <p-divider></p-divider>
+  
+            <ul class="categories-list">
+              <li *ngFor="let cat of categories" class="category-item">
+                <span>{{ cat.name }}</span>
+                <p-button icon="pi pi-trash" styleClass="p-button-rounded p-button-text p-button-danger p-button-sm" 
+                          (onClick)="deleteCategory(cat)"></p-button>
+              </li>
+            </ul>
+          </div>
+        </p-card>
+      </div>
+    </div>
+  
+    <p-toast position="bottom-center"></p-toast>
+  </div>
