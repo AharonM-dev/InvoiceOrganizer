@@ -4,6 +4,7 @@ using API.Services;
 using API.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace API.Services
 {
@@ -67,88 +68,34 @@ namespace API.Services
                     var fullPath = Path.Combine(webRootPath, doc.FilePath);
                     
                     var extracted = await _ocrEngine.ExtractInvoiceDataAsync(fullPath, doc.Id);
+                    doc.ExtractedJson = JsonSerializer.Serialize(extracted);
+                    doc.OcrStatus = "Processing";
+                    doc.ProcessedAt = DateTime.UtcNow;
 
-                    // 3. זיהוי ספק אוטומטי (לפי SupNum)
-                    var supplier = await _context.Suppliers
-                        .FirstOrDefaultAsync(s => s.SupNum == extracted.SupplierSupNum && s.UserId == doc.UserId, ct);
-
-                    if (supplier == null)
-                    {
-                        _logger.LogInformation($"Supplier {extracted.SupplierSupNum} not found. Creating auto-generated supplier.");
-                
-                        supplier = new Supplier
-                        {
-                            Name = extracted.SupplierName ?? "ספק לא ידוע",
-                            SupNum = extracted.SupplierSupNum ?? 0,
-                            UserId = doc.UserId ?? string.Empty, // וודא שזה תואם להגדרות ה-Entity
-                            Address = extracted.Address // אם ה-OCR מחלץ כתובת
-                        };
-
-                        _context.Suppliers.Add(supplier);
-                        await _context.SaveChangesAsync(ct);
-                    }
-
-                    var category = await _context.Categories
-                        .FirstOrDefaultAsync(c => c.Name == "כללי" && c.UserId == doc.UserId, ct);
-
-                    if (category == null)
-                    {
-                        category = new Category { Name = "כללי", UserId = doc.UserId ?? string.Empty };
-                        _context.Categories.Add(category);
-                        await _context.SaveChangesAsync(ct);
-                    }
-                    // 4. יצירת חשבונית (Invoice)
-                    var invoice = new Invoice
-                    {
-                        SupplierId = supplier.Id,
-                        UserId = doc.UserId ?? string.Empty,
-                        InvoiceNumber = extracted.InvoiceNumber ?? 0,
-                        InvoiceDate = extracted.InvoiceDate ?? DateOnly.FromDateTime(DateTime.Now),
-                        FilePath = doc.FilePath
-                    };
-
-                    // 5. הוספת פריטים
-                    if (extracted.Items != null)
-                    {
-                        foreach (var item in extracted.Items)
-                        {
-                            invoice.Items.Add(new InvoiceItem
-                            {
-                                Name = item.Name ?? "פריט לא ידוע",
-                                Price = item.Price,
-                                Quantity = item.Quantity,
-                                CategoryId = category.Id
-                            });
-                        }
-                    }
-
-                    invoice.ReCalculateTotal();
-                    _context.Invoices.Add(invoice);
-                    
-                    doc.OcrStatus = "Success";
                     await _context.SaveChangesAsync(ct);
+
                     if (!string.IsNullOrEmpty(doc.UserId))
                     {
                         await _hubContext.Clients.Group(doc.UserId).SendAsync("OcrFinished", new 
                         { 
                             documentId = doc.Id, 
-                            status = "Success",
-                            invoiceId = invoice.Id 
+                            status = "PendingValidation"
                         }, ct);
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"Failed to process document {documentId}");
-                    doc.OcrStatus = "Failed - OCR Error";
+                    doc.OcrStatus = "Failed";
+                    doc.ProcessingError = ex.Message;
                     await _context.SaveChangesAsync(ct);
                     if (!string.IsNullOrEmpty(doc.UserId))
                     {
-                        await _hubContext.Clients.Group(doc.UserId).SendAsync("OcrFinished", new 
-                        { 
-                            documentId = doc.Id, 
-                            status = "Success",
-                             
+                        await _hubContext.Clients.Group(doc.UserId).SendAsync("OcrFinished", new
+                        {
+                            documentId = doc.Id,
+                            OcrStatus = "Failed",
+                            ProcessingError = ex.Message
                         }, ct);
                     }
                 }
