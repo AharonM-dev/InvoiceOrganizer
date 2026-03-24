@@ -13,7 +13,8 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { HttpClient } from '@angular/common/http';
-
+import * as ExcelJS from 'exceljs';
+import * as FileSaver from 'file-saver';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -26,7 +27,8 @@ import { HttpClient } from '@angular/common/http';
 })
 export class DashboardComponent implements OnInit {
   
- isSidebarOpen: boolean = false;
+  isLoading: boolean = true;
+  isSidebarOpen: boolean = false;
  
   expenses: Expense[] = [];
   expenseTrendChart: any;
@@ -67,10 +69,11 @@ export class DashboardComponent implements OnInit {
                 id: inv.id, 
                 vendor: inv.vendorName || inv.supplier?.name || 'ספק כללי',
                 logo: inv.logoUrl || '',
+                icon: inv.icon || '',
                 category: inv.category || '',
                 date: inv.invoiceDate,
                 amount: inv.total,
-                status: inv.status?.toLowerCase() || 'pending'
+                status: (inv.status?.toLowerCase() as 'approved' | 'pending' | 'rejected') || 'pending'
             }));
             console.log('Expenses mapped:', this.expenses); // Debug: Mapped data
 
@@ -79,24 +82,39 @@ export class DashboardComponent implements OnInit {
             
             // 3. עדכון גרף המגמה (אם הנתונים מגיעים מהשרת)
             this.updateTrendChart(response.invoices);
+
+            this.isLoading = false;
             // כאן אנחנו קוראים לו כדי לפתור את השגיאה:
-          this.cd.detectChanges();
+            this.cd.detectChanges();
         },
-        error: (err) => console.error("שגיאה בטעינת נתונים", err)
+        error: (err) => {
+            console.error("שגיאה בטעינת נתונים", err);
+            this.isLoading = false;
+            this.cd.detectChanges();
+        }
     });
   }
 
-  // פונקציית עזר לעיבוד קטגוריות (מותאם ל-CategorySummaryDto)
   processCategoryData(summaryData: any[]) {
-      // summaryData מגיע כבר מסוכם מהשרת
-      const labels = summaryData.map(x => x.categoryName || 'אחר');
-      const data = summaryData.map(x => x.total);
+      let labels = [];
+      let data = [];
+      let bgColors = [];
+
+      if (!summaryData || summaryData.length === 0) {
+          labels = ['אין הוצאות מקוטלגות'];
+          data = [1];
+          bgColors = ['#e2e8f0']; // Grey color for empty state
+      } else {
+          labels = summaryData.map(x => x.categoryName || 'אחר');
+          data = summaryData.map(x => x.total);
+          bgColors = ['#6366f1', '#f43f5e', '#f59e0b', '#10b981', '#a855f7', '#3b82f6'];
+      }
 
       this.categoryChart = {
           labels: labels,
           datasets: [{
               data: data,
-              backgroundColor: ['#6366f1', '#f43f5e', '#f59e0b', '#10b981', '#a855f7', '#3b82f6'],
+              backgroundColor: bgColors,
               hoverOffset: 15,
               borderRadius: 10
           }]
@@ -150,11 +168,11 @@ export class DashboardComponent implements OnInit {
   initCharts() {
     // 1. הגדרת גרף מגמה עם קו כפול (הוצאות נוכחיות מול תקציב)
     this.expenseTrendChart = {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      labels: [], // Initial empty state
       datasets: [
         {
           label: 'הוצאות בפועל',
-          data: [42, 48, 41, 55, 48, 60],
+          data: [],
           fill: true,
           borderColor: '#f43f5e',
           backgroundColor: 'rgba(244, 63, 94, 0.1)',
@@ -163,7 +181,7 @@ export class DashboardComponent implements OnInit {
         },
         {
           label: 'תקציב יעד',
-          data: [45, 45, 45, 45, 45, 45],
+          data: [],
           fill: false,
           borderColor: '#64748b',
           borderDash: [5, 5], // קו מקווקו
@@ -185,10 +203,10 @@ export class DashboardComponent implements OnInit {
 
     // 2. גרף "חצי עוגה" (Semi-Doughnut) למראה מודרני
     this.categoryChart = {
-      labels: ['Marketing', 'IT', 'Offices', 'Others'],
+      labels: [],
       datasets: [
         {
-          data: [35, 25, 20, 20],
+          data: [],
           backgroundColor: ['#6366f1', '#f43f5e', '#f59e0b', '#10b981'],
           hoverOffset: 15,
           borderRadius: 10 // פינות מעוגלות בגרף העוגה
@@ -218,6 +236,43 @@ export class DashboardComponent implements OnInit {
             return 'info';
     }
   }
+  
+      exportToExcel() {
+      if (!this.expenses || this.expenses.length === 0) {
+          alert('אין נתונים לייצוא');
+          return;
+      }
+  
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('הוצאות');
+  
+      // הוספת כותרת
+      worksheet.addRow(['מזהה', 'ספק', 'קטגוריה', 'תאריך', 'סכום', 'סטטוס']);
+      worksheet.getRow(1).font = { bold: true };
+  
+      // מיפוי הנתונים
+      this.expenses.forEach(exp => {
+          worksheet.addRow([
+              exp.id || '',
+              exp.vendor || '',
+              exp.category || '',
+              exp.date ? new Date(exp.date).toLocaleDateString('he-IL') : '',
+              exp.amount || 0,
+              exp.status || ''
+          ]);
+      });
+  
+      // עיצוב רוחב עמודות בסיסי
+      worksheet.columns.forEach(column => {
+          column.width = 15;
+      });
+  
+      // יצירת הקובץ והורדתו
+      workbook.xlsx.writeBuffer().then((data) => {
+          const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          FileSaver.saveAs(blob, `Dashboard_Expenses_${new Date().getTime()}.xlsx`);
+      });
+    }
 }
 
 export interface Expense {

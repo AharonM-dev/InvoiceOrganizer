@@ -6,13 +6,24 @@
         <p>מבט על הביצועים הפיננסים שלך</p>
       </div>
       <div class="flex gap-3 mt-3 md:mt-0">
+        <span class="p-input-icon-left custom-date-filter">
+          <i class="pi pi-calendar" style="color: #64748b; z-index: 2;"></i>
         <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true" placeholder="סינון לפי תאריך"
           styleClass="premium-calendar"></p-datepicker>
-        <p-button label="Excel" icon="pi pi-file-excel" styleClass="p-button-outlined p-button-success"></p-button>
+        </span>
+        <p-button label="Excel" icon="pi pi-file-excel" styleClass="p-button-outlined p-button-success" (onClick)="exportToExcel()"></p-button>
         <p-button label="PDF" icon="pi pi-file-pdf" styleClass="p-button-outlined p-button-danger"></p-button>
       </div>
     </div>
-  
+
+  <div class="empty-state-card" *ngIf="!hasData" style="text-align: center; padding: 4rem; background: rgba(255,255,255,0.8); border-radius: 12px; margin-top: 2rem;">
+    <i class="pi pi-chart-pie" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+    <h2>אין נתונים להצגה רגע זה</h2>
+    <p style="color: #64748b; margin-bottom: 2rem;">בשביל שנוכל לנתח ולהציג בפניך פילוח מדויק של כל ההוצאות שלך, עליך קודם להעלות חשבוניות למערכת דרך אזור ההעלאה.</p>
+    <a routerLink="/upload" pButton label="מעבר להעלאת חשבוניות" icon="pi pi-cloud-upload" class="p-button-outlined p-button-primary"></a>
+  </div>
+
+  <div *ngIf="hasData">
     <!-- KPI Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 kpi-grid">
       <!-- Total Spend -->
@@ -95,19 +106,25 @@
           </div>
         </p-card>
       </div>
-  
+
+      <!-- Bottom Charts Row (Flex layout for consistent gap) -->
+      <div class="col-12">
+        <div class="flex flex-column lg:flex-row gap-4">
+          
       <!-- Category Chart -->
-      <div class="col-12 lg:col-6 mb-4 lg:mb-0">
-        <p-card styleClass="premium-card h-full" header="התפלגות הוצאות">
+      <div class="flex-1 w-full">
+        <p-card styleClass="premium-card h-full w-full" header="התפלגות הוצאות">
           <div class="flex justify-content-center align-items-center h-full py-4">
-            <p-chart type="doughnut" [data]="categoryData" [options]="categoryOptions" height="350px"></p-chart>
+            <p-chart type="doughnut" [data]="categoryData" [options]="categoryOptions" width="100%" height="350px"
+              [style]="{'display': 'flex', 'justify-content': 'center', 'width': '100%'}"
+            ></p-chart>
           </div>
         </p-card>
       </div>
   
       <!-- Top Vendors Chart -->
-      <div class="col-12 lg:col-6">
-        <p-card styleClass="premium-card h-full" header="ספקים עיקריים">
+      <div class="flex-1 w-full">
+        <p-card styleClass="premium-card h-full w-full" header="ספקים עיקריים">
             <p class="text-gray-400 mb-2 text-sm px-3">חמשת הספקים עם ההוצאה המצטברת הגבוהה ביותר</p>
             <p-chart type="bar" [data]="topVendorsData" [options]="topVendorsOptions" height="350px"></p-chart>
         </p-card>

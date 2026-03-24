@@ -26,9 +26,7 @@
        [routerLink]="item.route" 
        routerLinkActive="active-link" 
        class="menu-item"
-       (click)="closeSidebar()"
-       > 
-       <i [class]="item.icon"></i>
+       (click)="closeSidebar()"> <i [class]="item.icon"></i>
       <span class="label">{{ item.label }}</span>
     </a>
   </div>
@@ -50,9 +48,7 @@
 </svg></div>
     <div class="user-info">
       <span class="name">{{ user.username }}</span>
-      <span class="role">
-        {{ user.isAdmin ? 'מנהל מערכת' : 'משתמש' }}
-      </span>
+      <span class="email">{{ user.email}}</span>
     </div>
   </div>
 </nav>

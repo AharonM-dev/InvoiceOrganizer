@@ -15,6 +15,7 @@ export interface UserDto {
 
 interface StoredUser {
   id: string;
+  email: string;
   username: string;
   token: string;
   isAdmin: boolean;
@@ -63,6 +64,7 @@ export class AuthService {
   private setCurrentUser(user: UserDto): void {
     const loggedUser: StoredUser = {
       id: user.id,
+      email: user.email,
       username: user.username,
       token: user.token,
       isAdmin: user.isAdmin

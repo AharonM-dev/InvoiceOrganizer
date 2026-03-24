@@ -17,6 +17,7 @@ export class RegisterComponent {
   private authService = inject(AuthService);
 
   errorMessage: string | null = null;
+  successMessage: string = '';
 
   registerForm = this.fb.group({
     username: ['', Validators.required],
@@ -25,13 +26,25 @@ export class RegisterComponent {
   });
 
   onSubmit() {
+    this.errorMessage = '';
+    this.successMessage = '';
+   if (this.registerForm.invalid) {
+        this.errorMessage = 'אנא בדוק את הטופס, נראה שיש שדות חסרים או לא תקינים.';
+        this.registerForm.markAllAsTouched();
+        return;
+    }
     if(this.registerForm.valid) {
         this.errorMessage = null; // Clear previous errors
         const { username, email, password } = this.registerForm.value;
         this.authService.register(username!, email!, password!)
         .subscribe({
-          next: () => {
+          next: (data:any) => {
+            this.successMessage = 'ההרשמה בוצעה בהצלחה! מועבר למערכת...';
+            let loggedUser = {username:data.username, token:data.token }
+            localStorage.setItem("user", JSON.stringify(loggedUser));
+            setTimeout(() => {
             this.router.navigate(['/dashboard']);
+          }, 1500);
           },
           error: (error) => {
             // Handle different error types

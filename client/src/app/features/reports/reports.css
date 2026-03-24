@@ -3,11 +3,8 @@
     width: 100%;
     min-height: 100vh;
     padding: 2rem;
-    /* Brilliant Green "Emerald City" Background - Brighter Version */
-    background: radial-gradient(circle at 10% 20%, #86efac 0%, transparent 40%),  /* Lighter Green Top-Left */
-                radial-gradient(circle at 90% 80%, #34d399 0%, transparent 40%),  /* Vivid Emerald Bottom-Right */
-                linear-gradient(135deg, #064e3b 0%, #065f46 50%, #10b981 100%);   /* Slightly lighter/richer base */
-    color: #ffffff;
+    background: #ffffff;
+    color: #1e293b;
     font-family: 'Inter', sans-serif;
 }
 
@@ -27,55 +24,86 @@
 .header-section h1 {
     font-size: 2.8rem;
     font-weight: 800;
-    /* White to Lime-Green Gradient Text */
-    background: linear-gradient(to right, #ffffff, #bef264);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #0f172a;
     margin: 0 0 0.5rem 0;
     letter-spacing: -1px;
-    text-shadow: 0 0 40px rgba(132, 204, 22, 0.4);
 }
 
 .header-section p {
-    color: #dcfce7; /* Green-100 */
+    color: #64748b;
     font-size: 1.2rem;
     margin: 0;
     font-weight: 500;
-    opacity: 0.95;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Crystalline Emerald Cards */
-::ng-deep .premium-card {
-    /* Glassy Green Tint */
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+/* Crystalline Emerald Cards - VERY SHINY / GLOSSY WHITE */
+::ng-deep .premium-card,
+::ng-deep .premium-card .p-card {
+    /* Pure white base (removed the diagonal blueish effect and shadow) */
+    background: rgba(255, 255, 255, 1) !important;
     border-radius: 24px !important;
-    /* Crisp thin border */
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.3);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy spring effect */
+    /* Thicker, prominent vibrant green border for large cards */
+    border: 3px solid #22c55e !important;
+        
+    /* Removed shadow per user request */
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    filter: none !important;
+    
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 
-::ng-deep .premium-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 25px 50px -12px rgba(6, 78, 59, 0.5); /* Green shadow glow */
-    border-color: rgba(167, 243, 208, 0.6) !important; /* Brighter border on hover */
-    background: rgba(255, 255, 255, 0.15) !important;
+/* Animated Shine Reflection */
+::ng-deep .premium-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 60%;
+    height: 100%;
+    /* Bright white blur for the shine */
+        background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: glossyShine 6s infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes glossyShine {
+    0% { left: -150%; }
+    15% { left: 200%; }
+    100% { left: 200%; }
+}
+
+::ng-deep .premium-card:hover,
+::ng-deep .premium-card:hover .p-card {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    filter: none !important;
+    border-color: #16a34a !important; /* Slightly darker green on hover for interaction */
+    /* Pure white base on hover */
+    background: rgba(255, 255, 255, 1) !important;
 }
 
 ::ng-deep .premium-card .p-card-header {
+    position: relative;
+    z-index: 2; /* Keep above the shine */
     padding: 1.5rem 1.5rem 0.5rem 1.5rem;
     font-weight: 700;
     font-size: 1.2rem;
-    color: #f8fafc;
+    color: #1e293b;
     letter-spacing: 0.5px;
 }
 
 ::ng-deep .premium-card .p-card-content {
+    position: relative;
+    z-index: 2; /* Keep above the shine */
     padding: 1.5rem;
 }
 
@@ -88,26 +116,27 @@
     position: relative;
 }
 
-.kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--kpi-color, #3b82f6), transparent);
-    opacity: 0.8;
+/* Full border for small KPI cards using their specific color */
+::ng-deep .kpi-card.premium-card,
+::ng-deep .kpi-card.premium-card .p-card {
+    border: 2px solid var(--kpi-color, #3b82f6) !important;
 }
+
+::ng-deep .kpi-card.premium-card:hover,
+::ng-deep .kpi-card.premium-card:hover .p-card {
+    border-color: var(--kpi-color, #3b82f6) !important;
+}
+
+/* Removed old top bar (::before) element */
 
 .kpi-value {
     font-size: 2.2rem;
     font-weight: 700;
-    color: #ffffff;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    color: #0f172a;
 }
 
 .kpi-label {
-    color: #cbd5e1;
+    color: #64748b;
     font-size: 0.95rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -115,41 +144,102 @@
 }
 
 .kpi-icon-wrapper {
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 16px;
+    width: 2.25rem;
+    height: 2.25rem;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    flex-shrink: 0; /* Prevents the box from getting squished by long text */
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+}
+/* Premium Calendar Input Customization */
+.custom-date-filter {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
 }
 
-/* Custom Component Overrides for Dark Mode */
+.custom-date-filter i {
+    position: absolute;
+    left: 1rem !important; /* Move icon safely inside */
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 10;
+}
+
+::ng-deep .custom-date-filter .p-datepicker {
+    width: 260px; /* Thicker and substantial width */
+}
+
+::ng-deep .custom-date-filter .p-inputtext {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+    border-radius: 999px !important; /* Pill shaped */
+    padding: 0.85rem 1rem 0.85rem 3rem !important; /* Space for the left icon */
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    width: 100%;
+}
+
+::ng-deep .custom-date-filter .p-inputtext:hover {
+    border-color: #94a3b8 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+::ng-deep .custom-date-filter .p-inputtext:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+}
+
+/* Calendar Panel Styling */
 ::ng-deep .p-datepicker {
-    background: #1e293b !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    color: #fff !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    color: #1e293b !important;
+    padding: 0.5rem !important;
 }
 
 ::ng-deep .p-datepicker .p-datepicker-header {
-    background: #0f172a !important;
-    color: #fff !important;
-    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    background: transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 0.5rem 0 !important;
+    font-weight: 600 !important;
 }
 
 ::ng-deep .p-datepicker table td > span {
-    color: #cbd5e1 !important;
+        border-radius: 50% !important;
+    color: #475569 !important;
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+    transition: all 0.2s;
+}
+
+::ng-deep .p-datepicker table td > span.p-highlight {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+}
+
+::ng-deep .p-datepicker table td.p-datepicker-today > span {
+    background: #e0e7ff !important;
+    color: #4338ca !important;
 }
 
 ::ng-deep .p-dropdown, ::ng-deep .p-multiselect {
-    background: rgba(30, 41, 59, 0.6) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
 }
 
 ::ng-deep .p-dropdown-label {
-    color: #fff !important;
+    color: #1e293b !important;
 }
 
 /* Animations */

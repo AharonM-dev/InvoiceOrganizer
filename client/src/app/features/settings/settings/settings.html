@@ -52,8 +52,11 @@
   
             <ul class="categories-list">
               <li *ngFor="let cat of categories" class="category-item">
-                <span>{{ cat.name }}</span>
-                <p-button icon="pi pi-trash" styleClass="p-button-rounded p-button-text p-button-danger p-button-sm" 
+                <span class="category-name">
+                  {{ cat.name }}
+                  <p-tag *ngIf="!cat.userId" severity="info" value="ברירת מחדל"></p-tag>
+                </span>
+                <p-button *ngIf="cat.userId" icon="pi pi-trash" styleClass="p-button-rounded p-button-text p-button-danger p-button-sm" 
                           (onClick)="deleteCategory(cat)"></p-button>
               </li>
             </ul>
