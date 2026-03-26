@@ -16,7 +16,7 @@ public class InvoicesController(AppDbContext db) : ControllerBase
     private const int MaxPageSize = 200; // מגן על השרת
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Invoice>>> Get(
+    public async Task<ActionResult<IEnumerable<InvoiceListDto>>> Get(
         [FromQuery] int? supplierId,
         [FromQuery] DateOnly? fromDate,
         [FromQuery] DateOnly? toDate
@@ -32,9 +32,19 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         if (toDate.HasValue)
             q = q.Where(i => i.InvoiceDate <= toDate.Value);
 
-        q = q.OrderByDescending(i => i.InvoiceDate);
-
-        return await q.ToListAsync();
+        var data = await q
+            .OrderByDescending(i => i.InvoiceDate)
+            .Select(i => new InvoiceListDto
+            {
+                Id = i.Id,
+                InvoiceNumber = i.InvoiceNumber,
+                InvoiceDate = i.InvoiceDate,
+                Total = i.Total,
+                SupplierName = i.Supplier != null ? i.Supplier.Name : null,
+                FilePath = i.FilePath
+            })
+            .ToListAsync();
+        return Ok(data);
     }
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Invoice>> GetOne(int id)
@@ -172,8 +182,10 @@ public class InvoicesController(AppDbContext db) : ControllerBase
                 Count = g.Count(),
                 Total = g.Sum(i => i.Total)
             })
-            .OrderByDescending(ss => ss.Total)
             .ToListAsync();
+        data = data
+            .OrderByDescending(ss => ss.Total)
+            .ToList();
         return Ok(data);
 
     }
@@ -223,8 +235,11 @@ public class InvoicesController(AppDbContext db) : ControllerBase
                 Count = g.Count(),
                 Total = g.Sum(x => x.Price * x.Quantity)
             })
-            .OrderByDescending(x => x.Total)
             .ToListAsync();
+        data = data
+            .OrderByDescending(x => x.Total)
+            .ToList();
+
         return Ok(data);
     }
 
