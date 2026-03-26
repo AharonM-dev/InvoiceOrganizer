@@ -69,7 +69,7 @@ namespace API.Services
                     
                     var extracted = await _ocrEngine.ExtractInvoiceDataAsync(fullPath, doc.Id);
                     doc.ExtractedJson = JsonSerializer.Serialize(extracted);
-                    doc.OcrStatus = "Processing";
+                    doc.OcrStatus = "PendingValidation";
                     doc.ProcessedAt = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync(ct);
