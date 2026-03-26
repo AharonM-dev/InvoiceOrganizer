@@ -26,7 +26,7 @@ namespace API.Controllers
         [Authorize]
         [HttpPost]
         [Consumes("multipart/form-data")]
-        public async Task<ActionResult<object>> UploadFile([FromForm] IFormFile file)
+        public async Task<ActionResult<object>> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File is empty");
