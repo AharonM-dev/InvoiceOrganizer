@@ -20,6 +20,9 @@
                 <span class="status-badge">{{ item.status }}</span>
             </div>
             <div class="status-message" *ngIf="item.message">{{ item.message }}</div>
+            <button *ngIf="item.canReview && item.documentId" (click)="openReview(item.documentId)">
+                Review
+            </button>
         </div>
     </div>
 </div>

@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using API.Data;
 using API.Entities;
 using API.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -21,16 +23,16 @@ namespace API.Controllers
             _queue = queue;
             _ocrWorker = ocrWorker;
         }
-
+        [Authorize]
         [HttpPost]
         [Consumes("multipart/form-data")]
-        public async Task<ActionResult<object>> UploadFile(
-            [FromForm] IFormFile file,
-            [FromForm] string? userId)
+        public async Task<ActionResult<object>> UploadFile([FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File is empty");
-
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized("User ID not found in token");
             // 1) שמירת הקובץ בדיסק
             var (relativePath, storedFileName) = await SaveFileAsync(file);
 
@@ -40,7 +42,7 @@ namespace API.Controllers
                 FilePath = relativePath,
                 UploadedAt = DateTime.UtcNow,
                 UserId = userId,
-                OcrStatus = "Processing"
+                OcrStatus = "Pending"
             };
 
             _context.UploadedDocuments.Add(doc);

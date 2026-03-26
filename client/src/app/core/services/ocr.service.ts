@@ -16,7 +16,9 @@ export class OCRService {
       UploadedDocumentId: uploadedDocumentId,
     });
   }
-
+  getDraft(documentId: number): Observable<ExtractedData> {
+    return this.http.get<ExtractedData>(`${this.apiUrl}/draft/${documentId}`);
+  }
   validate(data: ExtractedData): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/validate`, data);
   }

@@ -5,7 +5,7 @@ import { UploadService } from '../../core/services/upload.service';
 import { OcrNotificationService } from '../../core/services/ocr-notification.service'; // השירות החדש
 import { AuthService } from '../../core/services/auth.service';
 import { Subscription } from 'rxjs';
-
+import { Router } from '@angular/router';
 interface UploadStatus {
   fileName: string;
   documentId?: number;
@@ -13,6 +13,7 @@ interface UploadStatus {
   progress: number;
   status: 'pending' | 'uploading' | 'processing' | 'completed' | 'error';
   message?: string;
+  canReview?: boolean;
 }
 
 @Component({
@@ -33,7 +34,8 @@ export class Upload implements OnInit, OnDestroy {
     private uploadService: UploadService,
     private ocrNotification: OcrNotificationService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -50,14 +52,15 @@ export class Upload implements OnInit, OnDestroy {
       
       if (statusIndex !== -1) {
         const status = this.uploadStatuses[statusIndex];
-        
-        if (result.success) {
-          status.status = 'completed';
-          status.invoiceId = result.data.invoiceId;
-          status.message = `הושלם! (חשבונית: ${result.data.invoiceId})`;
-        } else {
+        const statusServer = result.data.status;
+        if (statusServer === 'PendingValidation') {
+          status.status = 'processing';
+          status.message = 'OCR הושלם. המסמך ממתין לבדיקה.';
+          status.canReview = true;
+        } else if (statusServer === 'Failed') {
           status.status = 'error';
-          status.message = `שגיאה: ${result.data.message}`;
+          status.message = `שגיאה: ${result.data.processingError ?? 'OCR failed'}`;
+          status.canReview = false;
         }
         this.cdr.detectChanges();
       }
@@ -108,9 +111,8 @@ export class Upload implements OnInit, OnDestroy {
     status.status = 'uploading';
     this.cdr.detectChanges(); // Force update
 
-    const userId = this.authService.getCurrentUserId();
     return new Promise<void>((resolve) => {
-      this.uploadService.upload(file, userId || '').subscribe({
+      this.uploadService.upload(file).subscribe({
         next: (response) => {
             status.documentId = response.uploadedDocumentId;
             status.message = 'הקובץ עלה, מעבד נתונים ברקע...';  
@@ -127,5 +129,8 @@ export class Upload implements OnInit, OnDestroy {
         },
       });
     });
+  }
+  openReview(documentId: number) {
+    this.router.navigate(['/review', documentId]);
   }
 }
