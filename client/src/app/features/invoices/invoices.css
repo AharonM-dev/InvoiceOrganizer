@@ -1,0 +1,13 @@
+.page-container {
+ min-height: 100vh;
+  display: flex;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at center, #ffffff 10%, #eaeaea 100%);
+  flex-direction: column;
+  overflow-x: hidden;
+  color: #333;
+  background-attachment: fixed;
+  padding: 20px;
+  position: relative;
+
+}

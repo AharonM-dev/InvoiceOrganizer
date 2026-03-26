@@ -1,0 +1,27 @@
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="error">{{ error }}</div>
+<div *ngIf="draft">
+  <h2>Review Invoice</h2>
+
+  <p><strong>Supplier:</strong> {{ draft.supplierName }}</p>
+  <p><strong>Supplier Number:</strong> {{ draft.supplierSupNum }}</p>
+  <p><strong>Invoice Number:</strong> {{ draft.invoiceNumber }}</p>
+  <p><strong>Invoice Date:</strong> {{ draft.invoiceDate }}</p>
+
+
+  <div *ngIf="draft.items.length">
+    <h3>Items</h3>
+    <div *ngFor="let item of draft.items; let i = index">
+      {{ item.name }} - {{ item.quantity }} x {{ item.price }}
+      
+      <label>Category ID:</label>
+      <input 
+        type="number"
+        [value]="item.categoryId ?? ''"
+        (input)="setCategoryId(i, $event)"
+        />
+    </div>
+  </div>
+  
+  <button (click)="save()">Save</button>
+</div>

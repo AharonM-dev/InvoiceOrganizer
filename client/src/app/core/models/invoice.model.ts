@@ -31,16 +31,18 @@ extractedFields: ExtractedData;
 confidence: number;
 processedAt: Date;
 }
-export interface ExtractedData {
-vendor: string;date: string;
-amount: number;
-invoiceNumber?: string;
-taxAmount?: number;
-items?: InvoiceItem[];
+export interface ExtractedItemDto {
+  name?: string;
+  price: number;
+  quantity: number;
+  categoryId?: number;
 }
-export interface InvoiceItem {
-description: string;
-quantity: number;
-unitPrice: number;
-total: number;
+
+export interface ExtractedData {
+  uploadedDocumentId: number;
+  supplierName?: string;
+  supplierSupNum?: number;
+  invoiceDate?: string;
+  invoiceNumber?: number;
+  items: ExtractedItemDto[];
 }

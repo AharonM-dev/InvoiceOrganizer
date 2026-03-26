@@ -10,6 +10,7 @@ public class ExtractedData
     // זיהוי ספק
     public string? SupplierName { get; set; }
     public int? SupplierSupNum { get; set; } // מספר ספק כפי שמופיע אצלך ב-Supplier.SupNum
+    public string? Address { get; set; }
 
     public DateOnly? InvoiceDate { get; set; }
     public int? InvoiceNumber { get; set; }

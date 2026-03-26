@@ -1,1 +1,133 @@
-<p>reports works!</p>
+<div class="reports-container fade-in">
+    <!-- Header & Actions -->
+    <div class="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center header-section">
+      <div>
+        <h1>ניתוח הוצאות</h1>
+        <p>מבט על הביצועים הפיננסים שלך</p>
+      </div>
+      <div class="flex gap-3 mt-3 md:mt-0">
+        <span class="p-input-icon-left custom-date-filter">
+          <i class="pi pi-calendar" style="color: #64748b; z-index: 2;"></i>
+        <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true" placeholder="סינון לפי תאריך"
+          styleClass="premium-calendar"></p-datepicker>
+        </span>
+        <p-button label="Excel" icon="pi pi-file-excel" styleClass="p-button-outlined p-button-success" (onClick)="exportToExcel()"></p-button>
+        <p-button label="PDF" icon="pi pi-file-pdf" styleClass="p-button-outlined p-button-danger"></p-button>
+      </div>
+    </div>
+
+  <div class="empty-state-card" *ngIf="!hasData" style="text-align: center; padding: 4rem; background: rgba(255,255,255,0.8); border-radius: 12px; margin-top: 2rem;">
+    <i class="pi pi-chart-pie" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+    <h2>אין נתונים להצגה רגע זה</h2>
+    <p style="color: #64748b; margin-bottom: 2rem;">בשביל שנוכל לנתח ולהציג בפניך פילוח מדויק של כל ההוצאות שלך, עליך קודם להעלות חשבוניות למערכת דרך אזור ההעלאה.</p>
+    <a routerLink="/upload" pButton label="מעבר להעלאת חשבוניות" icon="pi pi-cloud-upload" class="p-button-outlined p-button-primary"></a>
+  </div>
+
+  <div *ngIf="hasData">
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 kpi-grid">
+      <!-- Total Spend -->
+      <div>
+        <p-card styleClass="premium-card kpi-card" [style]="{'--kpi-color': '#3b82f6'}">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="block kpi-label mb-2">סה"כ הוצאות</span>
+              <div class="kpi-value">{{ totalSpend | currency:'ILS':'symbol':'1.0-0' }}</div>
+              <div class="text-green-400 text-sm mt-2 font-bold flex items-center gap-1">
+                <i class="pi pi-arrow-up text-xs"></i> 2.5% מהחודש שעבר
+              </div>
+            </div>
+            <div class="kpi-icon-wrapper">
+              <i class="pi pi-wallet text-blue-400 text-2xl"></i>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Monthly Average -->
+      <div>
+        <p-card styleClass="premium-card kpi-card" [style]="{'--kpi-color': '#a855f7'}">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="block kpi-label mb-2">ממוצע חודשי</span>
+              <div class="kpi-value">{{ monthlyAverage | currency:'ILS':'symbol':'1.0-0' }}</div>
+              <div class="text-gray-400 text-sm mt-2">מחושב שנתית</div>
+            </div>
+            <div class="kpi-icon-wrapper">
+              <i class="pi pi-calendar text-purple-400 text-2xl"></i>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Top Category -->
+      <div>
+        <p-card styleClass="premium-card kpi-card" [style]="{'--kpi-color': '#ec4899'}">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="block kpi-label mb-2">קטגוריה מובילה</span>
+              <div class="kpi-value text-xl">{{ topCategory }}</div>
+              <div class="text-pink-400 text-sm mt-2 font-bold">{{ 1250 | currency:'ILS':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="kpi-icon-wrapper">
+              <i class="pi pi-shopping-bag text-pink-400 text-2xl"></i>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Savings -->
+      <div>
+        <p-card styleClass="premium-card kpi-card" [style]="{'--kpi-color': '#22c55e'}">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="block kpi-label mb-2">חיסכון משוער</span>
+              <div class="kpi-value">{{ savings | currency:'ILS':'symbol':'1.0-0' }}</div>
+              <div class="text-green-400 text-sm mt-2 flex items-center gap-1">
+                <i class="pi pi-check-circle text-xs"></i> מצב מצוין
+              </div>
+            </div>
+            <div class="kpi-icon-wrapper">
+              <i class="pi pi-chart-line text-green-400 text-2xl"></i>
+            </div>
+          </div>
+        </p-card>
+      </div>
+    </div>
+  
+    <!-- Main Charts -->
+    <div class="grid p-fluid">
+      <!-- Monthly Trend -->
+      <div class="col-12 mb-4">
+        <p-card styleClass="premium-card h-full" header="מגמת הוצאות שנתית">
+          <p class="text-gray-400 mb-4 text-sm px-3">פירוט הוצאות חודשי מתחילת השנה הנוכחית</p>
+          <div class="px-2 pb-2">
+            <p-chart type="line" [data]="monthlyTrendData" [options]="monthlyTrendOptions" height="400px"></p-chart>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Bottom Charts Row (Flex layout for consistent gap) -->
+      <div class="col-12">
+        <div class="flex flex-column lg:flex-row gap-4">
+          
+      <!-- Category Chart -->
+      <div class="flex-1 w-full">
+        <p-card styleClass="premium-card h-full w-full" header="התפלגות הוצאות">
+          <div class="flex justify-content-center align-items-center h-full py-4">
+            <p-chart type="doughnut" [data]="categoryData" [options]="categoryOptions" width="100%" height="350px"
+              [style]="{'display': 'flex', 'justify-content': 'center', 'width': '100%'}"
+            ></p-chart>
+          </div>
+        </p-card>
+      </div>
+  
+      <!-- Top Vendors Chart -->
+      <div class="flex-1 w-full">
+        <p-card styleClass="premium-card h-full w-full" header="ספקים עיקריים">
+            <p class="text-gray-400 mb-2 text-sm px-3">חמשת הספקים עם ההוצאה המצטברת הגבוהה ביותר</p>
+            <p-chart type="bar" [data]="topVendorsData" [options]="topVendorsOptions" height="350px"></p-chart>
+        </p-card>
+      </div>
+    </div>
+  </div>

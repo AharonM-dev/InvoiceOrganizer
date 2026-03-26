@@ -15,27 +15,33 @@
       <h2>יצירת חשבון חדש</h2>
       <p class="subtitle">הצטרף למהפכת הניהול הפיננסי החכם</p>
     </div>
+    
+        <div *ngIf="errorMessage" class="error-message" style="background-color: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; border: 1px solid #f87171;">
+          {{ errorMessage }}
+        </div>
+
+        <div *ngIf="successMessage" class="success-message" style="background-color: #dcfce3; color: #22c55e; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; border: 1px solid #4ade80;">
+          {{ successMessage }}
+        </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label>שם משתמש</label>
-        <input type="text" formControlName="username" placeholder="שם משתמש">
+        <input type="text" formControlName="username" placeholder="שם משתמש" [ngStyle]="{'border-color': registerForm.get('username')?.invalid && registerForm.get('username')?.touched ? '#ef4444' : ''}">
+        <span *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" style="color: #ef4444; font-size: 0.85rem; display: block; margin-top: 5px;">*שדה עמותת שם הוא שדה חובה</span>
       </div>
 
       <div class="form-group">
         <label>כתובת אימייל</label>
-        <input type="email" formControlName="email" placeholder="name@example.com" dir="ltr">
+        <input type="email" formControlName="email" placeholder="name@example.com" dir="ltr" [ngStyle]="{'border-color': registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? '#ef4444' : ''}">
+        <span *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" style="color: #ef4444; font-size: 0.85rem; display: block; margin-top: 5px;">*כתובת אימייל חובה ותקינה</span>
       </div>
 
       <div class="form-group">
         <label>סיסמה</label>
-        <input type="password" formControlName="password" placeholder="••••••••" dir="ltr">
-        <p style="text-align: right; font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">לפחות 6 תווים</p>
-      </div>
-
-      <div *ngIf="errorMessage"
-        style="margin-bottom: 1rem; padding: 0.75rem; background: #fee; border-radius: 8px; color: #c33; text-align: center; font-size: 0.9rem;">
-        {{ errorMessage }}
+        <input type="password" formControlName="password" placeholder="••••••••" dir="ltr" [ngStyle]="{'border-color': registerForm.get('password')?.invalid && registerForm.get('password')?.touched ? '#ef4444' : ''}">
+        <p *ngIf="!(registerForm.get('password')?.invalid && registerForm.get('password')?.touched)" style="text-align: right; font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">לפחות 6 תווים</p>
+        <span *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" style="color: #ef4444; font-size: 0.85rem; display: block; margin-top: 5px;">*סיסמה חובה (לפחות 6 תווים)</span>
       </div>
 
       <button type="submit" class="btn-submit">

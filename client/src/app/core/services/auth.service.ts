@@ -10,11 +10,15 @@ export interface UserDto {
   email: string;
   username: string;
   token: string;
+  isAdmin: boolean;
 }
 
 interface StoredUser {
+  id: string;
+  email: string;
   username: string;
   token: string;
+  isAdmin: boolean;
 }
 
 @Injectable({
@@ -58,11 +62,20 @@ export class AuthService {
   }
 
   private setCurrentUser(user: UserDto): void {
-    const loggedUser: StoredUser = { username: user.username, token: user.token };
+    const loggedUser: StoredUser = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      token: user.token,
+      isAdmin: user.isAdmin
+    };
     localStorage.setItem('user', JSON.stringify(loggedUser));
     this.currentUserSubject.next(loggedUser);
   }
-
+  getCurrentUserId(): string | null {
+  const user = this.getCurrentUser();
+  return user ? user.id : null;
+  }
   private getUserFromStorage(): StoredUser | null {
     const userJson = localStorage.getItem('user');
     return userJson ? JSON.parse(userJson) : null;

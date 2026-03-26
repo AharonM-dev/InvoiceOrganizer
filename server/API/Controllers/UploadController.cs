@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using API.Data;
 using API.Entities;
+using API.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -10,22 +13,26 @@ namespace API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
-
-        public UploadController(AppDbContext context, IWebHostEnvironment env)
+        private readonly IBackgroundTaskQueue _queue;
+        private readonly OcrWorker _ocrWorker;
+        
+        public UploadController(AppDbContext context, IWebHostEnvironment env, IBackgroundTaskQueue queue, OcrWorker ocrWorker)
         {
             _context = context;
             _env = env;
+            _queue = queue;
+            _ocrWorker = ocrWorker;
         }
-
+        [Authorize]
         [HttpPost]
         [Consumes("multipart/form-data")]
-        public async Task<ActionResult<object>> UploadFile(
-            [FromForm] IFormFile file,
-            [FromForm] string? userId)
+        public async Task<ActionResult<object>> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File is empty");
-
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized("User ID not found in token");
             // 1) שמירת הקובץ בדיסק
             var (relativePath, storedFileName) = await SaveFileAsync(file);
 
@@ -41,12 +48,18 @@ namespace API.Controllers
             _context.UploadedDocuments.Add(doc);
             await _context.SaveChangesAsync();
 
+            await _queue.QueueBackgroundWorkItemAsync(async token =>
+            {
+            //var worker = HttpContext.RequestServices.GetRequiredService<OcrWorker>();
+                await _ocrWorker.ProcessDocumentAsync(doc.Id, token);
+            });
+
             // 3) מחזירים ללקוח מזהה
             return Ok(new
             {
                 UploadedDocumentId = doc.Id,
-                doc.OcrStatus,
-                doc.FilePath
+                Status = doc.OcrStatus,
+                FilePath = doc.FilePath
             });
         }
 

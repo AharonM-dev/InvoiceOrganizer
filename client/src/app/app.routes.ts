@@ -10,6 +10,7 @@ import { Upload } from './features/upload/upload';
 import { Invoices } from './features/invoices/invoices';
 import { Reports } from './features/reports/reports';
 import { Settings } from './features/settings/settings/settings';
+import { Review } from './features/review/review';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -22,6 +23,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'upload', component: Upload },
+      { path: 'review/:documentId', component: Review },
       { path: 'invoices', component: Invoices },
       { path: 'reports', component: Reports },
       { path: 'settings', component: Settings },

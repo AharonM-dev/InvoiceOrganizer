@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Services;
 using API.Interfaces;
@@ -6,6 +5,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using API.Services.DocumentAI;
+using API.Hubs;
+using API.Entities;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -20,9 +23,6 @@ builder.Services.AddScoped<IInvoiceOcrService, AzureDocumentIntelligenceInvoiceP
 builder.Services.AddScoped<IOcrEngine, OcrEngine>();
 
 builder.Services.AddControllers();
-
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -39,13 +39,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IBackgroundTaskQueue>(ctx => new BackgroundTaskQueue(100));
+builder.Services.AddSingleton<OcrWorker>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<OcrWorker>());
+
+builder.Services.AddSignalR();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // הכתובת המדויקת של האנגולר
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // קריטי ל-SignalR!
+    });
+});
 
 var app = builder.Build();
 
@@ -62,14 +74,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
-
+app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200").AllowCredentials());
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<OcrHub>("/hubs/ocr");
+
 
 app.Run();
