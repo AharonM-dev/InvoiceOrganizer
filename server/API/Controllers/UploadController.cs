@@ -23,6 +23,9 @@ namespace API.Controllers
             _queue = queue;
             _ocrWorker = ocrWorker;
         }
+        private static readonly string[] AllowedExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".tiff"];
+        private const long MaxFileSizeBytes = 10 * 1024 * 1024; // 10 MB
+
         [Authorize]
         [HttpPost]
         [Consumes("multipart/form-data")]
@@ -30,6 +33,13 @@ namespace API.Controllers
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File is empty");
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!AllowedExtensions.Contains(extension))
+                return BadRequest($"File type not allowed. Allowed types: {string.Join(", ", AllowedExtensions)}");
+
+            if (file.Length > MaxFileSizeBytes)
+                return BadRequest("File size exceeds the 10 MB limit");
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
                 return Unauthorized("User ID not found in token");
