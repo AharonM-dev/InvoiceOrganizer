@@ -1,13 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.Hubs
 {
+    [Authorize]
     public class OcrHub : Hub
     {
-        // ניתן להוסיף לוגיקה לשיוך משתמשים לקבוצות לפי UserId
-        public async Task JoinUserGroup(string userId)
+        public async Task JoinUserGroup()
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+            var userId = Context.UserIdentifier;
+            if (!string.IsNullOrEmpty(userId))
+                await Groups.AddToGroupAsync(Context.ConnectionId, userId);
         }
     }
 }
