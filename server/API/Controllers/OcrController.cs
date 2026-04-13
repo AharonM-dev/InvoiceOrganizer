@@ -2,14 +2,16 @@ using API.Data;
 using API.DTOs.Ocr;
 using API.Entities;
 using API.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
 
 
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OcrController : ControllerBase
@@ -32,9 +34,10 @@ namespace API.Controllers
         public async Task<ActionResult<ExtractedData>> ProcessOCR(
             [FromBody] ProcessRequest request)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var doc = await _context.UploadedDocuments
                 .Include(d => d.User)
-                .FirstOrDefaultAsync(d => d.Id == request.UploadedDocumentId);
+                .FirstOrDefaultAsync(d => d.Id == request.UploadedDocumentId && d.UserId == userId);
 
             if (doc == null)
                 return NotFound("Uploaded document not found");
@@ -83,9 +86,10 @@ namespace API.Controllers
             }
 
             // 2. מוצאים את UploadedDocument כדי לדעת מי המשתמש
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var doc = await _context.UploadedDocuments
                 .Include(d => d.User)
-                .FirstOrDefaultAsync(d => d.Id == data.UploadedDocumentId);
+                .FirstOrDefaultAsync(d => d.Id == data.UploadedDocumentId && d.UserId == userId);
 
             if (doc == null)
             {
@@ -184,8 +188,9 @@ namespace API.Controllers
         [HttpGet("draft/{documentId}")]
         public async Task<ActionResult<ExtractedData>> GetDraft(int documentId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var doc = await _context.UploadedDocuments
-            .FirstOrDefaultAsync(d => d.Id == documentId);
+                .FirstOrDefaultAsync(d => d.Id == documentId && d.UserId == userId);
 
              if (doc == null)
                 return NotFound("Uploaded document not found");

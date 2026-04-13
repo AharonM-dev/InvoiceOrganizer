@@ -10,6 +10,7 @@ namespace API.Controllers
     [Route("api/[controller]")]
         public class MembersController(AppDbContext context) : ControllerBase
     {
+        [Authorize]
         [HttpGet]
         public ActionResult<IReadOnlyList<Users>> GetMembers()
         {
