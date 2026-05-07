@@ -39,11 +39,7 @@ export class Upload implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const userId = this.authService.getCurrentUserId();
-    if (userId) {
-      // שלב קריטי: התחלת החיבור בפועל
-      this.ocrNotification.startConnection(userId);
-    }
+    this.ocrNotification.startConnection();
     // הרשמה לעדכונים מהשרת
     this.signalRSubscription = this.ocrNotification.ocrResult$.subscribe((result) => {
       console.log('SignalR Message Received:', result); // לוג לבדיקה

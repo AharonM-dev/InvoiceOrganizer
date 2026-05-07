@@ -1,19 +1,21 @@
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 
 namespace API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class InvoicesController(AppDbContext db) : ControllerBase
 {
     private readonly AppDbContext db = db;
-    private const int MaxPageSize = 200; // מגן על השרת
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<InvoiceListDto>>> Get(
@@ -22,7 +24,11 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         [FromQuery] DateOnly? toDate
     )
     {
-        var q = db.Invoices.AsNoTracking().Include(i => i.Supplier).AsQueryable();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var q = db.Invoices.AsNoTracking().Include(i => i.Supplier)
+            .Where(i => i.UserId == userId)
+            .AsQueryable();
+
         if (supplierId.HasValue)
             q = q.Where(i => i.SupplierId == supplierId.Value);
 
@@ -46,52 +52,52 @@ public class InvoicesController(AppDbContext db) : ControllerBase
             .ToListAsync();
         return Ok(data);
     }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Invoice>> GetOne(int id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var invoice = await db.Invoices
             .Include(i => i.Items)
             .Include(i => i.Supplier)
             .Include(i => i.User)
             .AsNoTracking()
-            .FirstOrDefaultAsync(i => i.Id == id);
+            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
 
         return invoice is null ? NotFound() : invoice;
     }
+
     [HttpPost]
     public async Task<ActionResult<Invoice>> Create(Invoice dto)
     {
-        // לוודא שיש אוסף Items
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
         dto.Items ??= new List<InvoiceItem>();
-
-        // מונעים בלגן במספור מזהים שמגיעים מהקליינט
         dto.Id = 0;
-        foreach (var item in dto.Items)
-        {
-            item.Id = 0;
-            // אפשר לאפשר ל-EF לקשר אוטומטית דרך ה-Items
-            // item.InvoiceId לא חובה למלא ידנית כאן
-        }
+        dto.UserId = userId;
 
-        // חישוב Total בצד השרת
+        foreach (var item in dto.Items)
+            item.Id = 0;
+
         dto.ReCalculateTotal();
 
         db.Invoices.Add(dto);
         await db.SaveChangesAsync();
 
-        // נחזיר 201 + Location ל-GetOne
         return CreatedAtAction(nameof(GetOne), new { id = dto.Id }, dto);
     }
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, Invoice dto)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         if (id != dto.Id)
-            return BadRequest("Id ב-URL לא תואם ל-Id בגוף הבקשה");
+            return BadRequest("Id in URL does not match Id in body");
 
         var invoice = await db.Invoices
             .Include(i => i.Items)
-            .FirstOrDefaultAsync(i => i.Id == id);
+            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
 
         if (invoice is null)
             return NotFound();
@@ -101,7 +107,7 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         invoice.InvoiceDate   = dto.InvoiceDate;
         invoice.FilePath      = dto.FilePath;
         invoice.SupplierId    = dto.SupplierId;
-        invoice.UserId        = dto.UserId;
+        // UserId is NOT updated from client — always kept as the authenticated user's Id
 
         // עדכון Items בצורה פשוטה: מוחקים ומכניסים מחדש
         invoice.Items.Clear();
@@ -139,15 +145,16 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("{summary}")]
+    [HttpGet("summary/by-month")]
     public async Task<ActionResult<IEnumerable<MonthSummaryDto>>> SummaryByYear(
         [FromQuery, Range(1, 9999)] int year,
         [FromQuery] int? supplierId
     )
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var start = new DateOnly(year, 1, 1);
         var end = start.AddYears(1);
-        var q = db.Invoices.AsNoTracking().Where(i => i.InvoiceDate >= start && i.InvoiceDate < end);
+        var q = db.Invoices.AsNoTracking().Where(i => i.InvoiceDate >= start && i.InvoiceDate < end && i.UserId == userId);
         if (supplierId.HasValue)
             q = q.Where(i => i.SupplierId == supplierId.Value);
         var data = await q
@@ -170,10 +177,11 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         [FromQuery, Range(1, 12)] int month
     )
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var start = new DateOnly(year, month, 1);
         var end = start.AddMonths(1);
 
-        var q = db.Invoices.AsNoTracking().Where(i => i.InvoiceDate >= start && i.InvoiceDate < end);
+        var q = db.Invoices.AsNoTracking().Where(i => i.InvoiceDate >= start && i.InvoiceDate < end && i.UserId == userId);
         var data = await q
             .GroupBy(i => i.SupplierId)
             .Select(g => new SupplierSummaryDto
@@ -199,6 +207,8 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         [FromQuery] int? supplierId
         )
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         DateOnly? start = null, end = null;
         if (year.HasValue && month.HasValue)
         {
@@ -215,7 +225,9 @@ public class InvoicesController(AppDbContext db) : ControllerBase
             if (from.HasValue) start = from.Value;
             if (to.HasValue) end = to.Value;
         }
-        var q = db.InvoiceItems.AsNoTracking().AsQueryable();
+
+        var q = db.InvoiceItems.AsNoTracking()
+            .Where(ii => ii.Invoice.UserId == userId);
 
         if (supplierId.HasValue)
             q = q.Where(ii => ii.Invoice.SupplierId == supplierId.Value);
@@ -225,8 +237,7 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         if (end.HasValue)
             q = q.Where(ii => ii.Invoice.InvoiceDate < end.Value);
 
-        var data = await db.InvoiceItems.AsNoTracking()
-            .Where(ii => q.Select(i => i.Id).Contains(ii.InvoiceId))
+        var data = await q
             .GroupBy(ii => new { ii.CategoryId, CategoryName = ii.Category.Name })
             .Select(g => new CategorySummaryDto
             {
@@ -249,13 +260,14 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         [FromQuery] DateOnly? to
         )
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var defaultStart = new DateOnly(today.Year - 4, 1, 1); // 5
+        var defaultStart = new DateOnly(today.Year - 4, 1, 1);
 
         var start = from ?? defaultStart;
         var end = to ?? start.AddYears(5);
         var q = db.Invoices.AsNoTracking()
-            .Where(i => i.InvoiceDate >= start && i.InvoiceDate < end);
+            .Where(i => i.InvoiceDate >= start && i.InvoiceDate < end && i.UserId == userId);
         var data = await q
             .GroupBy(i => i.InvoiceDate.Year)
             .Select(g => new YearSummaryDto
