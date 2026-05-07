@@ -1,4 +1,5 @@
 using API.Data;
+using API.DTOs;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,14 +34,23 @@ public class SuppliersController(AppDbContext db) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Supplier>> Create(Supplier dto)
+    public async Task<ActionResult<Supplier>> Create(CreateSupplierRequest req)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        dto.Id = 0;
-        dto.UserId = userId;
-        db.Suppliers.Add(dto);
+
+        var supplier = new Supplier
+        {
+            Name          = req.Name,
+            SupNum        = req.SupNum,
+            ContactEmail  = req.ContactEmail,
+            PhoneNumber   = req.PhoneNumber,
+            Address       = req.Address,
+            UserId        = userId   // set only from JWT — never from client input
+        };
+
+        db.Suppliers.Add(supplier);
         await db.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetOne), new { id = dto.Id }, dto);
+        return CreatedAtAction(nameof(GetOne), new { id = supplier.Id }, supplier);
     }
 
     [HttpPut("{id:int}")]
