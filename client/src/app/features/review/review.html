@@ -1,27 +1,152 @@
-<div *ngIf="loading">Loading...</div>
-<div *ngIf="error">{{ error }}</div>
-<div *ngIf="draft">
-  <h2>Review Invoice</h2>
+<div class="max-w-3xl mx-auto px-4 py-8" dir="rtl">
 
-  <p><strong>Supplier:</strong> {{ draft.supplierName }}</p>
-  <p><strong>Supplier Number:</strong> {{ draft.supplierSupNum }}</p>
-  <p><strong>Invoice Number:</strong> {{ draft.invoiceNumber }}</p>
-  <p><strong>Invoice Date:</strong> {{ draft.invoiceDate }}</p>
-
-
-  <div *ngIf="draft.items.length">
-    <h3>Items</h3>
-    <div *ngFor="let item of draft.items; let i = index">
-      {{ item.name }} - {{ item.quantity }} x {{ item.price }}
-      
-      <label>Category ID:</label>
-      <input 
-        type="number"
-        [value]="item.categoryId ?? ''"
-        (input)="setCategoryId(i, $event)"
-        />
-    </div>
+  <!-- טעינה -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20 text-gray-400">
+    <i class="fas fa-spinner fa-spin text-2xl ml-3"></i>
+    <span>טוען נתונים...</span>
   </div>
-  
-  <button (click)="save()">Save</button>
+
+  <!-- תוכן ראשי -->
+  <ng-container *ngIf="!loading && draft">
+
+    <!-- כותרת -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">אישור חשבונית</h1>
+      <p class="text-gray-500 text-sm mt-1">בדוק את הנתונים שחולצו ואשר לפני שמירה</p>
+    </div>
+
+    <!-- כרטיס: פרטי חשבונית -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+      <h2 class="text-base font-semibold text-gray-700 mb-4">פרטי חשבונית</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-gray-500">מספר חשבונית</label>
+          <span class="text-sm font-semibold text-gray-800">{{ draft.invoiceNumber ?? '—' }}</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-gray-500">תאריך</label>
+          <span class="text-sm font-semibold text-gray-800">{{ draft.invoiceDate ?? '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- כרטיס: ספק -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+      <h2 class="text-base font-semibold text-gray-700 mb-3">ספק</h2>
+
+      <!-- רמז OCR -->
+      <p *ngIf="ocrSupplierHint" class="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mb-3">
+        <i class="fas fa-robot ml-1"></i>
+        OCR זיהה: <span class="font-medium">{{ ocrSupplierHint }}</span>
+      </p>
+
+      <!-- דרופדאון בחירת ספק -->
+      <div class="flex items-center gap-3">
+        <p-select
+          [(ngModel)]="selectedSupplierId"
+          [options]="suppliers"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="בחר ספק..."
+          [filter]="true"
+          filterPlaceholder="חפש ספק"
+          [showClear]="true"
+          styleClass="w-full"
+          appendTo="body"
+          class="flex-1"
+        />
+        <button
+          type="button"
+          (click)="showSupplierModal = true"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-blue-600 border border-blue-200
+                 rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap"
+        >
+          <i class="fas fa-plus text-xs"></i>
+          ספק חדש
+        </button>
+      </div>
+
+      <p *ngIf="!selectedSupplierId" class="text-xs text-amber-600 mt-2">
+        <i class="fas fa-exclamation-triangle ml-1"></i>
+        יש לבחור ספק כדי לשמור את החשבונית
+      </p>
+    </div>
+
+    <!-- כרטיס: פריטים -->
+    <div *ngIf="draft.items.length" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+      <h2 class="text-base font-semibold text-gray-700 mb-4">פריטים</h2>
+
+      <div class="flex flex-col gap-3">
+        <div
+          *ngFor="let item of draft.items; let i = index"
+          class="flex items-center justify-between gap-4 bg-gray-50 rounded-xl px-4 py-3"
+        >
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-800 truncate">{{ item.name || 'פריט ללא שם' }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">
+              {{ item.quantity }} יח' × ₪{{ item.price | number:'1.2-2' }}
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-1 min-w-[140px]">
+            <label class="text-xs text-gray-500">קטגוריה</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="ID קטגוריה"
+              [value]="item.categoryId ?? ''"
+              (input)="setCategoryId(i, $event)"
+              class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              [class.border-red-300]="!item.categoryId"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- הודעות שגיאה / הצלחה -->
+    <div *ngIf="errorMessage"
+         class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4 text-sm">
+      <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div *ngIf="successMessage"
+         class="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4 text-sm">
+      <i class="fas fa-check-circle flex-shrink-0"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- כפתור שמור -->
+    <div class="flex justify-start">
+      <button
+        type="button"
+        (click)="save()"
+        [disabled]="!selectedSupplierId || isSaving"
+        class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-white transition-all duration-200 shadow-sm
+               bg-green-500 hover:bg-green-600 active:bg-green-700
+               disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+      >
+        <i *ngIf="isSaving" class="fas fa-spinner fa-spin"></i>
+        <i *ngIf="!isSaving" class="fas fa-save"></i>
+        <span>{{ isSaving ? 'שומר...' : 'שמור חשבונית' }}</span>
+      </button>
+    </div>
+
+  </ng-container>
+
+  <!-- שגיאת טעינה -->
+  <div *ngIf="!loading && errorMessage && !draft"
+       class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ errorMessage }}</span>
+  </div>
+
 </div>
+
+<!-- מודאל יצירת ספק -->
+<app-supplier-form-modal
+  [visible]="showSupplierModal"
+  (saved)="onSupplierCreated($event)"
+  (cancelled)="showSupplierModal = false"
+/>
