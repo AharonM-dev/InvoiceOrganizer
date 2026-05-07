@@ -38,8 +38,26 @@ export interface ExtractedItemDto {
   categoryId?: number;
 }
 
+export interface Supplier {
+  id: number;
+  name: string;
+  supNum: number;
+  contactEmail?: string;
+  phoneNumber?: string;
+  address?: string;
+}
+
+export interface CreateSupplierDto {
+  name: string;
+  supNum: number;
+  contactEmail?: string;
+  phoneNumber?: string;
+  address?: string;
+}
+
 export interface ExtractedData {
   uploadedDocumentId: number;
+  supplierId?: number;       // ID מפורש שנבחר ידנית — עדיפות על שם/מספר
   supplierName?: string;
   supplierSupNum?: number;
   invoiceDate?: string;
