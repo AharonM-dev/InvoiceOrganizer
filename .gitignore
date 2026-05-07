@@ -496,3 +496,5 @@ client/.angular/
 
 invoice_figma/
 client_remote/
+CLAUDE.md
+.claude/settings.local.json
