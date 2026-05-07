@@ -1,24 +1,64 @@
-<div class="file-upload-container" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)"
-    (drop)="onDrop($event)" [class.drag-over]="isDragOver">
-    <div class="upload-content">
-        <div class="icon-container">
-            <i class="fas fa-cloud-upload-alt"></i>
-        </div>
-        <h3>Drag & Drop files here</h3>
-        <p>or</p>
-        <button class="browse-btn" (click)="fileInput.click()">Browse Files</button>
-        <input #fileInput type="file" multiple (change)="onFileSelected($event)" style="display: none" />
-    </div>
+<!-- אזור גרירה -->
+<div
+  class="border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-300 cursor-pointer select-none"
+  [class.border-blue-400]="!isDragOver"
+  [class.bg-gray-50]="!isDragOver"
+  [class.border-blue-500]="isDragOver"
+  [class.bg-blue-50]="isDragOver"
+  [class.scale-[1.01]]="isDragOver"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
+  <div class="flex flex-col items-center gap-3">
+    <i
+      class="fas fa-cloud-upload-alt text-5xl transition-colors duration-300"
+      [class.text-blue-400]="!isDragOver"
+      [class.text-blue-600]="isDragOver"
+    ></i>
+    <p class="text-gray-700 font-semibold text-base">גרור קבצים לכאן</p>
+    <p class="text-gray-400 text-sm">או</p>
+    <button
+      type="button"
+      (click)="fileInput.click()"
+      class="px-5 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm"
+    >
+      בחר קבצים
+    </button>
+    <p class="text-xs text-gray-400 mt-1">PDF, JPG, PNG, TIFF &middot; עד 10MB לקובץ</p>
+    <input
+      #fileInput
+      type="file"
+      multiple
+      accept=".pdf,.jpg,.jpeg,.png,.tiff"
+      (change)="onFileSelected($event)"
+      class="hidden"
+    />
+  </div>
 </div>
 
-<div class="file-list" *ngIf="files.length > 0">
-    <div class="file-item" *ngFor="let file of files; let i = index">
-        <div class="file-info">
-            <span class="file-name">{{ file.name }}</span>
-            <span class="file-size">{{ formatSize(file.size) }}</span>
-        </div>
-        <button class="remove-btn" (click)="removeFile(i)">
-            <i class="fas fa-times"></i>
-        </button>
+<!-- רשימת קבצים שנבחרו -->
+<div *ngIf="files.length > 0" class="mt-4 flex flex-col gap-2" dir="rtl">
+  <div
+    *ngFor="let file of files; let i = index"
+    class="flex items-center justify-between bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors"
+  >
+    <div class="flex items-center gap-3">
+      <i [class]="'fas ' + getFileIcon(file) + ' text-xl ' + getFileIconColor(file)"></i>
+      <div class="flex flex-col text-right">
+        <span class="text-sm font-medium text-gray-700 truncate max-w-xs" [title]="file.name">
+          {{ file.name }}
+        </span>
+        <span class="text-xs text-gray-400">{{ formatSize(file.size) }}</span>
+      </div>
     </div>
+    <button
+      type="button"
+      (click)="removeFile(i)"
+      class="text-gray-300 hover:text-red-500 transition-colors duration-200 p-1 rounded-full hover:bg-red-50"
+      title="הסר קובץ"
+    >
+      <i class="fas fa-times text-sm"></i>
+    </button>
+  </div>
 </div>
