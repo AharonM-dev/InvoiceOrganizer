@@ -14,6 +14,10 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 
+import { SupplierService } from '../../../core/services/supplier.service';
+import { Supplier } from '../../../core/models/invoice.model';
+import { SupplierFormModal } from '../../../shared/components/supplier-form-modal/supplier-form-modal';
+
 @Component({
   selector: 'app-settings',
   standalone: true,
@@ -28,7 +32,8 @@ import { TagModule } from 'primeng/tag';
     ListboxModule,
     DialogModule,
     ToastModule,
-    TagModule
+    TagModule,
+    SupplierFormModal,
   ],
     providers: [MessageService],
   templateUrl: './settings.html',
@@ -38,17 +43,24 @@ export class Settings implements OnInit {
     private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
   private http = inject(HttpClient);
+  private supplierService = inject(SupplierService);
 
   profileForm!: FormGroup;
-  
+
   // Categories Data
   categories: any[] = [];
   newCategoryName: string = '';
+
+  // Suppliers Data
+  suppliers: Supplier[] = [];
+  showSupplierModal = false;
+  isDeletingId: number | null = null;
 
   ngOnInit() {
     this.initProfileForm();
     this.loadProfileFromApi();
     this.loadTypes();
+    this.loadSuppliers();
   }
 
   initProfileForm() {
@@ -139,6 +151,55 @@ export class Settings implements OnInit {
         }
     });
   }
+
+  // ── ניהול ספקים ──────────────────────────────────────────────────────────
+
+  loadSuppliers(): void {
+    this.supplierService.getAll().subscribe({
+      next: (data) => (this.suppliers = data),
+      error: () =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'טעינת רשימת הספקים נכשלה',
+        }),
+    });
+  }
+
+  onSupplierCreated(supplier: Supplier): void {
+    this.suppliers = [...this.suppliers, supplier];
+    this.showSupplierModal = false;
+    this.messageService.add({
+      severity: 'success',
+      summary: 'נוסף',
+      detail: `הספק "${supplier.name}" נוסף בהצלחה`,
+    });
+  }
+
+  deleteSupplier(supplier: Supplier): void {
+    this.isDeletingId = supplier.id;
+    this.supplierService.delete(supplier.id).subscribe({
+      next: () => {
+        this.suppliers = this.suppliers.filter((s) => s.id !== supplier.id);
+        this.isDeletingId = null;
+        this.messageService.add({
+          severity: 'info',
+          summary: 'נמחק',
+          detail: `הספק "${supplier.name}" נמחק`,
+        });
+      },
+      error: () => {
+        this.isDeletingId = null;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'מחיקת הספק נכשלה',
+        });
+      },
+    });
+  }
+
+  // ── Auth Headers (קיים) ──────────────────────────────────────────────────
 
   private getAuthHeaders(): { [header: string]: string } {
     const loggedUser = JSON.parse(localStorage.getItem('user') || '{}');
