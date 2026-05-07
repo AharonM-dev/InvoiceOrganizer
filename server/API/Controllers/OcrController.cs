@@ -98,32 +98,47 @@ namespace API.Controllers
                 return Ok(result);
             }
 
-            // 3. ניסיון למצוא ספק לפי SupNum + UserId
+            // 3. פתרון ספק
             Supplier? supplier = null;
 
-            if (data.SupplierSupNum != null)
+            if (data.SupplierId.HasValue)
             {
+                // המשתמש בחר ספק ידנית — מחפשים לפי ID בלבד, ללא fallback
                 supplier = await _context.Suppliers
                     .FirstOrDefaultAsync(s =>
-                        s.SupNum == data.SupplierSupNum.Value &&
-                        s.UserId == doc.UserId);
+                        s.Id == data.SupplierId.Value &&
+                        s.UserId == userId);
+
+                if (supplier == null)
+                    return BadRequest("הספק שנבחר לא נמצא או אינו שייך למשתמש זה.");
             }
-            if (supplier == null && !string.IsNullOrWhiteSpace(data.SupplierName))
+            else
             {
-                supplier = await _context.Suppliers
-                    .FirstOrDefaultAsync(s =>
-                        s.Name == data.SupplierName &&
-                        s.UserId == doc.UserId);
-            }
-            if (supplier == null)
-            {
-                result.Errors.Add(new ValidationErrorDto
+                // fallback: OCR — מנסה לפי SupNum ואז לפי שם
+                if (data.SupplierSupNum != null)
                 {
-                    Field = "Supplier",
-                    Message = "Could not resolve supplier. Please choose a valid supplier."
-                });
-                result.IsValid = false;
-                return Ok(result);
+                    supplier = await _context.Suppliers
+                        .FirstOrDefaultAsync(s =>
+                            s.SupNum == data.SupplierSupNum.Value &&
+                            s.UserId == doc.UserId);
+                }
+                if (supplier == null && !string.IsNullOrWhiteSpace(data.SupplierName))
+                {
+                    supplier = await _context.Suppliers
+                        .FirstOrDefaultAsync(s =>
+                            s.Name == data.SupplierName &&
+                            s.UserId == doc.UserId);
+                }
+                if (supplier == null)
+                {
+                    result.Errors.Add(new ValidationErrorDto
+                    {
+                        Field = "Supplier",
+                        Message = "לא ניתן לזהות את הספק. אנא בחר ספק מהרשימה."
+                    });
+                    result.IsValid = false;
+                    return Ok(result);
+                }
             }
 
             // 4. בדיקה שהפריטים כוללים CategoryId (אם חובה אצלך)
