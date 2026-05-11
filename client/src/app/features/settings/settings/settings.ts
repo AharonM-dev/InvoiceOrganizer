@@ -59,7 +59,6 @@ export class Settings implements OnInit {
   ngOnInit() {
     this.initProfileForm();
     this.loadProfileFromApi();
-    this.loadTypes();
     this.loadSuppliers();
   }
 
@@ -89,10 +88,6 @@ export class Settings implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load profile details' });
       }
     });
-  }
-
-  loadTypes() {
-
   }
 
   saveProfile() {
