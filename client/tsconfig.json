@@ -15,7 +15,6 @@
     "target": "ES2022",
     "module": "es2022",
     "moduleResolution": "bundler",
-    "baseUrl": "./",
     "paths": {
       "primeng/*": [
         "./node_modules/primeng/*"
