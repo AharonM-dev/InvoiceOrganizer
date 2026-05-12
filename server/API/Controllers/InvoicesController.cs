@@ -79,6 +79,18 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         foreach (var item in dto.Items)
             item.Id = 0;
 
+        var categoryIds = dto.Items.Select(i => i.CategoryId).Distinct().ToList();
+        if (categoryIds.Any())
+        {
+            var allowedIds = await db.Categories
+                .Where(c => categoryIds.Contains(c.Id) && (c.UserId == userId || c.UserId == ""))
+                .Select(c => c.Id)
+                .ToListAsync();
+            var forbidden = categoryIds.Except(allowedIds).ToList();
+            if (forbidden.Any())
+                return BadRequest(new { message = $"Categories not accessible: {string.Join(", ", forbidden)}" });
+        }
+
         dto.ReCalculateTotal();
 
         db.Invoices.Add(dto);
@@ -101,6 +113,19 @@ public class InvoicesController(AppDbContext db) : ControllerBase
 
         if (invoice is null)
             return NotFound();
+
+        var incomingItems = dto.Items ?? new List<InvoiceItem>();
+        var categoryIds = incomingItems.Select(i => i.CategoryId).Distinct().ToList();
+        if (categoryIds.Any())
+        {
+            var allowedIds = await db.Categories
+                .Where(c => categoryIds.Contains(c.Id) && (c.UserId == userId || c.UserId == ""))
+                .Select(c => c.Id)
+                .ToListAsync();
+            var forbidden = categoryIds.Except(allowedIds).ToList();
+            if (forbidden.Any())
+                return BadRequest(new { message = $"Categories not accessible: {string.Join(", ", forbidden)}" });
+        }
 
         // עדכון שדות בסיסיים
         invoice.InvoiceNumber = dto.InvoiceNumber;
