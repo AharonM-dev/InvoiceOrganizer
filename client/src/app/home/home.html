@@ -1,75 +1,72 @@
-<div class="main-wrapper">
-      
-      <nav>
-        <div class="logo-area">
-           <div class="logo-icon">IH</div>
-          <span class="logo-text">InvoiceHub</span>
-        </div>
+<div class="main-wrapper" dir="rtl">
 
-        <div class="nav-links">
-          <a routerLink="/login" class="link-login">כניסה</a>
-          <a routerLink="/register" class="btn-register">הרשמה חינם</a>
-        </div>
-      </nav>
-
-      <main>
-        
-        <div class="hero-text">
-          <div class="badge-new">✨ חדש: ניהול תקציב חכם ב-AI</div>
-          
-          <h1>
-            הדרך הקלה <br />
-            <span class="gradient-text">לשלוט בכסף שלך</span>
-          </h1>
-          
-          <p class="subtitle">
-            פלטפורמה מתקדמת לניהול הוצאות. 
-            קבל תובנות בזמן אמת, גרפים ושקט נפשי – הכל במקום אחד.
-          </p>
-          
-          <div class="btn-group">
-            <a routerLink="/register" class="btn-primary">התחל עכשיו בחינם</a>
-          </div>
-        </div>
-
-        <div class="hero-visual">
-          <div class="glow-effect"></div>
-          
-          <div class="card-glass">
-            <div class="card-header">
-              <div>
-                <div class="label">הוצאה כוללת</div>
-                <div class="amount">₪42,500</div>
-              </div>
-              <div class="icon-up">⬆</div>
-            </div>
-
-            <div class="graph">
-              <div class="bar" style="height: 40%"></div>
-              <div class="bar active" style="height: 70%"></div>
-              <div class="bar" style="height: 50%"></div>
-              <div class="bar" style="height: 60%"></div>
-              <div class="bar" style="height: 85%"></div>
-            </div>
-            
-            <div class="transaction-item">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="t-icon">🍔</div>
-                <span style="color: #cbd5e1; font-size: 0.9rem;">מסעדות</span>
-              </div>
-              <span style="color: white; font-weight: 500;">-₪250</span>
-            </div>
-            
-            <div class="transaction-item">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="t-icon green">💰</div>
-                <span style="color: #cbd5e1; font-size: 0.9rem;">נסיעות</span>
-              </div>
-              <span style="color: #34d399; font-weight: 500;">-₪2,000</span>
-            </div>
-
-          </div>
-        </div>
-
-      </main>
+  <nav>
+    <div class="logo-area">
+      <div class="logo-icon" aria-label="InvoiceHub logo">IH</div>
+      <span class="logo-text">InvoiceHub</span>
     </div>
+    <div class="nav-links">
+      <a routerLink="/login" class="link-login">כניסה</a>
+      <a routerLink="/register" class="btn-register">הרשמה חינם</a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="hero-text">
+      <div class="badge-new" aria-hidden="true">✨ חדש: ניהול תקציב חכם ב-AI</div>
+
+      <h1>
+        הדרך הקלה <br />
+        <span class="gradient-text">לשלוט בכסף שלך</span>
+      </h1>
+
+      <p class="subtitle">
+        פלטפורמה מתקדמת לניהול הוצאות.
+        קבל תובנות בזמן אמת, גרפים ושקט נפשי – הכל במקום אחד.
+      </p>
+
+      <div class="btn-group">
+        <a routerLink="/register" class="btn-primary">התחל עכשיו בחינם</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="glow-effect"></div>
+
+      <div class="card-glass">
+        <div class="card-header">
+          <div>
+            <div class="label">הוצאה כוללת</div>
+            <div class="amount">₪42,500</div>
+          </div>
+          <div class="icon-up" aria-hidden="true">⬆</div>
+        </div>
+
+        <div class="graph">
+          <div class="bar" style="height: 40%"></div>
+          <div class="bar active" style="height: 70%"></div>
+          <div class="bar" style="height: 50%"></div>
+          <div class="bar" style="height: 60%"></div>
+          <div class="bar" style="height: 85%"></div>
+        </div>
+
+        <div class="transaction-item">
+          <div class="t-info">
+            <div class="t-icon" aria-hidden="true">🍔</div>
+            <span class="t-label">מסעדות</span>
+          </div>
+          <span class="t-amount">-₪250</span>
+        </div>
+
+        <div class="transaction-item">
+          <div class="t-info">
+            <div class="t-icon" aria-hidden="true">🚗</div>
+            <span class="t-label">נסיעות</span>
+          </div>
+          <span class="t-amount">-₪2,000</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
