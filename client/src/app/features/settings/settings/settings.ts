@@ -17,6 +17,9 @@ import { TagModule } from 'primeng/tag';
 import { SupplierService } from '../../../core/services/supplier.service';
 import { Supplier } from '../../../core/models/invoice.model';
 import { SupplierFormModal } from '../../../shared/components/supplier-form-modal/supplier-form-modal';
+import { CategoryService } from '../../../core/services/category.service';
+import { Category } from '../../../core/models/category.model';
+import { CategoryFormModal } from '../../../shared/components/category-form-modal/category-form-modal';
 
 @Component({
   selector: 'app-settings',
@@ -34,6 +37,7 @@ import { SupplierFormModal } from '../../../shared/components/supplier-form-moda
     ToastModule,
     TagModule,
     SupplierFormModal,
+    CategoryFormModal,
   ],
     providers: [MessageService],
   templateUrl: './settings.html',
@@ -44,12 +48,14 @@ export class Settings implements OnInit {
   private messageService = inject(MessageService);
   private http = inject(HttpClient);
   private supplierService = inject(SupplierService);
+  private categoryService = inject(CategoryService);
 
   profileForm!: FormGroup;
 
   // Categories Data
-  categories: any[] = [];
-  newCategoryName: string = '';
+  categories: Category[] = [];
+  showCategoryModal = false;
+  isDeletingCategoryId: number | null = null;
 
   // Suppliers Data
   suppliers: Supplier[] = [];
@@ -60,6 +66,7 @@ export class Settings implements OnInit {
     this.initProfileForm();
     this.loadProfileFromApi();
     this.loadSuppliers();
+    this.loadCategories();
   }
 
   initProfileForm() {
@@ -113,37 +120,59 @@ export class Settings implements OnInit {
     }
   }
 
-  addCategory() {
-    if (this.newCategoryName.trim()) {
-      const payload = { Name: this.newCategoryName };
-      this.http.post('http://localhost:5042/api/invoices/categories', payload, { headers: this.getAuthHeaders() }).subscribe({
-        next: (data: any) => {
-      this.categories.push(data);
-      this.newCategoryName = '';
-          this.messageService.add({ severity: 'success', summary: 'Created', detail: 'Category added' });
-        },
-        error: (err) => {
-          console.error('Failed to add category', err);
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add category' });
-        }
-      });
-    }
+  // ── ניהול קטגוריות ──────────────────────────────────────────────────────
+
+  loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (data) => (this.categories = data),
+      error: () =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'טעינת הקטגוריות נכשלה',
+        }),
+    });
   }
 
-  deleteCategory(category: any) {
-    this.http.delete(`http://localhost:5042/api/invoices/categories/${category.id}`, { headers: this.getAuthHeaders() }).subscribe({
-        next: () => {    
-    this.categories = this.categories.filter(c => c.id !== category.id);
-    this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Category removed' });
+  onCategoryCreated(category: Category): void {
+    this.categories = [...this.categories, category];
+    this.showCategoryModal = false;
+    this.messageService.add({
+      severity: 'success',
+      summary: 'נוספה',
+      detail: `הקטגוריה "${category.name}" נוספה`,
+    });
+  }
+
+  deleteCategory(category: Category): void {
+    if (category.isGlobal) return;
+    this.isDeletingCategoryId = category.id;
+    this.categoryService.delete(category.id).subscribe({
+      next: () => {
+        this.categories = this.categories.filter((c) => c.id !== category.id);
+        this.isDeletingCategoryId = null;
+        this.messageService.add({
+          severity: 'info',
+          summary: 'נמחקה',
+          detail: `הקטגוריה "${category.name}" נמחקה`,
+        });
       },
-        error: (err) => {
-          console.error('Failed to delete category', err);
-          if (err.status === 403) {
-            this.messageService.add({ severity: 'warn', summary: 'Access Denied', detail: 'You cannot delete global default categories.' });
-          } else {
-             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete category.' });
-          }
+      error: (err) => {
+        this.isDeletingCategoryId = null;
+        if (err?.status === 409) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'לא ניתן למחוק',
+            detail: 'הקטגוריה משויכת לפריטי חשבונית קיימים.',
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'שגיאה',
+            detail: 'מחיקת הקטגוריה נכשלה',
+          });
         }
+      },
     });
   }
 

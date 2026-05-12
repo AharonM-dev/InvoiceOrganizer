@@ -7,8 +7,11 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { OCRService } from '../../core/services/ocr.service';
 import { SupplierService } from '../../core/services/supplier.service';
+import { CategoryService } from '../../core/services/category.service';
 import { ExtractedData, Supplier } from '../../core/models/invoice.model';
+import { Category } from '../../core/models/category.model';
 import { SupplierFormModal } from '../../shared/components/supplier-form-modal/supplier-form-modal';
+import { CategoryFormModal } from '../../shared/components/category-form-modal/category-form-modal';
 
 @Component({
   selector: 'app-review',
@@ -19,6 +22,7 @@ import { SupplierFormModal } from '../../shared/components/supplier-form-modal/s
     SelectModule,
     ButtonModule,
     SupplierFormModal,
+    CategoryFormModal,
   ],
   templateUrl: './review.html',
   styleUrl: './review.css',
@@ -26,9 +30,13 @@ import { SupplierFormModal } from '../../shared/components/supplier-form-modal/s
 export class Review implements OnInit {
   draft: ExtractedData | null = null;
   suppliers: Supplier[] = [];
+  categories: Category[] = [];
 
   selectedSupplierId: number | null = null;
   showSupplierModal = false;
+
+  showCategoryModal = false;
+  categoryModalForItemIndex: number | null = null;
 
   loading = true;
   isSaving = false;
@@ -40,20 +48,23 @@ export class Review implements OnInit {
     private router: Router,
     private ocrService: OCRService,
     private supplierService: SupplierService,
+    private categoryService: CategoryService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     const documentId = Number(this.route.snapshot.paramMap.get('documentId'));
 
-    // טעינת draft ורשימת ספקים במקביל
+    // טעינת draft, רשימת ספקים ורשימת קטגוריות במקביל
     forkJoin({
       draft: this.ocrService.getDraft(documentId),
       suppliers: this.supplierService.getAll(),
+      categories: this.categoryService.getAll(),
     }).subscribe({
-      next: ({ draft, suppliers }) => {
+      next: ({ draft, suppliers, categories }) => {
         this.draft = draft;
         this.suppliers = suppliers;
+        this.categories = categories;
 
         // בחירה אוטומטית של ספק לפי נתוני OCR
         if (draft.supplierSupNum) {
@@ -93,10 +104,21 @@ export class Review implements OnInit {
     this.cdr.detectChanges();
   }
 
-  setCategoryId(index: number, event: Event): void {
-    if (!this.draft) return;
-    const value = (event.target as HTMLInputElement).value;
-    this.draft.items[index].categoryId = value ? Number(value) : undefined;
+  openCategoryModal(itemIndex: number): void {
+    this.categoryModalForItemIndex = itemIndex;
+    this.showCategoryModal = true;
+  }
+
+  onCategoryCreated(newCategory: Category): void {
+    this.categories = [...this.categories, newCategory];
+
+    if (this.categoryModalForItemIndex !== null && this.draft) {
+      this.draft.items[this.categoryModalForItemIndex].categoryId = newCategory.id;
+    }
+
+    this.showCategoryModal = false;
+    this.categoryModalForItemIndex = null;
+    this.cdr.detectChanges();
   }
 
   save(): void {

@@ -141,22 +141,32 @@ namespace API.Controllers
                 }
             }
 
-            // 4. בדיקה שהפריטים כוללים CategoryId (אם חובה אצלך)
-            if (data.Items != null)
-                foreach (var item in data.Items)
-                {
-                    if (item.CategoryId == null)
-                    {
-                        result.Errors.Add(new ValidationErrorDto
-                        {
-                            Field = "Items",
-                            Message = "Each item must have CategoryId"
-                        });
-                    }
-                }
-
-            if (result.Errors.Any())
+            // 4. ולידציה של קטגוריות: כל פריט חייב CategoryId ששייך למשתמש או ברירת מחדל גלובלית
+            if (data.Items == null || data.Items.Any(i => i.CategoryId == null))
             {
+                result.Errors.Add(new ValidationErrorDto
+                {
+                    Field = "Items",
+                    Message = "Each item must have CategoryId"
+                });
+                result.IsValid = false;
+                return Ok(result);
+            }
+
+            var categoryIds = data.Items.Select(i => i.CategoryId!.Value).Distinct().ToList();
+            var allowedIds = await _context.Categories
+                .Where(c => categoryIds.Contains(c.Id) && (c.UserId == userId || c.UserId == ""))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            var forbidden = categoryIds.Except(allowedIds).ToList();
+            if (forbidden.Any())
+            {
+                result.Errors.Add(new ValidationErrorDto
+                {
+                    Field = "Items",
+                    Message = $"Categories not accessible: {string.Join(", ", forbidden)}"
+                });
                 result.IsValid = false;
                 return Ok(result);
             }
