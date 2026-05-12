@@ -1,57 +1,104 @@
-<div class="page-container">
-  <nav>
-    <div class="logo-area">
-      <div class="logo-icon">IH</div> <span class="logo-text">InvoiceHub</span>
-    </div>
+<div class="auth" dir="rtl">
+  <div class="auth-grid">
 
-    <div class="nav-links">
-      <a routerLink="/login" class="link-login">כניסה לחשבון</a>
-    </div>
-  </nav>
+    <!-- Form pane -->
+    <section class="auth-form">
+      <div class="auth-brand">
+        <div class="auth-brand-logo">IH</div>
+        <span class="auth-brand-text">InvoiceHub</span>
+      </div>
 
-  <div class="auth-card" style="margin-top: 3.2rem">
+      <div class="auth-heading">
+        <span class="wf-mono">חשבון חדש</span>
+        <h2>בוא נתחיל.</h2>
+        <p>הצטרף למהפכת הניהול הפיננסי החכם.</p>
+      </div>
 
-    <div class="text-center">
-      <h2>יצירת חשבון חדש</h2>
-      <p class="subtitle">הצטרף למהפכת הניהול הפיננסי החכם</p>
-    </div>
-    
-        <div *ngIf="errorMessage" class="error-message" style="background-color: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; border: 1px solid #f87171;">
-          {{ errorMessage }}
+      <div *ngIf="errorMessage" class="auth-error">
+        <i class="pi pi-exclamation-circle"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div *ngIf="successMessage" class="auth-success">
+        <i class="pi pi-check-circle"></i>
+        <span>{{ successMessage }}</span>
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-fields" novalidate>
+        <div class="auth-field">
+          <label for="reg-username" class="wf-mono">שם משתמש</label>
+          <input id="reg-username" class="wf-input" type="text" formControlName="username"
+                 placeholder="שם משתמש"
+                 [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+          <span class="auth-field-hint" *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+            שדה שם משתמש הוא חובה
+          </span>
         </div>
 
-        <div *ngIf="successMessage" class="success-message" style="background-color: #dcfce3; color: #22c55e; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; border: 1px solid #4ade80;">
-          {{ successMessage }}
+        <div class="auth-field">
+          <label for="reg-email" class="wf-mono">אימייל</label>
+          <input id="reg-email" class="wf-input" type="email" formControlName="email"
+                 placeholder="name@example.com" dir="ltr" autocomplete="email"
+                 [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          <span class="auth-field-hint" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+            כתובת אימייל חובה ותקינה
+          </span>
         </div>
 
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label>שם משתמש</label>
-        <input type="text" formControlName="username" placeholder="שם משתמש" [ngStyle]="{'border-color': registerForm.get('username')?.invalid && registerForm.get('username')?.touched ? '#ef4444' : ''}">
-        <span *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" style="color: #ef4444; font-size: 0.85rem; display: block; margin-top: 5px;">*שדה עמותת שם הוא שדה חובה</span>
+        <div class="auth-field">
+          <label for="reg-password" class="wf-mono">סיסמה</label>
+          <input id="reg-password" class="wf-input" type="password" formControlName="password"
+                 placeholder="••••••••" dir="ltr" autocomplete="new-password"
+                 [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          <span class="auth-field-hint auth-field-hint-muted"
+                *ngIf="!(registerForm.get('password')?.invalid && registerForm.get('password')?.touched)">
+            לפחות 6 תווים
+          </span>
+          <span class="auth-field-hint"
+                *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+            סיסמה חובה (לפחות 6 תווים)
+          </span>
+        </div>
+
+        <button type="submit" class="wf-btn wf-btn-primary auth-submit">ליצירת חשבון חינם</button>
+      </form>
+
+      <div class="auth-foot">
+        כבר רשום במערכת?
+        <a routerLink="/login" class="auth-foot-link">התחבר כאן</a>
+      </div>
+    </section>
+
+    <!-- Visual pane -->
+    <aside class="auth-visual">
+      <div class="wf-surface auth-visual-card auth-visual-stat">
+        <span class="wf-mono">סה"כ הוצאות החודש</span>
+        <div class="auth-visual-amount wf-num">₪ 42,580</div>
+        <svg class="auth-visual-chart" viewBox="0 0 600 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="reg-lc" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="var(--wf-accent)" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="var(--wf-accent)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M 10 140 C 60 90, 110 160, 160 120 S 260 80, 310 100 S 410 60, 460 80 S 560 50, 590 60"
+                fill="none" stroke="var(--wf-accent)" stroke-width="1.8"/>
+          <path d="M 10 140 C 60 90, 110 160, 160 120 S 260 80, 310 100 S 410 60, 460 80 S 560 50, 590 60 L 590 200 L 10 200 Z"
+                fill="url(#reg-lc)"/>
+        </svg>
       </div>
 
-      <div class="form-group">
-        <label>כתובת אימייל</label>
-        <input type="email" formControlName="email" placeholder="name@example.com" dir="ltr" [ngStyle]="{'border-color': registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? '#ef4444' : ''}">
-        <span *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" style="color: #ef4444; font-size: 0.85rem; display: block; margin-top: 5px;">*כתובת אימייל חובה ותקינה</span>
+      <div class="wf-surface auth-visual-card">
+        <p class="auth-quote">"חיסכנו 4 שעות בשבוע על הזנת חשבוניות."</p>
+        <div class="auth-quote-by">
+          <div class="auth-quote-avatar">ר</div>
+          <div class="auth-quote-meta">
+            <span class="auth-quote-name">רוני שמיר</span>
+            <span class="auth-quote-role">מנהלת כספים · Studio42</span>
+          </div>
+        </div>
       </div>
+    </aside>
 
-      <div class="form-group">
-        <label>סיסמה</label>
-        <input type="password" formControlName="password" placeholder="••••••••" dir="ltr" [ngStyle]="{'border-color': registerForm.get('password')?.invalid && registerForm.get('password')?.touched ? '#ef4444' : ''}">
-        <p *ngIf="!(registerForm.get('password')?.invalid && registerForm.get('password')?.touched)" style="text-align: right; font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">לפחות 6 תווים</p>
-        <span *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" style="color: #ef4444; font-size: 0.85rem; display: block; margin-top: 5px;">*סיסמה חובה (לפחות 6 תווים)</span>
-      </div>
-
-      <button type="submit" class="btn-submit">
-        ליצירת חשבון חינם
-      </button>
-    </form>
-
-    <div class="footer-links">
-      כבר רשום במערכת?
-      <a routerLink="/login" class="link">התחבר כאן</a>
-    </div>
   </div>
 </div>

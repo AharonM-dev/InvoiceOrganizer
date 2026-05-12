@@ -1,152 +1,142 @@
-<div class="min-h-screen flex flex-col overflow-x-hidden text-gray-700 font-sans hero-bg" dir="rtl">
+<div class="home" dir="rtl">
 
   <!-- Nav -->
-  <nav class="flex justify-between items-center px-4 py-3 sm:px-10 lg:px-20 w-full box-border">
-    <div class="flex items-center gap-2.5">
-      <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-2xl text-white shadow-[0_4px_10px_rgba(79,70,229,0.3)]"
-           aria-label="InvoiceHub logo">IH</div>
-      <span class="text-base sm:text-xl font-bold text-slate-800">InvoiceHub</span>
+  <nav class="home-nav">
+    <div class="home-brand">
+      <div class="home-brand-logo">IH</div>
+      <span class="home-brand-text">InvoiceHub</span>
     </div>
-    <div class="flex items-center gap-3 sm:gap-5">
-      <a routerLink="/login"
-         class="no-underline text-slate-600 text-sm sm:text-base font-medium transition-colors duration-300 hover:text-black">כניסה</a>
-      <a routerLink="/register"
-         class="bg-indigo-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full no-underline text-sm sm:text-base font-medium transition-[background-color,box-shadow] duration-300 hover:bg-indigo-700 hover:shadow-[0_4px_12px_rgba(79,70,229,0.4)]">הרשמה חינם</a>
+    <div class="home-nav-links">
+      <a class="home-nav-link" href="#features-heading">תכונות</a>
+      <a class="home-nav-link" href="#features-heading">תמחור</a>
+      <a class="home-nav-link" href="#features-heading">למה אנחנו</a>
+      <a routerLink="/login" class="wf-btn wf-btn-ghost">כניסה</a>
+      <a routerLink="/register" class="wf-btn wf-btn-primary">פתח חשבון</a>
     </div>
   </nav>
 
   <!-- Hero -->
-  <main class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 lg:gap-[60px] w-full px-4 py-8 sm:px-10 lg:px-20 sm:py-12 box-border">
-
-    <div class="flex-1 text-center md:text-right">
-      <div class="inline-block px-4 py-1.5 bg-indigo-100 border border-indigo-200 text-indigo-700 text-sm font-semibold rounded-full mb-6"
-           aria-hidden="true">✨ חדש: ניהול תקציב חכם ב-AI</div>
-
-      <h1 class="text-[1.85rem] sm:text-[2.4rem] lg:text-5xl leading-tight font-extrabold mb-6 text-slate-900">
-        הדרך הקלה <br />
-        <span class="bg-gradient-to-r from-indigo-600 to-emerald-500 bg-clip-text text-transparent">לשלוט בכסף שלך</span>
+  <main class="home-hero">
+    <div class="home-hero-copy">
+      <span class="wf-mono">חדש · עיבוד חשבוניות באמצעות בינה מלאכותית</span>
+      <h1 class="home-hero-title">
+        חשבוניות שמסתדרות
+        <br>
+        <span class="home-hero-title-accent">בעצמן.</span>
       </h1>
-
-      <p class="text-base sm:text-lg text-slate-600 mb-8 leading-relaxed">
-        פלטפורמה מתקדמת לניהול הוצאות.
-        קבל תובנות בזמן אמת, גרפים ושקט נפשי – הכל במקום אחד.
+      <p class="home-hero-sub">
+        העלאה, סיווג, אימות ודיווח — בלי גיליונות, בלי תיקיות, בלי לחפש איפה
+        שמת את החשבונית של ספטמבר.
       </p>
-
-      <div class="flex flex-col gap-3 w-full max-w-xs mx-auto sm:flex-row sm:gap-4 sm:w-auto sm:max-w-none sm:justify-center">
-        <a routerLink="/register"
-           class="bg-indigo-600 text-white px-8 py-4 rounded-full no-underline font-bold text-center transition-[background-color,box-shadow] duration-300 hover:bg-indigo-700 hover:shadow-[0_4px_12px_rgba(79,70,229,0.4)] w-full sm:w-auto">
-          התחל עכשיו בחינם
-        </a>
+      <div class="home-hero-ctas">
+        <a routerLink="/register" class="wf-btn wf-btn-primary">התחל ניסיון חינם</a>
+        <a routerLink="/login" class="wf-btn wf-btn-ghost">צפה בהדגמה · 2 דקות</a>
+      </div>
+      <div class="home-hero-logos">
+        <span class="wf-mono">בשימוש אצל</span>
+        <span class="home-bar home-bar-1"></span>
+        <span class="home-bar home-bar-2"></span>
+        <span class="home-bar home-bar-3"></span>
+        <span class="home-bar home-bar-4"></span>
       </div>
     </div>
 
-    <div class="flex-1 relative flex justify-center w-full">
-      <div class="absolute w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[80px] z-0"></div>
-
-      <div class="relative bg-slate-900/95 border border-slate-700 p-5 sm:p-6 rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] rotate-0 md:-rotate-3 md:hover:rotate-0 transition-transform duration-500 z-10 w-full max-w-sm sm:max-w-[400px] text-white">
-
-        <div class="flex justify-between items-center mb-6">
-          <div>
-            <div class="text-sm text-slate-400">הוצאה כוללת</div>
-            <div class="text-[2rem] font-bold"><bdi dir="ltr">₪42,500</bdi></div>
-          </div>
-          <div class="w-10 h-10 bg-emerald-500/20 text-emerald-300 rounded-full flex items-center justify-center text-xl font-bold"
-               aria-hidden="true">⬆</div>
-        </div>
-
-        <div class="flex items-end gap-2 h-[100px] mb-6">
-          <div class="flex-1 bg-slate-700 rounded-t" style="height: 40%"></div>
-          <div class="flex-1 bg-indigo-500 rounded-t" style="height: 70%"></div>
-          <div class="flex-1 bg-slate-700 rounded-t" style="height: 50%"></div>
-          <div class="flex-1 bg-slate-700 rounded-t" style="height: 60%"></div>
-          <div class="flex-1 bg-slate-700 rounded-t" style="height: 85%"></div>
-        </div>
-
-        <div class="flex justify-between items-center p-3 bg-slate-800 rounded-xl mb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-rose-600/20 rounded-full flex items-center justify-center text-xs" aria-hidden="true">🍔</div>
-            <span class="text-slate-300 text-[0.9rem]">מסעדות</span>
-          </div>
-          <span class="text-white font-medium"><bdi dir="ltr">-₪250</bdi></span>
-        </div>
-
-        <div class="flex justify-between items-center p-3 bg-slate-800 rounded-xl mb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-rose-600/20 rounded-full flex items-center justify-center text-xs" aria-hidden="true">🚗</div>
-            <span class="text-slate-300 text-[0.9rem]">נסיעות</span>
-          </div>
-          <span class="text-white font-medium"><bdi dir="ltr">-₪2,000</bdi></span>
-        </div>
-
+    <!-- Product peek -->
+    <aside class="home-peek wf-surface">
+      <div class="home-peek-head">
+        <span class="home-peek-title">הוצאות · ספטמבר</span>
+        <span class="wf-tag wf-tag-accent">+12%</span>
       </div>
-    </div>
+      <div class="home-peek-amount wf-num">₪ 42,580</div>
+      <div class="home-peek-budget">מתוך ₪ 50,000 תקציב</div>
+
+      <svg class="home-peek-chart" viewBox="0 0 600 200" aria-hidden="true">
+        <defs>
+          <linearGradient id="home-lc" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="var(--wf-accent)" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="var(--wf-accent)" stop-opacity="0"/>
+          </linearGradient>
+          <pattern id="home-grid" width="60" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 40" fill="none" stroke="var(--wf-border)" stroke-width="1" opacity="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="600" height="200" fill="url(#home-grid)"/>
+        <path d="M 10 140 C 60 90, 110 160, 160 120 S 260 80, 310 100 S 410 60, 460 80 S 560 50, 590 60"
+              fill="none" stroke="var(--wf-accent)" stroke-width="1.8"/>
+        <path d="M 10 140 C 60 90, 110 160, 160 120 S 260 80, 310 100 S 410 60, 460 80 S 560 50, 590 60 L 590 200 L 10 200 Z"
+              fill="url(#home-lc)"/>
+        <path d="M 10 170 C 60 150, 110 175, 160 165 S 260 155, 310 162 S 410 150, 460 156 S 560 145, 590 152"
+              fill="none" stroke="var(--wf-text-muted)" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+      </svg>
+
+      <div class="home-peek-list">
+        <div class="home-peek-row">
+          <span>מסעדות</span>
+          <span class="wf-num home-peek-amount-sm">₪ 1,240</span>
+        </div>
+        <div class="home-peek-row">
+          <span>נסיעות</span>
+          <span class="wf-num home-peek-amount-sm">₪ 820</span>
+        </div>
+        <div class="home-peek-row">
+          <span>משרד</span>
+          <span class="wf-num home-peek-amount-sm">₪ 360</span>
+        </div>
+      </div>
+    </aside>
   </main>
 
   <!-- Features -->
-  <section class="relative py-12 px-4 sm:py-16 lg:py-[100px] lg:px-5 bg-gradient-to-b from-indigo-50 to-indigo-100 features-divider"
-           aria-labelledby="features-heading">
-    <div class="max-w-[1200px] mx-auto">
-      <span class="block text-center text-indigo-600 text-sm font-bold tracking-widest uppercase mb-3">פיצ'רים</span>
-      <h2 id="features-heading"
-          class="text-[1.6rem] sm:text-[2rem] lg:text-[2.5rem] font-extrabold text-slate-900 text-center mt-0 mb-4 leading-tight">
+  <section class="home-features" aria-labelledby="features-heading">
+    <div class="home-features-inner">
+      <span class="wf-mono home-features-eyebrow">פיצ'רים</span>
+      <h2 id="features-heading" class="home-features-title">
         כל מה שצריך כדי לנהל את ההוצאות שלך
       </h2>
-      <p class="text-sm sm:text-base lg:text-lg text-slate-600 text-center mx-auto mb-8 lg:mb-14 max-w-[560px]">
+      <p class="home-features-sub">
         פיצ'רים חכמים שחוסכים לך זמן ומספקים שליטה מלאה.
       </p>
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7">
-
-        <article class="bg-white border border-indigo-200/50 rounded-[20px] p-5 sm:p-8 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-12px_rgba(79,70,229,0.25)] hover:border-indigo-400">
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-[14px] flex items-center justify-center text-2xl sm:text-[1.75rem] bg-indigo-600/[0.12]"
-               aria-hidden="true">🤖</div>
-          <h3 class="text-lg sm:text-xl font-bold text-slate-900 mt-3 sm:mt-4 mb-2">סריקה אוטומטית עם AI</h3>
-          <p class="text-sm sm:text-[0.95rem] text-slate-600 leading-relaxed m-0">העלה תמונה של חשבונית – המערכת מחלצת ספק, סכום, תאריך וקטגוריה בשניות.</p>
+      <div class="home-features-grid">
+        <article class="wf-surface home-feature-card">
+          <div class="home-feature-icon"><i class="pi pi-bolt"></i></div>
+          <h3 class="home-feature-h">סריקה אוטומטית עם AI</h3>
+          <p class="home-feature-p">העלה תמונה של חשבונית — המערכת מחלצת ספק, סכום, תאריך וקטגוריה בשניות.</p>
         </article>
 
-        <article class="bg-white border border-indigo-200/50 rounded-[20px] p-5 sm:p-8 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-12px_rgba(79,70,229,0.25)] hover:border-indigo-400">
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-[14px] flex items-center justify-center text-2xl sm:text-[1.75rem] bg-emerald-500/[0.12]"
-               aria-hidden="true">📊</div>
-          <h3 class="text-lg sm:text-xl font-bold text-slate-900 mt-3 sm:mt-4 mb-2">דוחות ותובנות בזמן אמת</h3>
-          <p class="text-sm sm:text-[0.95rem] text-slate-600 leading-relaxed m-0">גרפים אינטראקטיביים, פילוח לפי קטגוריה ומעקב אחרי התקציב החודשי שלך.</p>
+        <article class="wf-surface home-feature-card">
+          <div class="home-feature-icon"><i class="pi pi-chart-bar"></i></div>
+          <h3 class="home-feature-h">דוחות ותובנות בזמן אמת</h3>
+          <p class="home-feature-p">גרפים אינטראקטיביים, פילוח לפי קטגוריה ומעקב אחרי התקציב החודשי שלך.</p>
         </article>
 
-        <article class="bg-white border border-indigo-200/50 rounded-[20px] p-5 sm:p-8 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-12px_rgba(79,70,229,0.25)] hover:border-indigo-400">
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-[14px] flex items-center justify-center text-2xl sm:text-[1.75rem] bg-rose-600/[0.12]"
-               aria-hidden="true">🗂️</div>
-          <h3 class="text-lg sm:text-xl font-bold text-slate-900 mt-3 sm:mt-4 mb-2">ניהול ספקים וקטגוריות</h3>
-          <p class="text-sm sm:text-[0.95rem] text-slate-600 leading-relaxed m-0">ארגן את ההוצאות שלך לפי ספקים וקטגוריות מותאמים אישית – הכל במקום אחד.</p>
+        <article class="wf-surface home-feature-card">
+          <div class="home-feature-icon"><i class="pi pi-folder"></i></div>
+          <h3 class="home-feature-h">ניהול ספקים וקטגוריות</h3>
+          <p class="home-feature-p">ארגן את ההוצאות שלך לפי ספקים וקטגוריות מותאמים אישית — הכל במקום אחד.</p>
         </article>
-
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="bg-slate-900 text-slate-300 pt-10 pb-6 px-4 sm:pt-12 sm:px-5">
-    <div class="max-w-[1200px] mx-auto flex flex-col gap-8 flex-wrap md:flex-row md:justify-between md:items-start">
-      <div class="max-w-[360px]">
-        <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-2xl text-white shadow-[0_4px_10px_rgba(79,70,229,0.3)]"
-               aria-label="InvoiceHub logo">IH</div>
-          <span class="text-xl font-bold text-slate-50">InvoiceHub</span>
+  <footer class="home-footer">
+    <div class="home-footer-inner">
+      <div class="home-footer-brand">
+        <div class="home-brand">
+          <div class="home-brand-logo">IH</div>
+          <span class="home-brand-text">InvoiceHub</span>
         </div>
-        <p class="text-slate-400 text-sm sm:text-[0.95rem] leading-relaxed mt-3 mb-0">ניהול הוצאות חכם, פשוט וזמין מכל מקום.</p>
+        <p class="home-footer-tag">ניהול הוצאות חכם, פשוט וזמין מכל מקום.</p>
       </div>
-
-      <div class="flex gap-6 flex-wrap">
-        <a routerLink="/login"
-           class="text-slate-300 no-underline text-sm sm:text-[0.95rem] font-medium transition-colors duration-300 hover:text-white">כניסה</a>
-        <a routerLink="/register"
-           class="text-slate-300 no-underline text-sm sm:text-[0.95rem] font-medium transition-colors duration-300 hover:text-white">הרשמה</a>
-        <a href="#features-heading"
-           class="text-slate-300 no-underline text-sm sm:text-[0.95rem] font-medium transition-colors duration-300 hover:text-white">פיצ'רים</a>
-      </div>
+      <nav class="home-footer-links">
+        <a routerLink="/login">כניסה</a>
+        <a routerLink="/register">הרשמה</a>
+        <a href="#features-heading">פיצ'רים</a>
+      </nav>
     </div>
-
-    <div class="max-w-[1200px] mx-auto mt-8 pt-6 border-t border-slate-800 text-center text-sm text-slate-500">
+    <div class="home-footer-bottom">
       © {{ currentYear }} InvoiceHub. כל הזכויות שמורות.
     </div>
   </footer>
-
 </div>
