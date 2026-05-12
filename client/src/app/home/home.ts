@@ -9,4 +9,6 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./home.css'],
   templateUrl: './home.html'
 })
-export class HomeComponent {}
+export class HomeComponent {
+  readonly currentYear = new Date().getFullYear();
+}

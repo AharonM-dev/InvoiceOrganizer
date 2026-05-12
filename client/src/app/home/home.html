@@ -37,7 +37,7 @@
         <div class="card-header">
           <div>
             <div class="label">הוצאה כוללת</div>
-            <div class="amount">₪42,500</div>
+            <div class="amount"><bdi dir="ltr">₪42,500</bdi></div>
           </div>
           <div class="icon-up" aria-hidden="true">⬆</div>
         </div>
@@ -55,7 +55,7 @@
             <div class="t-icon" aria-hidden="true">🍔</div>
             <span class="t-label">מסעדות</span>
           </div>
-          <span class="t-amount">-₪250</span>
+          <span class="t-amount"><bdi dir="ltr">-₪250</bdi></span>
         </div>
 
         <div class="transaction-item">
@@ -63,10 +63,66 @@
             <div class="t-icon" aria-hidden="true">🚗</div>
             <span class="t-label">נסיעות</span>
           </div>
-          <span class="t-amount">-₪2,000</span>
+          <span class="t-amount"><bdi dir="ltr">-₪2,000</bdi></span>
         </div>
       </div>
     </div>
   </main>
+
+  <!-- Features Section -->
+  <section class="features" aria-labelledby="features-heading">
+    <div class="features-inner">
+      <span class="section-eyebrow">פיצ'רים</span>
+      <h2 id="features-heading" class="section-title">
+        כל מה שצריך כדי לנהל את ההוצאות שלך
+      </h2>
+      <p class="section-subtitle">
+        פיצ'רים חכמים שחוסכים לך זמן ומספקים שליטה מלאה.
+      </p>
+
+      <div class="features-grid">
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-indigo" aria-hidden="true">🤖</div>
+          <h3>סריקה אוטומטית עם AI</h3>
+          <p>העלה תמונה של חשבונית – המערכת מחלצת ספק, סכום, תאריך וקטגוריה בשניות.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-emerald" aria-hidden="true">📊</div>
+          <h3>דוחות ותובנות בזמן אמת</h3>
+          <p>גרפים אינטראקטיביים, פילוח לפי קטגוריה ומעקב אחרי התקציב החודשי שלך.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-rose" aria-hidden="true">🗂️</div>
+          <h3>ניהול ספקים וקטגוריות</h3>
+          <p>ארגן את ההוצאות שלך לפי ספקים וקטגוריות מותאמים אישית – הכל במקום אחד.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo-area">
+          <div class="logo-icon" aria-label="InvoiceHub logo">IH</div>
+          <span class="logo-text-light">InvoiceHub</span>
+        </div>
+        <p class="footer-tagline">ניהול הוצאות חכם, פשוט וזמין מכל מקום.</p>
+      </div>
+
+      <div class="footer-links">
+        <a routerLink="/login">כניסה</a>
+        <a routerLink="/register">הרשמה</a>
+        <a href="#features-heading">פיצ'רים</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © {{ currentYear }} InvoiceHub. כל הזכויות שמורות.
+    </div>
+  </footer>
 
 </div>
