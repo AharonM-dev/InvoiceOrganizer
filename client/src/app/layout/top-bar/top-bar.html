@@ -1,0 +1,13 @@
+<header class="wf-topbar">
+  <div class="wf-topbar-title">
+    <span class="wf-mono" *ngIf="breadcrumb">{{ breadcrumb }}</span>
+    <h1 class="wf-topbar-h1">{{ title }}</h1>
+  </div>
+  <div class="wf-topbar-actions">
+    <div class="wf-topbar-search" *ngIf="showSearch" aria-hidden="true">
+      <span class="wf-topbar-search-key">⌘K</span>
+      <span class="wf-topbar-search-text">חיפוש בחשבוניות, ספקים, קטגוריות…</span>
+    </div>
+    <ng-content select="[actions]"></ng-content>
+  </div>
+</header>

@@ -1,0 +1,21 @@
+.wf-shell {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100vh;
+  background: var(--wf-bg);
+  color: var(--wf-text);
+  overflow: hidden;
+}
+
+.wf-shell-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--wf-bg);
+}
+
+/* Pages render their own <app-top-bar> at the top and a .wf-page wrapper
+   below it. The TopBar sticks; the page content scrolls within main. */
