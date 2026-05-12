@@ -1,166 +1,142 @@
-<div class="dashboard-page">
+<app-top-bar breadcrumb="לוח בקרה" title="סקירה כללית">
+  <div actions class="dash-topbar-actions">
+    <button class="wf-btn wf-btn-ghost" type="button" (click)="exportToExcel()">
+      <i class="pi pi-download"></i>
+      <span>ייצוא</span>
+    </button>
+    <a class="wf-btn wf-btn-primary" routerLink="/upload">
+      <i class="pi pi-plus"></i>
+      <span>חשבונית</span>
+    </a>
+  </div>
+</app-top-bar>
 
-  <div class="glass-header">
+<div class="wf-page dash">
 
-    <div class="title-area">
-
-      <h1>סקירה כללית  <span class="badge">PRO</span></h1>
-
-      <div class="subtitle text-500">לוח בקרה של הוצאות ותקציב</div>
-
-    </div>
-
-   
-
-
-
-    <!-- Actions placeholder if needed -->
-
-    <div class="actions">
-       <p-button label="הורד דוח" icon="pi pi-download" styleClass="p-button-outlined" (onClick)="exportToExcel()"></p-button>
-    </div>
-
+  <!-- Loading -->
+  <div class="dash-state" *ngIf="isLoading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>טוען נתונים…</span>
   </div>
 
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading" style="text-align: center; padding: 4rem; margin-top: 2rem;">
-    <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #4f46e5;"></i>
-    <p style="margin-top: 1rem; color: #64748b; font-weight: 500;">טוען נתונים...</p>
+  <!-- Empty -->
+  <div class="wf-surface dash-empty" *ngIf="!isLoading && (!expenses || expenses.length === 0)">
+    <i class="pi pi-receipt"></i>
+    <h2>ברוך הבא למערכת</h2>
+    <p>עדיין לא העלית חשבוניות. הוסף חשבונית ראשונה כדי שנוכל להתחיל לנתח עבורך את הנתונים.</p>
+    <a routerLink="/upload" class="wf-btn wf-btn-primary">
+      <i class="pi pi-cloud-upload"></i>
+      <span>העלאת חשבונית ראשונה</span>
+    </a>
   </div>
 
-  <!-- Empty State -->
-  <div class="empty-state-card" *ngIf="!isLoading && (!expenses || expenses.length === 0)" style="text-align: center; padding: 4rem; background: rgba(255,255,255,0.8); border-radius: 12px; margin-top: 2rem;">
-    <i class="pi pi-receipt" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-    <h2>ברוך הבא למערכת!</h2>
-    <p style="color: #64748b; margin-bottom: 2rem;">נראה שעדיין לא העלית חשבוניות למערכת. הוסף חשבונית חדשה ותן לנו להתחיל לנתח עבורך את הנתונים.</p>
-    <a routerLink="/upload" pButton label="העלאת חשבונית ראשונה" icon="pi pi-plus" class="p-button-rounded p-button-primary"></a>
-  </div>
+  <ng-container *ngIf="!isLoading && expenses && expenses.length > 0">
 
-  <div class="main-grid" *ngIf="!isLoading && expenses && expenses.length > 0">
-
-    <!-- Main Trend Chart -->
-
-    <div class="card main-chart">
-
-      <div class="flex-between">
-
-        <h3>מגמת הוצאות</h3>
-
-        <span>חצי שנתי</span>
-
+    <!-- KPI strip — values derived from `expenses` only -->
+    <div class="dash-kpi-row">
+      <div class="wf-surface dash-kpi">
+        <span class="wf-mono">סה"כ הוצאות</span>
+        <div class="dash-kpi-value wf-num">{{ totalAmount | currency:'ILS':'symbol':'1.0-0' }}</div>
+        <span class="wf-tag wf-tag-accent">{{ expenses.length }} חשבוניות</span>
       </div>
-
-      <p-chart type="line" [data]="expenseTrendChart" [options]="expenseTrendOptions" height="300px"></p-chart>
-
+      <div class="wf-surface dash-kpi">
+        <span class="wf-mono">מאומתות</span>
+        <div class="dash-kpi-value wf-num">{{ approvedCount }}</div>
+        <span class="wf-tag wf-tag-success">מתוך {{ expenses.length }}</span>
+      </div>
+      <div class="wf-surface dash-kpi">
+        <span class="wf-mono">ממתינות אישור</span>
+        <div class="dash-kpi-value wf-num">{{ pendingCount }}</div>
+        <span class="wf-tag wf-tag-warn">דורש טיפול</span>
+      </div>
+      <div class="wf-surface dash-kpi">
+        <span class="wf-mono">שגיאות</span>
+        <div class="dash-kpi-value wf-num">{{ rejectedCount }}</div>
+        <span class="wf-tag" [ngClass]="rejectedCount > 0 ? 'wf-tag-danger' : ''">
+          {{ rejectedCount > 0 ? 'לבדיקה' : 'נקי' }}
+        </span>
+      </div>
     </div>
 
-
-
-    <!-- Category Doughnut Chart -->
-
-    <div class="card donut-section">
-
-      <h3>התפלגות תקציב</h3>
-
-      <div class="chart-relative">
-
-        <p-chart type="doughnut" [data]="categoryChart" [options]="categoryOptions" width="100%" height="250px" [style]="{'display': 'flex', 'justify-content': 'center'}"></p-chart>
-
-        <div class="chart-center-label">
-
-          <strong>85%</strong>
-
-          <span class="text-sm text-500">ניצול תקציב</span>
-
+    <!-- Main grid: trend + donut -->
+    <div class="dash-grid">
+      <section class="wf-surface dash-chart-card">
+        <header class="dash-card-head">
+          <div>
+            <h3 class="dash-card-title">מגמת הוצאות</h3>
+            <p class="dash-card-sub">שישה חודשים אחרונים</p>
+          </div>
+          <div class="dash-segment" aria-hidden="true">
+            <span>שבוע</span>
+            <span class="is-active">חודש</span>
+            <span>רבעון</span>
+            <span>שנה</span>
+          </div>
+        </header>
+        <div class="dash-chart-body">
+          <p-chart type="line" [data]="expenseTrendChart" [options]="expenseTrendOptions" height="240px"></p-chart>
         </div>
+      </section>
 
-      </div>
-
+      <section class="wf-surface dash-donut-card">
+        <header>
+          <h3 class="dash-card-title">התפלגות קטגוריות</h3>
+          <p class="dash-card-sub">חודש נוכחי</p>
+        </header>
+        <div class="dash-donut-body">
+          <p-chart type="doughnut" [data]="categoryChart" [options]="categoryOptions" height="180px"></p-chart>
+        </div>
+        <ul class="dash-legend" *ngIf="categoryChart?.labels?.length">
+          <li *ngFor="let label of categoryChart.labels; let i = index">
+            <span class="dash-legend-dot"
+                  [style.background]="categoryChart.datasets[0].backgroundColor[i]"></span>
+            <span class="dash-legend-label">{{ label }}</span>
+            <span class="dash-legend-amount wf-num">
+              {{ categoryChart.datasets[0].data[i] | currency:'ILS':'symbol':'1.0-0' }}
+            </span>
+          </li>
+        </ul>
+      </section>
     </div>
 
+    <!-- Recent invoices -->
+    <section class="wf-surface dash-table-card">
+      <header class="dash-card-head dash-table-head">
+        <h3 class="dash-card-title">חשבוניות אחרונות</h3>
+        <a routerLink="/invoices" class="dash-table-link">צפייה בכל החשבוניות ←</a>
+      </header>
+      <p-table [value]="expenses" [rows]="5" [paginator]="false" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>ספק</th>
+            <th>קטגוריה</th>
+            <th>תאריך</th>
+            <th>סכום</th>
+            <th>סטטוס</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-expense>
+          <tr>
+            <td>
+              <div class="dash-vendor">
+                <p-avatar *ngIf="expense.logo; else iconAvatar" [image]="expense.logo" shape="circle"></p-avatar>
+                <ng-template #iconAvatar>
+                  <p-avatar [icon]="expense.icon || 'pi pi-building'" shape="circle"></p-avatar>
+                </ng-template>
+                <span>{{ expense.vendor }}</span>
+              </div>
+            </td>
+            <td>{{ expense.category || '—' }}</td>
+            <td class="wf-num">{{ expense.date | date:'dd/MM/yyyy' }}</td>
+            <td class="wf-num dash-amount">{{ expense.amount | currency:'ILS':'symbol':'1.0-0' }}</td>
+            <td>
+              <p-tag [value]="getStatusLabel(expense.status)" [severity]="getSeverity(expense.status)"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
 
-
-    <!-- Expenses Table -->
-
-    <div class="table-container">
-
-      <div class="card">
-
-        <h3>הוצאות אחרונות</h3>
-
-        <p-table [value]="expenses" [rows]="5" [paginator]="false" responsiveLayout="scroll" styleClass="p-datatable-sm">
-
-          <ng-template pTemplate="header">
-            
-            <tr>
-
-              <th>ספק</th>
-
-              <th>קטגוריה</th>
-
-              <th>תאריך</th>
-
-              <th>סכום</th>
-
-              <th>סטטוס</th>
-
-              <th></th>
-
-            </tr>
-
-          </ng-template>
-
-          <ng-template pTemplate="body" let-expense>
-
-            <tr class="table-row">
-
-              <td>
-
-                <div class="vendor-info">
-
-                  <p-avatar *ngIf="expense.logo; else iconAvatar" [image]="expense.logo" shape="circle"></p-avatar>
-
-                  <ng-template #iconAvatar>
-
-                     <p-avatar [icon]="expense.icon" shape="circle" styleClass="bg-blue-100 text-blue-600"></p-avatar>
-
-                  </ng-template>
-
-                  <span class="font-medium">{{expense.vendor}}</span>
-
-                </div>
-
-              </td>
-
-              <td><p-tag [value]="expense.category" severity="info" [rounded]="true"></p-tag></td>
-
-              <td>{{expense.date | date:'dd/MM/yyyy'}}</td>
-
-              <td class="amount">{{expense.amount | currency:'ILS':'symbol':'1.0-0'}}</td>
-
-              <td>
-
-                <p-tag [value]="expense.status" [severity]="getSeverity(expense.status)"></p-tag>
-
-              </td>
-
-              <td>
-
-                <button pButton icon="pi pi-angle-left" class="p-button-text p-button-rounded p-button-secondary"></button>
-
-              </td>
-
-            </tr>
-
-          </ng-template>
-
-        </p-table>
-
-      </div>
-
-    </div>
-
-  </div>
+  </ng-container>
 
 </div>
-

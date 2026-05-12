@@ -1,7 +1,6 @@
-import { Component, OnInit, inject, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Routes } from '@angular/router';
-import { routes } from '../../app.routes';
+import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 // PrimeNG Imports
 import { TableModule } from 'primeng/table';
@@ -15,21 +14,24 @@ import { InputTextModule } from 'primeng/inputtext';
 import { HttpClient } from '@angular/common/http';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
+import { TopBarComponent } from '../../layout/top-bar/top-bar';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, TableModule, ButtonModule, ChartModule, 
-    TagModule, AvatarModule, ProgressBarModule, TooltipModule, InputTextModule
+    CommonModule, RouterLink,
+    TableModule, ButtonModule, ChartModule,
+    TagModule, AvatarModule, ProgressBarModule, TooltipModule, InputTextModule,
+    TopBarComponent,
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
 export class DashboardComponent implements OnInit {
-  
+
   isLoading: boolean = true;
-  isSidebarOpen: boolean = false;
- 
+
   expenses: Expense[] = [];
   expenseTrendChart: any;
   expenseTrendOptions: any;
@@ -38,13 +40,27 @@ export class DashboardComponent implements OnInit {
   private http = inject(HttpClient);
   private cd = inject(ChangeDetectorRef);
 
+  /* ── KPI getters — derived from `expenses`; no new data sources. ───────── */
+  get totalAmount(): number {
+    return this.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  }
+  get pendingCount(): number {
+    return this.expenses.filter(e => e.status === 'pending').length;
+  }
+  get approvedCount(): number {
+    return this.expenses.filter(e => e.status === 'approved').length;
+  }
+  get rejectedCount(): number {
+    return this.expenses.filter(e => e.status === 'rejected').length;
+  }
+
   ngOnInit() {
     this.loadDashboardData();
     this.initCharts();
   }
 
   loadDashboardData() {
-    
+
   console.log('initMockData called'); // Debug: Function entry
     const userStr = localStorage.getItem("user");
     if (!userStr) {
@@ -63,10 +79,10 @@ export class DashboardComponent implements OnInit {
     }).subscribe({
         next: (response) => {
             console.log('API Response received:', response); // Debug: API response
-            
+
             // 1. עדכון הטבלה מהחשבוניות
             this.expenses = response.invoices.map(inv => ({
-                id: inv.id, 
+                id: inv.id,
                 vendor: inv.vendorName || inv.supplier?.name || 'ספק כללי',
                 logo: inv.logoUrl || '',
                 icon: inv.icon || '',
@@ -79,7 +95,7 @@ export class DashboardComponent implements OnInit {
 
             // 2. עיבוד הפריטים עבור גרף הקטגוריות
             this.processCategoryData(response.categorySummary);
-            
+
             // 3. עדכון גרף המגמה (אם הנתונים מגיעים מהשרת)
             this.updateTrendChart(response.invoices);
 
@@ -95,19 +111,30 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /* Wireframe palette: accent + muted + success + warn + border. One brand
+     color, the rest are token grayscale/state tones — keeps the donut quiet. */
+  private chartPalette = [
+    '#c8a76d', // accent
+    '#b8b8bf', // text-secondary
+    '#6fa890', // success
+    '#c89860', // warn
+    '#c47878', // danger
+    '#72727a', // text-muted
+  ];
+
   processCategoryData(summaryData: any[]) {
-      let labels = [];
-      let data = [];
-      let bgColors = [];
+      let labels: string[] = [];
+      let data: number[] = [];
+      let bgColors: string[] = [];
 
       if (!summaryData || summaryData.length === 0) {
           labels = ['אין הוצאות מקוטלגות'];
           data = [1];
-          bgColors = ['#e2e8f0']; // Grey color for empty state
+          bgColors = ['#26262c']; // border tone for empty state
       } else {
           labels = summaryData.map(x => x.categoryName || 'אחר');
           data = summaryData.map(x => x.total);
-          bgColors = ['#6366f1', '#f43f5e', '#f59e0b', '#10b981', '#a855f7', '#3b82f6'];
+          bgColors = labels.map((_, i) => this.chartPalette[i % this.chartPalette.length]);
       }
 
       this.categoryChart = {
@@ -115,8 +142,9 @@ export class DashboardComponent implements OnInit {
           datasets: [{
               data: data,
               backgroundColor: bgColors,
-              hoverOffset: 15,
-              borderRadius: 10
+              borderColor: '#131316',
+              borderWidth: 2,
+              hoverOffset: 8,
           }]
       };
   }
@@ -161,31 +189,33 @@ export class DashboardComponent implements OnInit {
             ]
         };
     }
-    
+
     console.log('Updated trend chart data:', data);
   }
 
   initCharts() {
-    // 1. הגדרת גרף מגמה עם קו כפול (הוצאות נוכחיות מול תקציב)
+    // Token palette: accent line + muted dashed reference
     this.expenseTrendChart = {
-      labels: [], // Initial empty state
+      labels: [],
       datasets: [
         {
           label: 'הוצאות בפועל',
           data: [],
           fill: true,
-          borderColor: '#f43f5e',
-          backgroundColor: 'rgba(244, 63, 94, 0.1)',
-          tension: 0.5, // קו סופר חלק ומעוגל
-          pointRadius: 0 // מסתיר נקודות למראה נקי
+          borderColor: '#c8a76d',
+          backgroundColor: 'rgba(200, 167, 109, 0.12)',
+          tension: 0.4,
+          pointRadius: 0,
+          borderWidth: 2,
         },
         {
           label: 'תקציב יעד',
           data: [],
           fill: false,
-          borderColor: '#64748b',
-          borderDash: [5, 5], // קו מקווקו
-          pointRadius: 0
+          borderColor: '#72727a',
+          borderDash: [5, 5],
+          pointRadius: 0,
+          borderWidth: 1.2,
         }
       ]
     };
@@ -193,33 +223,36 @@ export class DashboardComponent implements OnInit {
     this.expenseTrendOptions = {
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'top', align: 'end', labels: { usePointStyle: true } }
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: { usePointStyle: true, color: '#b8b8bf', font: { size: 11 } }
+        }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-        y: { grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { color: '#94a3b8' } }
+        x: { grid: { display: false }, ticks: { color: '#72727a', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(38, 38, 44, 0.6)' }, ticks: { color: '#72727a', font: { size: 11 } } }
       }
     };
 
-    // 2. גרף "חצי עוגה" (Semi-Doughnut) למראה מודרני
     this.categoryChart = {
       labels: [],
       datasets: [
         {
           data: [],
-          backgroundColor: ['#6366f1', '#f43f5e', '#f59e0b', '#10b981'],
-          hoverOffset: 15,
-          borderRadius: 10 // פינות מעוגלות בגרף העוגה
+          backgroundColor: this.chartPalette,
+          borderColor: '#131316',
+          borderWidth: 2,
+          hoverOffset: 8,
         }
       ]
     };
 
     this.categoryOptions = {
-      rotation: -90,      // מתחיל ב-90 מעלות
-      circumference: 180, // חצי עיגול בלבד
-      cutout: '80%',      // חור גדול באמצע
+      maintainAspectRatio: false,
+      cutout: '70%',
       plugins: {
-        legend: { position: 'bottom' }
+        legend: { display: false }
       }
     };
   }
@@ -236,20 +269,29 @@ export class DashboardComponent implements OnInit {
             return 'info';
     }
   }
-  
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'approved': return 'מאומת';
+      case 'pending':  return 'ממתין';
+      case 'rejected': return 'שגיאה';
+      default:         return 'בעיבוד';
+    }
+  }
+
       exportToExcel() {
       if (!this.expenses || this.expenses.length === 0) {
           alert('אין נתונים לייצוא');
           return;
       }
-  
+
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('הוצאות');
-  
+
       // הוספת כותרת
       worksheet.addRow(['מזהה', 'ספק', 'קטגוריה', 'תאריך', 'סכום', 'סטטוס']);
       worksheet.getRow(1).font = { bold: true };
-  
+
       // מיפוי הנתונים
       this.expenses.forEach(exp => {
           worksheet.addRow([
@@ -261,12 +303,12 @@ export class DashboardComponent implements OnInit {
               exp.status || ''
           ]);
       });
-  
+
       // עיצוב רוחב עמודות בסיסי
       worksheet.columns.forEach(column => {
           column.width = 15;
       });
-  
+
       // יצירת הקובץ והורדתו
       workbook.xlsx.writeBuffer().then((data) => {
           const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
