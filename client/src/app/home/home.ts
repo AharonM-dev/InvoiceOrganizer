@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'; //  אפשרות שנייה שנראה לי שהוא עבד 
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -9,4 +9,6 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./home.css'],
   templateUrl: './home.html'
 })
-export class HomeComponent {}
+export class HomeComponent {
+  readonly currentYear = new Date().getFullYear();
+}
