@@ -78,16 +78,20 @@ export class FileUpload {
     return null;
   }
 
+  /* Returns a PrimeIcons class (previously Font Awesome, which isn't
+     actually loaded globally). Kept on the public interface so any
+     external consumer of this component still works. */
   getFileIcon(file: File): string {
-    if (file.type === 'application/pdf') return 'fa-file-pdf';
-    if (file.type.startsWith('image/')) return 'fa-file-image';
-    return 'fa-file';
+    if (file.type === 'application/pdf') return 'pi-file-pdf';
+    if (file.type.startsWith('image/')) return 'pi-image';
+    return 'pi-file';
   }
 
+  /* Returns a CSS class that maps to a wf-token color for the icon. */
   getFileIconColor(file: File): string {
-    if (file.type === 'application/pdf') return 'text-red-400';
-    if (file.type.startsWith('image/')) return 'text-blue-400';
-    return 'text-gray-400';
+    if (file.type === 'application/pdf') return 'fu-icon-pdf';
+    if (file.type.startsWith('image/')) return 'fu-icon-image';
+    return 'fu-icon-file';
   }
 
   removeFile(index: number) {
