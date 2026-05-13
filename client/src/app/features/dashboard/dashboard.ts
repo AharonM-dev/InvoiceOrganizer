@@ -37,21 +37,32 @@ export class DashboardComponent implements OnInit {
   expenseTrendOptions: any;
   categoryChart: any;
   categoryOptions: any;
+  /** Top-category label cached from the by-category summary endpoint —
+   *  used in the KPI strip. Null while loading / no data. */
+  topCategoryName: string | null = null;
+  topCategoryTotal = 0;
+
   private http = inject(HttpClient);
   private cd = inject(ChangeDetectorRef);
 
-  /* ── KPI getters — derived from `expenses`; no new data sources. ───────── */
+  /* ── KPI getters — derived only from the real list payload + the
+        by-category summary. No invented statuses. ─────────────────────── */
   get totalAmount(): number {
     return this.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
   }
-  get pendingCount(): number {
-    return this.expenses.filter(e => e.status === 'pending').length;
+  get invoiceCount(): number {
+    return this.expenses.length;
   }
-  get approvedCount(): number {
-    return this.expenses.filter(e => e.status === 'approved').length;
+  get averageAmount(): number {
+    return this.invoiceCount > 0 ? this.totalAmount / this.invoiceCount : 0;
   }
-  get rejectedCount(): number {
-    return this.expenses.filter(e => e.status === 'rejected').length;
+  get supplierCount(): number {
+    const seen = new Set<string>();
+    for (const e of this.expenses) {
+      const v = (e.vendor || '').trim();
+      if (v) seen.add(v);
+    }
+    return seen.size;
   }
 
   ngOnInit() {
@@ -60,54 +71,44 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData() {
-
-  console.log('initMockData called'); // Debug: Function entry
     const userStr = localStorage.getItem("user");
     if (!userStr) {
-        console.error('No user found in localStorage'); // Debug: User check
-        return;
+      console.error('No user found in localStorage');
+      return;
     }
     const loggedUser = JSON.parse(userStr);
     const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
-    console.log('Fetching data with token:', loggedUser.token.substring(0, 10) + '...'); // Debug: Token check
 
     // ביצוע שתי קריאות במקביל
-    // api/InvoicesItem לא קיים - נשתמש ב-api/Invoices/summary/by-category
     forkJoin({
-        invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
-        categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers })
+      invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
+      categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers })
     }).subscribe({
-        next: (response) => {
-            console.log('API Response received:', response); // Debug: API response
+      next: (response) => {
+        // 1. Map list items into a UI shape using ONLY fields the
+        //    InvoiceListDto contract actually returns:
+        //      id, invoiceNumber, invoiceDate, total, supplierName, filePath.
+        this.expenses = (response.invoices ?? []).map(inv => ({
+          id: inv.id,
+          vendor: inv.supplierName ?? '',
+          date: inv.invoiceDate,
+          amount: inv.total,
+        }));
 
-            // 1. עדכון הטבלה מהחשבוניות
-            this.expenses = response.invoices.map(inv => ({
-                id: inv.id,
-                vendor: inv.vendorName || inv.supplier?.name || 'ספק כללי',
-                logo: inv.logoUrl || '',
-                icon: inv.icon || '',
-                category: inv.category || '',
-                date: inv.invoiceDate,
-                amount: inv.total,
-                status: (inv.status?.toLowerCase() as 'approved' | 'pending' | 'rejected') || 'pending'
-            }));
-            console.log('Expenses mapped:', this.expenses); // Debug: Mapped data
+        // 2. Process the category summary for the donut + top-category KPI
+        this.processCategoryData(response.categorySummary);
 
-            // 2. עיבוד הפריטים עבור גרף הקטגוריות
-            this.processCategoryData(response.categorySummary);
+        // 3. Update the trend line from the same invoices list
+        this.updateTrendChart(response.invoices ?? []);
 
-            // 3. עדכון גרף המגמה (אם הנתונים מגיעים מהשרת)
-            this.updateTrendChart(response.invoices);
-
-            this.isLoading = false;
-            // כאן אנחנו קוראים לו כדי לפתור את השגיאה:
-            this.cd.detectChanges();
-        },
-        error: (err) => {
-            console.error("שגיאה בטעינת נתונים", err);
-            this.isLoading = false;
-            this.cd.detectChanges();
-        }
+        this.isLoading = false;
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error("שגיאה בטעינת נתונים", err);
+        this.isLoading = false;
+        this.cd.detectChanges();
+      }
     });
   }
 
@@ -123,30 +124,40 @@ export class DashboardComponent implements OnInit {
   ];
 
   processCategoryData(summaryData: any[]) {
-      let labels: string[] = [];
-      let data: number[] = [];
-      let bgColors: string[] = [];
+    let labels: string[] = [];
+    let data: number[] = [];
+    let bgColors: string[] = [];
 
-      if (!summaryData || summaryData.length === 0) {
-          labels = ['אין הוצאות מקוטלגות'];
-          data = [1];
-          bgColors = ['#26262c']; // border tone for empty state
-      } else {
-          labels = summaryData.map(x => x.categoryName || 'אחר');
-          data = summaryData.map(x => x.total);
-          bgColors = labels.map((_, i) => this.chartPalette[i % this.chartPalette.length]);
-      }
+    if (!summaryData || summaryData.length === 0) {
+      labels = ['אין הוצאות מקוטלגות'];
+      data = [1];
+      bgColors = ['#26262c']; // border tone for empty state
+      this.topCategoryName = null;
+      this.topCategoryTotal = 0;
+    } else {
+      // CategorySummaryDto: { categoryId, categoryName, count, total }
+      labels = summaryData.map(x => x.categoryName ?? 'אחר');
+      data = summaryData.map(x => Number(x.total) || 0);
+      bgColors = labels.map((_, i) => this.chartPalette[i % this.chartPalette.length]);
 
-      this.categoryChart = {
-          labels: labels,
-          datasets: [{
-              data: data,
-              backgroundColor: bgColors,
-              borderColor: '#131316',
-              borderWidth: 2,
-              hoverOffset: 8,
-          }]
-      };
+      const top = summaryData.reduce(
+        (a, b) => ((b.total ?? 0) > (a.total ?? 0) ? b : a),
+        summaryData[0],
+      );
+      this.topCategoryName = top.categoryName ?? 'אחר';
+      this.topCategoryTotal = Number(top.total) || 0;
+    }
+
+    this.categoryChart = {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: bgColors,
+        borderColor: '#131316',
+        borderWidth: 2,
+        hoverOffset: 8,
+      }]
+    };
   }
 
   updateTrendChart(invoices: any[]) {
@@ -156,41 +167,33 @@ export class DashboardComponent implements OnInit {
     const data: number[] = [];
     const today = new Date();
 
-    // Generate data for the last 6 months
+    // Last 6 months ending with the current month
     for (let i = 5; i >= 0; i--) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        const monthName = d.toLocaleString('en-US', { month: 'short' });
-        labels.push(monthName);
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthName = d.toLocaleString('en-US', { month: 'short' });
+      labels.push(monthName);
 
-        // Sum invoice totals for this specific month and year
-        const monthlyTotal = invoices.reduce((sum, inv) => {
-            const invDate = new Date(inv.invoiceDate);
-            if (invDate.getMonth() === d.getMonth() && invDate.getFullYear() === d.getFullYear()) {
-                return sum + (inv.total || 0);
-            }
-            return sum;
-        }, 0);
+      const monthlyTotal = invoices.reduce((sum, inv) => {
+        const invDate = new Date(inv.invoiceDate);
+        if (invDate.getMonth() === d.getMonth() && invDate.getFullYear() === d.getFullYear()) {
+          return sum + (inv.total || 0);
+        }
+        return sum;
+      }, 0);
 
-        data.push(monthlyTotal);
+      data.push(monthlyTotal);
     }
 
-    // Update the chart object (creating a new reference to trigger change detection in PrimeNG)
     if (this.expenseTrendChart) {
-        this.expenseTrendChart = {
-            ...this.expenseTrendChart,
-            labels: labels,
-            datasets: [
-                {
-                    ...this.expenseTrendChart.datasets[0],
-                    data: data
-                },
-                // Preserve the budget/target line (second dataset)
-                this.expenseTrendChart.datasets[1]
-            ]
-        };
+      this.expenseTrendChart = {
+        ...this.expenseTrendChart,
+        labels: labels,
+        datasets: [
+          { ...this.expenseTrendChart.datasets[0], data: data },
+          this.expenseTrendChart.datasets[1] // budget/target line
+        ]
+      };
     }
-
-    console.log('Updated trend chart data:', data);
   }
 
   initCharts() {
@@ -257,73 +260,41 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  getSeverity(status: string): any {
-    switch (status) {
-        case 'approved':
-            return 'success';
-        case 'pending':
-            return 'warning';
-        case 'rejected':
-            return 'danger';
-        default:
-            return 'info';
+  exportToExcel() {
+    if (!this.expenses || this.expenses.length === 0) {
+      alert('אין נתונים לייצוא');
+      return;
     }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('הוצאות');
+
+    worksheet.addRow(['מזהה', 'ספק', 'תאריך', 'סכום']);
+    worksheet.getRow(1).font = { bold: true };
+
+    this.expenses.forEach(exp => {
+      worksheet.addRow([
+        exp.id ?? '',
+        exp.vendor ?? '',
+        exp.date ? new Date(exp.date).toLocaleDateString('he-IL') : '',
+        exp.amount ?? 0,
+      ]);
+    });
+
+    worksheet.columns.forEach(column => { column.width = 15; });
+
+    workbook.xlsx.writeBuffer().then((data) => {
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      FileSaver.saveAs(blob, `Dashboard_Expenses_${new Date().getTime()}.xlsx`);
+    });
   }
-
-  getStatusLabel(status: string): string {
-    switch (status) {
-      case 'approved': return 'מאומת';
-      case 'pending':  return 'ממתין';
-      case 'rejected': return 'שגיאה';
-      default:         return 'בעיבוד';
-    }
-  }
-
-      exportToExcel() {
-      if (!this.expenses || this.expenses.length === 0) {
-          alert('אין נתונים לייצוא');
-          return;
-      }
-
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('הוצאות');
-
-      // הוספת כותרת
-      worksheet.addRow(['מזהה', 'ספק', 'קטגוריה', 'תאריך', 'סכום', 'סטטוס']);
-      worksheet.getRow(1).font = { bold: true };
-
-      // מיפוי הנתונים
-      this.expenses.forEach(exp => {
-          worksheet.addRow([
-              exp.id || '',
-              exp.vendor || '',
-              exp.category || '',
-              exp.date ? new Date(exp.date).toLocaleDateString('he-IL') : '',
-              exp.amount || 0,
-              exp.status || ''
-          ]);
-      });
-
-      // עיצוב רוחב עמודות בסיסי
-      worksheet.columns.forEach(column => {
-          column.width = 15;
-      });
-
-      // יצירת הקובץ והורדתו
-      workbook.xlsx.writeBuffer().then((data) => {
-          const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          FileSaver.saveAs(blob, `Dashboard_Expenses_${new Date().getTime()}.xlsx`);
-      });
-    }
 }
 
+/* Trimmed to fields the list endpoint actually provides. status / category
+   are NOT on the API contract — they used to be invented here. */
 export interface Expense {
-    id: string;
-    vendor: string;
-    logo: string;
-    icon?: string;
-    category: string;
-    date: string;
-    amount: number;
-    status: 'approved' | 'pending' | 'rejected';
+  id: number;
+  vendor: string;
+  date: string;
+  amount: number;
 }

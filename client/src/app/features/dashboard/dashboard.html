@@ -32,29 +32,31 @@
 
   <ng-container *ngIf="!isLoading && expenses && expenses.length > 0">
 
-    <!-- KPI strip — values derived from `expenses` only -->
+    <!-- KPI strip — every value has a real data source: invoice list +
+         category-summary endpoint. No status-based tiles (no such field). -->
     <div class="dash-kpi-row">
       <div class="wf-surface dash-kpi">
         <span class="wf-mono">סה"כ הוצאות</span>
         <div class="dash-kpi-value wf-num">{{ totalAmount | currency:'ILS':'symbol':'1.0-0' }}</div>
-        <span class="wf-tag wf-tag-accent">{{ expenses.length }} חשבוניות</span>
+        <span class="wf-tag wf-tag-accent">{{ invoiceCount }} חשבוניות</span>
       </div>
       <div class="wf-surface dash-kpi">
-        <span class="wf-mono">מאומתות</span>
-        <div class="dash-kpi-value wf-num">{{ approvedCount }}</div>
-        <span class="wf-tag wf-tag-success">מתוך {{ expenses.length }}</span>
+        <span class="wf-mono">ממוצע לחשבונית</span>
+        <div class="dash-kpi-value wf-num">{{ averageAmount | currency:'ILS':'symbol':'1.0-0' }}</div>
+        <span class="wf-tag">לפי {{ invoiceCount }} חשבוניות</span>
       </div>
       <div class="wf-surface dash-kpi">
-        <span class="wf-mono">ממתינות אישור</span>
-        <div class="dash-kpi-value wf-num">{{ pendingCount }}</div>
-        <span class="wf-tag wf-tag-warn">דורש טיפול</span>
+        <span class="wf-mono">ספקים פעילים</span>
+        <div class="dash-kpi-value wf-num">{{ supplierCount }}</div>
+        <span class="wf-tag">ייחודיים</span>
       </div>
       <div class="wf-surface dash-kpi">
-        <span class="wf-mono">שגיאות</span>
-        <div class="dash-kpi-value wf-num">{{ rejectedCount }}</div>
-        <span class="wf-tag" [ngClass]="rejectedCount > 0 ? 'wf-tag-danger' : ''">
-          {{ rejectedCount > 0 ? 'לבדיקה' : 'נקי' }}
+        <span class="wf-mono">קטגוריה מובילה</span>
+        <div class="dash-kpi-value dash-kpi-value-text">{{ topCategoryName || '—' }}</div>
+        <span class="wf-tag wf-tag-accent" *ngIf="topCategoryName">
+          {{ topCategoryTotal | currency:'ILS':'symbol':'1.0-0' }}
         </span>
+        <span class="wf-tag" *ngIf="!topCategoryName">אין נתונים</span>
       </div>
     </div>
 
@@ -81,7 +83,7 @@
       <section class="wf-surface dash-donut-card">
         <header>
           <h3 class="dash-card-title">התפלגות קטגוריות</h3>
-          <p class="dash-card-sub">חודש נוכחי</p>
+          <p class="dash-card-sub">לפי פריטי חשבונית</p>
         </header>
         <div class="dash-donut-body">
           <p-chart type="doughnut" [data]="categoryChart" [options]="categoryOptions" height="180px"></p-chart>
@@ -99,7 +101,7 @@
       </section>
     </div>
 
-    <!-- Recent invoices -->
+    <!-- Recent invoices — only fields the list endpoint returns -->
     <section class="wf-surface dash-table-card">
       <header class="dash-card-head dash-table-head">
         <h3 class="dash-card-title">חשבוניות אחרונות</h3>
@@ -109,29 +111,20 @@
         <ng-template pTemplate="header">
           <tr>
             <th>ספק</th>
-            <th>קטגוריה</th>
             <th>תאריך</th>
             <th>סכום</th>
-            <th>סטטוס</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-expense>
           <tr>
             <td>
               <div class="dash-vendor">
-                <p-avatar *ngIf="expense.logo; else iconAvatar" [image]="expense.logo" shape="circle"></p-avatar>
-                <ng-template #iconAvatar>
-                  <p-avatar [icon]="expense.icon || 'pi pi-building'" shape="circle"></p-avatar>
-                </ng-template>
-                <span>{{ expense.vendor }}</span>
+                <p-avatar icon="pi pi-building" shape="circle"></p-avatar>
+                <span>{{ expense.vendor || '—' }}</span>
               </div>
             </td>
-            <td>{{ expense.category || '—' }}</td>
             <td class="wf-num">{{ expense.date | date:'dd/MM/yyyy' }}</td>
             <td class="wf-num dash-amount">{{ expense.amount | currency:'ILS':'symbol':'1.0-0' }}</td>
-            <td>
-              <p-tag [value]="getStatusLabel(expense.status)" [severity]="getSeverity(expense.status)"></p-tag>
-            </td>
           </tr>
         </ng-template>
       </p-table>

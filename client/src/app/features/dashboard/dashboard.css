@@ -58,6 +58,15 @@
   color: var(--wf-text);
   margin-top: 2px;
 }
+.dash-kpi-value-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--wf-text);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .dash-kpi .wf-tag { align-self: flex-start; margin-top: 6px; }
 
 /* Main grid */
