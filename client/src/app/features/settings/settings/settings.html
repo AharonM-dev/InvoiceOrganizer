@@ -60,6 +60,34 @@
           </form>
         </section>
 
+        <!-- Appearance — theme selector (persisted in localStorage). -->
+        <section class="wf-surface st-card">
+          <div class="st-appearance-row">
+            <div>
+              <h3 class="st-card-title">מראה</h3>
+              <p class="st-card-sub">בחר ערכת צבעים. ברירת המחדל היא כהה.</p>
+            </div>
+            <div class="st-theme-switch" role="group" aria-label="ערכת צבעים">
+              <button type="button"
+                      class="st-theme-option"
+                      [class.is-active]="theme() === 'dark'"
+                      (click)="setTheme('dark')"
+                      [attr.aria-pressed]="theme() === 'dark'">
+                <i class="pi pi-moon"></i>
+                <span>כהה</span>
+              </button>
+              <button type="button"
+                      class="st-theme-option"
+                      [class.is-active]="theme() === 'light'"
+                      (click)="setTheme('light')"
+                      [attr.aria-pressed]="theme() === 'light'">
+                <i class="pi pi-sun"></i>
+                <span>בהיר</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
         <!-- Danger zone — visual placeholder; only wire up if a deleteAccount() exists. -->
         <section class="wf-surface st-card st-danger">
           <div class="st-danger-row">

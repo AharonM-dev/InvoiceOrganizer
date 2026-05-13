@@ -14,6 +14,7 @@ import { MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService, Theme } from '../../../core/services/theme.service';
 import { SupplierService } from '../../../core/services/supplier.service';
 import { Supplier } from '../../../core/models/invoice.model';
 import { SupplierFormModal } from '../../../shared/components/supplier-form-modal/supplier-form-modal';
@@ -51,8 +52,13 @@ export class Settings implements OnInit {
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
   private authService = inject(AuthService);
+  private themeService = inject(ThemeService);
   private supplierService = inject(SupplierService);
   private categoryService = inject(CategoryService);
+
+  /** Current theme — read-only signal exposed by ThemeService. */
+  readonly theme = this.themeService.theme;
+  setTheme(t: Theme): void { this.themeService.setTheme(t); }
 
   /* Profile form — limited to the two fields that actually exist on the
      Users entity. Email is captured for display only (no update path). */
