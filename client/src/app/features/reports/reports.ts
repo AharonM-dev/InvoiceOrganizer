@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 // PrimeNG Imports
 import { ChartModule } from 'primeng/chart';
@@ -13,6 +14,7 @@ import { ChangeDetectorRef, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
+import { TopBarComponent } from '../../layout/top-bar/top-bar';
 
 @Component({
   selector: 'app-reports',
@@ -20,11 +22,13 @@ import * as FileSaver from 'file-saver';
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     ChartModule,
     CardModule,
     ButtonModule,
     DatePickerModule,
-    TableModule
+    TableModule,
+    TopBarComponent,
   ],
   templateUrl: './reports.html',
   styleUrls: ['./reports.css']
@@ -52,6 +56,36 @@ export class Reports implements OnInit {
 
   // Filters
   dateRange: Date[] | undefined;
+
+  /* Segment control state — UI-only placeholder per the design plan.
+     Changing this does NOT refire data aggregation; it just toggles the
+     active pill in the segmented control matching the wireframe. */
+  range: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'monthly';
+  setRange(v: 'daily' | 'weekly' | 'monthly' | 'yearly') { this.range = v; }
+
+  /* Derived top-5 vendors list for the bar-list legend below the chart. */
+  get topVendorsList(): Array<{ name: string; value: number; pct: number }> {
+    const labels = this.topVendorsData?.labels ?? [];
+    const data = this.topVendorsData?.datasets?.[0]?.data ?? [];
+    const max = data.length ? Math.max(...data) : 1;
+    return labels.map((name: string, i: number) => ({
+      name,
+      value: data[i] ?? 0,
+      pct: max > 0 ? Math.round((data[i] / max) * 100) : 0,
+    }));
+  }
+
+  /* Derived donut legend rows for the side panel. */
+  get categoryLegend(): Array<{ name: string; value: number; color: string }> {
+    const labels = this.categoryData?.labels ?? [];
+    const data = this.categoryData?.datasets?.[0]?.data ?? [];
+    const colors = this.categoryData?.datasets?.[0]?.backgroundColor ?? [];
+    return labels.map((name: string, i: number) => ({
+      name,
+      value: data[i] ?? 0,
+      color: colors[i] ?? '#26262c',
+    }));
+  }
   
   ngOnInit() {
     this.initCharts();
@@ -148,14 +182,15 @@ export class Reports implements OnInit {
       let data = [];
       let bgColors = [];
 
+      const palette = ['#c8a76d', '#b8b8bf', '#6fa890', '#c89860', '#c47878', '#72727a'];
       if (!categories || categories.length === 0) {
           labels = ['אין הוצאות מקוטלגות'];
           data = [1];
-          bgColors = ['#e2e8f0']; // Grey color for empty state
+          bgColors = ['#26262c']; // border tone for empty state
       } else {
           labels = categories.map(c => c.categoryName || 'אחר');
           data = categories.map(c => c.total || 0);
-          bgColors = ['#3b82f6', '#a855f7', '#ec4899', '#22c55e', '#f59e0b'];
+          bgColors = labels.map((_, i) => palette[i % palette.length]);
       }
 
       this.categoryData = {
@@ -198,11 +233,15 @@ export class Reports implements OnInit {
   }
 
   initCharts() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    // Dark mode specific colors
-    const textColor = '#e2e8f0'; // slate-200
-    const textColorSecondary = '#64748b'; // slate-500
-    const surfaceBorder = 'rgba(255, 255, 255, 0.1)';
+    // Token palette: one warm accent + tonal grays + state hues
+    const accent       = '#c8a76d';
+    const accentDim    = 'rgba(200, 167, 109, 0.18)';
+    const text         = '#ececef';
+    const textMuted    = '#72727a';
+    const textSec      = '#b8b8bf';
+    const border       = 'rgba(38, 38, 44, 0.6)';
+    const surface      = '#131316';
+    const donutPalette = ['#c8a76d', '#b8b8bf', '#6fa890', '#c89860', '#c47878', '#72727a'];
 
     // 1. Monthly Trends (Line Chart)
     this.monthlyTrendData = {
@@ -212,21 +251,21 @@ export class Reports implements OnInit {
           label: 'הוצאות',
           data: [2200, 3100, 2800, 4500, 2400, 3800, 4100, 3600, 4520],
           fill: true,
-          borderColor: '#4ade80', // Green-400 (Vibrant Green)
+          borderColor: accent,
           tension: 0.4,
           backgroundColor: (context: any) => {
             const ctx = context.chart.ctx;
             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(74, 222, 128, 0.5)'); // Green glow
-            gradient.addColorStop(1, 'rgba(74, 222, 128, 0.0)');
+            gradient.addColorStop(0, accentDim);
+            gradient.addColorStop(1, 'rgba(200, 167, 109, 0)');
             return gradient;
           },
-          borderWidth: 3,
-          pointBackgroundColor: '#22c55e', // Green-500
-          pointBorderColor: '#ffffff',
+          borderWidth: 2,
+          pointBackgroundColor: accent,
+          pointBorderColor: surface,
           pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 8
+          pointRadius: 3,
+          pointHoverRadius: 6
         }
       ]
     };
@@ -235,16 +274,14 @@ export class Reports implements OnInit {
       maintainAspectRatio: false,
       aspectRatio: 0.6,
       plugins: {
-        legend: {
-          display: false
-        },
+        legend: { display: false },
         tooltip: {
             mode: 'index',
             intersect: false,
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-            titleColor: '#f8fafc',
-            bodyColor: '#e2e8f0',
-            borderColor: 'rgba(255,255,255,0.1)',
+            backgroundColor: surface,
+            titleColor: text,
+            bodyColor: textSec,
+            borderColor: '#26262c',
             borderWidth: 1,
             padding: 10,
             displayColors: false
@@ -252,42 +289,19 @@ export class Reports implements OnInit {
       },
       scales: {
         x: {
-          ticks: {
-            color: textColorSecondary,
-            font: {
-                family: 'Inter',
-                size: 11
-            }
-          },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false,
-            tickLength: 0
-          }
+          ticks: { color: textMuted, font: { size: 11 } },
+          grid:  { color: border, drawBorder: false, tickLength: 0 }
         },
         y: {
           ticks: {
-            color: textColorSecondary,
-            callback: function(value: any) {
-                return '₪' + value;
-            },
-            font: {
-                family: 'Inter',
-                size: 11
-            }
+            color: textMuted,
+            callback: function(value: any) { return '₪' + value; },
+            font: { size: 11 }
           },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false,
-            borderDash: [5, 5]
-          }
+          grid: { color: border, drawBorder: false, borderDash: [5, 5] }
         }
       },
-      interaction: {
-        mode: 'nearest',
-        axis: 'x',
-        intersect: false
-      }
+      interaction: { mode: 'nearest', axis: 'x', intersect: false }
     };
 
     // 2. Category Distribution (Doughnut Chart)
@@ -296,42 +310,19 @@ export class Reports implements OnInit {
       datasets: [
         {
           data: [1200, 800, 450, 300, 150],
-          backgroundColor: [
-            '#3b82f6', // Blue
-            '#a855f7', // Purple
-            '#ec4899', // Pink
-            '#22c55e', // Green
-            '#f59e0b'  // Orange
-          ],
-          hoverBackgroundColor: [
-            '#60a5fa',
-            '#c084fc',
-            '#f472b6',
-            '#4ade80',
-            '#fbbf24'
-          ],
-          borderWidth: 0,
-          hoverOffset: 15
+          backgroundColor: donutPalette.slice(0, 5),
+          borderColor: surface,
+          borderWidth: 2,
+          hoverOffset: 8
         }
       ]
     };
 
     this.categoryOptions = {
-      cutout: '65%',
+      maintainAspectRatio: false,
+      cutout: '70%',
       plugins: {
-        legend: {
-          position: 'right',
-          labels: {
-            usePointStyle: true,
-            pointStyle: 'circle',
-            color: textColor,
-            font: {
-                family: 'Inter',
-                size: 13
-            },
-            padding: 20
-          }
-        }
+        legend: { display: false }
       }
     };
 
@@ -342,9 +333,9 @@ export class Reports implements OnInit {
         {
           label: 'הוצאה חודשית',
           data: [2500, 1800, 1200, 900, 600],
-          backgroundColor: '#06b6d4', // Cyan
-          borderRadius: 8,
-          barThickness: 20
+          backgroundColor: accent,
+          borderRadius: 4,
+          barThickness: 14
         }
       ]
     };
@@ -354,43 +345,23 @@ export class Reports implements OnInit {
         maintainAspectRatio: false,
         aspectRatio: 0.8,
         plugins: {
-            legend: {
-                display: false
-            },
+            legend: { display: false },
             tooltip: {
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                titleColor: '#f8fafc',
-                bodyColor: '#e2e8f0',
-                borderWidth: 0
+                backgroundColor: surface,
+                titleColor: text,
+                bodyColor: textSec,
+                borderColor: '#26262c',
+                borderWidth: 1
             }
         },
         scales: {
             x: {
-                ticks: {
-                    color: textColorSecondary,
-                    font: {
-                        family: 'Inter',
-                        size: 11
-                    }
-                },
-                grid: {
-                    color: surfaceBorder,
-                    drawBorder: false
-                }
+                ticks: { color: textMuted, font: { size: 11 } },
+                grid:  { color: border, drawBorder: false }
             },
             y: {
-                ticks: {
-                    color: textColor,
-                    font: {
-                        family: 'Inter',
-                        weight: '500',
-                        size: 12
-                    }
-                },
-                grid: {
-                    display: false,
-                    drawBorder: false
-                }
+                ticks: { color: textSec, font: { weight: '500' as any, size: 12 } },
+                grid:  { display: false, drawBorder: false }
             }
         }
     };

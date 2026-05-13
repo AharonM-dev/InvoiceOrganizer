@@ -1,7 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { TopBarComponent } from '../../../layout/top-bar/top-bar';
+
+type SettingsTab = 'profile' | 'categories' | 'suppliers';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -38,6 +41,7 @@ import { CategoryFormModal } from '../../../shared/components/category-form-moda
     TagModule,
     SupplierFormModal,
     CategoryFormModal,
+    TopBarComponent,
   ],
     providers: [MessageService],
   templateUrl: './settings.html',
@@ -61,6 +65,11 @@ export class Settings implements OnInit {
   suppliers: Supplier[] = [];
   showSupplierModal = false;
   isDeletingId: number | null = null;
+
+  /* UI-only tab state for the side-nav (wireframe sub-nav). Drives which
+     section is visible; does not touch loading/save logic. */
+  activeTab = signal<SettingsTab>('profile');
+  setTab(tab: SettingsTab) { this.activeTab.set(tab); }
 
   ngOnInit() {
     this.initProfileForm();

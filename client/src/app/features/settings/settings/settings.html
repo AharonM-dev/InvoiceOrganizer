@@ -1,141 +1,181 @@
-<div class="settings-container fade-in">
-    <div class="header-section">
-      <h1>אזור אישי</h1>
-      <p>נהל את פרטי החשבון והגדרות המערכת שלך</p>
-    </div>
-  
-    <div class="grid-layout">
-      <!-- פרטים אישיים -->
-      <div class="card-wrapper">
-        <p-card header="פרטים אישיים" styleClass="premium-card h-full">
-          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="form-grid">
-            
-            <div class="field">
-              <label for="fullName">שם מלא</label>
-              <input pInputText id="fullName" formControlName="fullName" placeholder="הכנס שם מלא" />
+<app-top-bar breadcrumb="הגדרות" title="הגדרות חשבון"></app-top-bar>
+
+<div class="wf-page st">
+
+  <div class="st-grid">
+
+    <!-- Sub-nav -->
+    <nav class="st-subnav" aria-label="הגדרות">
+      <button type="button"
+              class="st-subnav-item"
+              [class.is-active]="activeTab() === 'profile'"
+              (click)="setTab('profile')">
+        <span>פרופיל</span>
+      </button>
+      <button type="button"
+              class="st-subnav-item"
+              [class.is-active]="activeTab() === 'categories'"
+              (click)="setTab('categories')">
+        <span>קטגוריות</span>
+      </button>
+      <button type="button"
+              class="st-subnav-item"
+              [class.is-active]="activeTab() === 'suppliers'"
+              (click)="setTab('suppliers')">
+        <span>ספקים</span>
+      </button>
+    </nav>
+
+    <!-- Main panel -->
+    <div class="st-main">
+
+      <!-- Profile -->
+      <ng-container *ngIf="activeTab() === 'profile'">
+        <section class="wf-surface st-card">
+          <header class="st-card-head">
+            <h3 class="st-card-title">פרטים אישיים</h3>
+            <p class="st-card-sub">פרטי הקשר שלך במערכת</p>
+          </header>
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="st-form">
+            <div class="st-form-grid">
+              <div class="st-field">
+                <label for="set-fullname" class="wf-mono">שם מלא</label>
+                <input id="set-fullname" pInputText formControlName="fullName" placeholder="הכנס שם מלא" />
+              </div>
+              <div class="st-field">
+                <label for="set-email" class="wf-mono">אימייל</label>
+                <input id="set-email" pInputText formControlName="email" placeholder="example@email.com" dir="ltr" />
+              </div>
+              <div class="st-field">
+                <label for="set-phone" class="wf-mono">טלפון</label>
+                <input id="set-phone" pInputText formControlName="phone" placeholder="050-0000000" dir="ltr" />
+              </div>
+              <div class="st-field">
+                <label for="set-address" class="wf-mono">כתובת</label>
+                <input id="set-address" pInputText formControlName="address" placeholder="רחוב, עיר, מיקוד" />
+              </div>
             </div>
-  
-            <div class="field">
-              <label for="email">אימייל</label>
-              <input pInputText id="email" formControlName="email" placeholder="example@email.com" />
-            </div>
-  
-            <div class="field">
-              <label for="phone">טלפון</label>
-              <input pInputText id="phone" formControlName="phone" placeholder="050-0000000" />
-            </div>
-  
-            <div class="field">
-              <label for="address">כתובת</label>
-              <input pInputText id="address" formControlName="address" placeholder="רחוב, עיר, מיקוד" />
-            </div>
-  
-            <div class="actions">
-              <p-button label="שמור שינויים" icon="pi pi-check" type="submit" styleClass="p-button-primary"></p-button>
+
+            <div class="st-form-actions">
+              <button type="submit" class="wf-btn wf-btn-primary">
+                <i class="pi pi-check"></i>
+                <span>שמור שינויים</span>
+              </button>
+              <button type="button" class="wf-btn wf-btn-quiet">ביטול</button>
             </div>
           </form>
-        </p-card>
-      </div>
-  
-      <!-- ניהול קטגוריות -->
-      <div class="card-wrapper">
-        <p-card header="ניהול קטגוריות" styleClass="premium-card h-full">
-          <div class="categories-content" dir="rtl">
-            <p class="text-gray-500 text-sm mb-4">קטגוריות שמוגדרות כאן יהיו זמינות לבחירה בעת אישור חשבוניות.</p>
+        </section>
 
-            <div class="flex justify-start mb-4">
-              <p-button
-                label="הוסף קטגוריה"
-                icon="pi pi-plus"
-                (onClick)="showCategoryModal = true"
-                styleClass="p-button-outlined"
-              />
+        <!-- Danger zone — visual placeholder; only wire up if a deleteAccount() exists. -->
+        <section class="wf-surface st-card st-danger">
+          <div class="st-danger-row">
+            <div>
+              <h3 class="st-card-title">אזור מסוכן</h3>
+              <p class="st-card-sub">פעולות בלתי הפיכות</p>
             </div>
+            <button type="button" class="wf-btn wf-btn-danger" disabled
+                    title="לא מחובר לפעולה — מקום שמור לעתיד">
+              מחק חשבון
+            </button>
+          </div>
+        </section>
+      </ng-container>
 
-            <p-divider />
-
-            <!-- empty state -->
-            <div *ngIf="categories.length === 0" class="text-center text-gray-400 py-8">
-              <i class="fas fa-tags text-3xl mb-3 block"></i>
-              <p class="text-sm">לא הוגדרו קטגוריות עדיין</p>
+      <!-- Categories -->
+      <ng-container *ngIf="activeTab() === 'categories'">
+        <section class="wf-surface st-card">
+          <header class="st-card-head st-card-head-row">
+            <div>
+              <h3 class="st-card-title">ניהול קטגוריות</h3>
+              <p class="st-card-sub">קטגוריות שמוגדרות כאן יהיו זמינות לבחירה בעת אישור חשבוניות</p>
             </div>
+            <button type="button"
+                    class="wf-btn wf-btn-ghost"
+                    (click)="showCategoryModal = true">
+              <i class="pi pi-plus"></i>
+              <span>הוסף קטגוריה</span>
+            </button>
+          </header>
 
-            <!-- רשימת קטגוריות -->
-            <ul *ngIf="categories.length > 0" class="categories-list">
-              <li *ngFor="let cat of categories" class="category-item">
-                <span class="category-name">
-                  {{ cat.name }}
-                  <p-tag *ngIf="cat.isGlobal" severity="info" value="ברירת מחדל"></p-tag>
-                </span>
-                <p-button
-                  *ngIf="!cat.isGlobal"
-                  icon="pi pi-trash"
-                  styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
-                  [loading]="isDeletingCategoryId === cat.id"
-                  [disabled]="isDeletingCategoryId !== null"
-                  (onClick)="deleteCategory(cat)"
-                />
-              </li>
-            </ul>
-          </div>
-        </p-card>
-      </div>
-    </div>
-  
-    <!-- ניהול ספקים -->
-    <div class="card-wrapper" style="grid-column: 1 / -1; margin-top: 1.5rem;">
-      <p-card header="ניהול ספקים" styleClass="premium-card h-full">
-        <div class="categories-content" dir="rtl">
-          <p class="text-gray-500 text-sm mb-4">ספקים שמוגדרים כאן יהיו זמינים לבחירה בעת אישור חשבוניות.</p>
-
-          <div class="flex justify-start mb-4">
-            <p-button
-              label="הוסף ספק"
-              icon="pi pi-plus"
-              (onClick)="showSupplierModal = true"
-              styleClass="p-button-outlined"
-            />
+          <div *ngIf="categories.length === 0" class="st-empty">
+            <i class="pi pi-tags"></i>
+            <p>לא הוגדרו קטגוריות עדיין</p>
           </div>
 
-          <p-divider />
-
-          <!-- empty state -->
-          <div *ngIf="suppliers.length === 0" class="text-center text-gray-400 py-8">
-            <i class="fas fa-building text-3xl mb-3 block"></i>
-            <p class="text-sm">לא הוגדרו ספקים עדיין</p>
-          </div>
-
-          <!-- רשימת ספקים -->
-          <ul *ngIf="suppliers.length > 0" class="categories-list">
-            <li *ngFor="let s of suppliers" class="category-item">
-              <span class="category-name flex flex-col">
-                <span class="font-medium">{{ s.name }}</span>
-                <span class="text-xs text-gray-400">ח.פ {{ s.supNum }}</span>
-              </span>
-              <p-button
-                icon="pi pi-trash"
-                styleClass="p-button-rounded p-button-text p-button-danger p-button-sm"
-                [loading]="isDeletingId === s.id"
-                [disabled]="isDeletingId !== null"
-                (onClick)="deleteSupplier(s)"
-              />
+          <ul *ngIf="categories.length > 0" class="st-list">
+            <li *ngFor="let cat of categories" class="st-list-row">
+              <div class="st-list-info">
+                <span class="st-list-name">{{ cat.name }}</span>
+                <span *ngIf="cat.isGlobal" class="wf-tag">ברירת מחדל</span>
+              </div>
+              <button *ngIf="!cat.isGlobal"
+                      type="button"
+                      class="st-list-action"
+                      [disabled]="isDeletingCategoryId !== null"
+                      (click)="deleteCategory(cat)"
+                      [attr.aria-label]="'מחק ' + cat.name">
+                <i *ngIf="isDeletingCategoryId === cat.id" class="pi pi-spin pi-spinner"></i>
+                <i *ngIf="isDeletingCategoryId !== cat.id" class="pi pi-trash"></i>
+              </button>
             </li>
           </ul>
-        </div>
-      </p-card>
-    </div>
+        </section>
+      </ng-container>
 
-    <p-toast position="bottom-center"></p-toast>
+      <!-- Suppliers -->
+      <ng-container *ngIf="activeTab() === 'suppliers'">
+        <section class="wf-surface st-card">
+          <header class="st-card-head st-card-head-row">
+            <div>
+              <h3 class="st-card-title">ניהול ספקים</h3>
+              <p class="st-card-sub">ספקים שמוגדרים כאן יהיו זמינים לבחירה בעת אישור חשבוניות</p>
+            </div>
+            <button type="button"
+                    class="wf-btn wf-btn-ghost"
+                    (click)="showSupplierModal = true">
+              <i class="pi pi-plus"></i>
+              <span>הוסף ספק</span>
+            </button>
+          </header>
+
+          <div *ngIf="suppliers.length === 0" class="st-empty">
+            <i class="pi pi-building"></i>
+            <p>לא הוגדרו ספקים עדיין</p>
+          </div>
+
+          <ul *ngIf="suppliers.length > 0" class="st-list">
+            <li *ngFor="let s of suppliers" class="st-list-row">
+              <div class="st-list-info">
+                <span class="st-list-name">{{ s.name }}</span>
+                <span class="st-list-sub wf-num">ח.פ {{ s.supNum }}</span>
+              </div>
+              <button type="button"
+                      class="st-list-action"
+                      [disabled]="isDeletingId !== null"
+                      (click)="deleteSupplier(s)"
+                      [attr.aria-label]="'מחק ' + s.name">
+                <i *ngIf="isDeletingId === s.id" class="pi pi-spin pi-spinner"></i>
+                <i *ngIf="isDeletingId !== s.id" class="pi pi-trash"></i>
+              </button>
+            </li>
+          </ul>
+        </section>
+      </ng-container>
+
+    </div>
   </div>
 
-<!-- מודאל יצירת ספק -->
+  <p-toast position="bottom-center"></p-toast>
+</div>
+
+<!-- Modals -->
 <app-supplier-form-modal
   [visible]="showSupplierModal"
   (saved)="onSupplierCreated($event)"
   (cancelled)="showSupplierModal = false"
 />
 
-<!-- מודאל יצירת קטגוריה -->
 <app-category-form-modal
   [visible]="showCategoryModal"
   (saved)="onCategoryCreated($event)"

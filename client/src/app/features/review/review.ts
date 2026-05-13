@@ -12,6 +12,7 @@ import { ExtractedData, Supplier } from '../../core/models/invoice.model';
 import { Category } from '../../core/models/category.model';
 import { SupplierFormModal } from '../../shared/components/supplier-form-modal/supplier-form-modal';
 import { CategoryFormModal } from '../../shared/components/category-form-modal/category-form-modal';
+import { TopBarComponent } from '../../layout/top-bar/top-bar';
 
 @Component({
   selector: 'app-review',
@@ -23,6 +24,7 @@ import { CategoryFormModal } from '../../shared/components/category-form-modal/c
     ButtonModule,
     SupplierFormModal,
     CategoryFormModal,
+    TopBarComponent,
   ],
   templateUrl: './review.html',
   styleUrl: './review.css',

@@ -8,30 +8,29 @@
   header="הוספת ספק חדש"
   dir="rtl"
 >
-  <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4 pt-2" dir="rtl">
+  <form [formGroup]="form" (ngSubmit)="save()" class="wf-modal-form" dir="rtl">
 
     <!-- שם ספק -->
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">
-        שם ספק <span class="text-red-500">*</span>
+    <div class="wf-modal-field">
+      <label class="wf-mono">
+        שם ספק <span class="wf-modal-required">*</span>
       </label>
       <input
         pInputText
         type="text"
         formControlName="name"
         placeholder="לדוגמה: חברת א' בע&quot;מ"
-        class="w-full"
         [class.ng-invalid]="nameControl?.invalid && nameControl?.touched"
       />
-      <p *ngIf="nameControl?.invalid && nameControl?.touched" class="text-xs text-red-500">
+      <p *ngIf="nameControl?.invalid && nameControl?.touched" class="wf-modal-error">
         שם ספק הוא שדה חובה (לפחות 2 תווים)
       </p>
     </div>
 
     <!-- מספר ספק / ח.פ -->
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">
-        מספר ספק / ח.פ <span class="text-red-500">*</span>
+    <div class="wf-modal-field">
+      <label class="wf-mono">
+        מספר ספק / ח.פ <span class="wf-modal-required">*</span>
       </label>
       <input
         pInputText
@@ -39,57 +38,55 @@
         formControlName="supNum"
         placeholder="לדוגמה: 512345678"
         inputmode="numeric"
-        class="w-full"
         [class.ng-invalid]="supNumControl?.invalid && supNumControl?.touched"
       />
-      <p *ngIf="supNumControl?.invalid && supNumControl?.touched" class="text-xs text-red-500">
+      <p *ngIf="supNumControl?.invalid && supNumControl?.touched" class="wf-modal-error">
         <span *ngIf="supNumControl?.hasError('required')">מספר ספק הוא שדה חובה</span>
         <span *ngIf="supNumControl?.hasError('pattern')">יש להזין ספרות בלבד</span>
       </p>
     </div>
 
     <!-- אימייל -->
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">אימייל</label>
+    <div class="wf-modal-field">
+      <label class="wf-mono">אימייל</label>
       <input
         pInputText
         type="email"
         formControlName="contactEmail"
         placeholder="supplier@example.com"
-        class="w-full"
+        dir="ltr"
         [class.ng-invalid]="emailControl?.invalid && emailControl?.touched"
       />
-      <p *ngIf="emailControl?.invalid && emailControl?.touched" class="text-xs text-red-500">
+      <p *ngIf="emailControl?.invalid && emailControl?.touched" class="wf-modal-error">
         כתובת אימייל לא תקינה
       </p>
     </div>
 
     <!-- טלפון -->
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">טלפון</label>
+    <div class="wf-modal-field">
+      <label class="wf-mono">טלפון</label>
       <input
         pInputText
         type="tel"
         formControlName="phoneNumber"
         placeholder="050-0000000"
-        class="w-full"
+        dir="ltr"
       />
     </div>
 
     <!-- כתובת -->
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">כתובת</label>
+    <div class="wf-modal-field">
+      <label class="wf-mono">כתובת</label>
       <input
         pInputText
         type="text"
         formControlName="address"
         placeholder="רחוב, עיר"
-        class="w-full"
       />
     </div>
 
     <!-- הודעת שגיאה כללית -->
-    <p *ngIf="errorMessage" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+    <p *ngIf="errorMessage" class="wf-modal-banner">
       {{ errorMessage }}
     </p>
 
@@ -97,19 +94,19 @@
 
   <!-- Footer -->
   <ng-template pTemplate="footer">
-    <div class="flex justify-start gap-3" dir="rtl">
+    <div class="wf-modal-actions" dir="rtl">
       <p-button
         label="שמור ספק"
         icon="pi pi-check"
         [loading]="isSaving"
         [disabled]="isSaving"
         (click)="save()"
-        severity="success"
       />
       <p-button
         label="ביטול"
         icon="pi pi-times"
         severity="secondary"
+        styleClass="p-button-outlined"
         [disabled]="isSaving"
         (click)="cancel()"
       />

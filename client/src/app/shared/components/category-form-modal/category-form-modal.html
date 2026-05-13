@@ -8,28 +8,27 @@
   header="הוספת קטגוריה חדשה"
   dir="rtl"
 >
-  <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4 pt-2" dir="rtl">
+  <form [formGroup]="form" (ngSubmit)="save()" class="wf-modal-form" dir="rtl">
 
     <!-- שם קטגוריה -->
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium text-gray-700">
-        שם קטגוריה <span class="text-red-500">*</span>
+    <div class="wf-modal-field">
+      <label class="wf-mono">
+        שם קטגוריה <span class="wf-modal-required">*</span>
       </label>
       <input
         pInputText
         type="text"
         formControlName="name"
         placeholder="לדוגמה: מזון, תחבורה"
-        class="w-full"
         [class.ng-invalid]="nameControl?.invalid && nameControl?.touched"
       />
-      <p *ngIf="nameControl?.invalid && nameControl?.touched" class="text-xs text-red-500">
+      <p *ngIf="nameControl?.invalid && nameControl?.touched" class="wf-modal-error">
         שם קטגוריה הוא שדה חובה (לפחות 2 תווים)
       </p>
     </div>
 
     <!-- הודעת שגיאה כללית -->
-    <p *ngIf="errorMessage" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+    <p *ngIf="errorMessage" class="wf-modal-banner">
       {{ errorMessage }}
     </p>
 
@@ -37,19 +36,19 @@
 
   <!-- Footer -->
   <ng-template pTemplate="footer">
-    <div class="flex justify-start gap-3" dir="rtl">
+    <div class="wf-modal-actions" dir="rtl">
       <p-button
         label="שמור קטגוריה"
         icon="pi pi-check"
         [loading]="isSaving"
         [disabled]="isSaving"
         (click)="save()"
-        severity="success"
       />
       <p-button
         label="ביטול"
         icon="pi pi-times"
         severity="secondary"
+        styleClass="p-button-outlined"
         [disabled]="isSaving"
         (click)="cancel()"
       />
