@@ -205,11 +205,14 @@ export class Reports implements OnInit {
   }
 
   updateTopVendorsChart(invoices: any[]) {
-      // קיבוץ לפי ספק
+      // קיבוץ לפי ספק.
+      // InvoiceListDto exposes supplierName (the real field). The previous
+      // implementation read inv.vendorName / inv.supplier?.name which do not
+      // exist on the list contract — every invoice fell into 'Unknown'.
       const vendorMap = new Map<string, number>();
-      
+
       invoices.forEach(inv => {
-          const vendorName = inv.vendorName || inv.supplier?.name || 'Unknown';
+          const vendorName = inv.supplierName || 'ללא ספק';
           const current = vendorMap.get(vendorName) || 0;
           vendorMap.set(vendorName, current + (inv.total || 0));
       });
