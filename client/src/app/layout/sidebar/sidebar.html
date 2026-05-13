@@ -23,15 +23,13 @@
   <div class="wf-side-section-label">תפריט</div>
 
   <div class="wf-side-list">
-    <a *ngFor="let item of menuItems; let i = index"
+    <a *ngFor="let item of menuItems"
        [routerLink]="item.route"
        routerLinkActive="is-active"
-       #rla="routerLinkActive"
        class="wf-side-item"
        (click)="closeSidebar()">
-      <span class="wf-side-item-num">{{ '0' + (i + 1) }}</span>
+      <i class="wf-side-item-icon" [ngClass]="item.icon" aria-hidden="true"></i>
       <span class="wf-side-item-label">{{ item.label }}</span>
-      <span class="wf-side-item-dot" *ngIf="rla.isActive"></span>
     </a>
   </div>
 
