@@ -15,7 +15,19 @@
   top: 0;
   z-index: 50;
   overflow-y: auto;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
+  transition:
+    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Desktop "rail" — icon-only narrow state. Mobile drawer below 1024px
+   ignores this class; the @media block at the bottom undoes it. */
+.wf-side.is-collapsed {
+  width: 64px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .wf-side-toggle,
@@ -29,6 +41,27 @@
   align-items: center;
   gap: 10px;
   padding: 4px 8px 18px;
+}
+
+/* Collapse toggle sits at the inline-end of the brand row. */
+.wf-side-collapse-btn {
+  margin-inline-start: auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--wf-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.wf-side-collapse-btn:hover {
+  background: var(--wf-surface-2);
+  color: var(--wf-text);
 }
 
 .wf-side-logo {
@@ -197,8 +230,89 @@
   text-overflow: ellipsis;
 }
 
-/* Mobile drawer */
+/* ── Collapsed rail variants ─────────────────────────────────────────
+   Hide every text fragment but keep icons, avatar, and the collapse
+   toggle visible so the rail stays operable. The native `title`
+   attribute (set in the template) acts as the tooltip. */
+
+.wf-side.is-collapsed .wf-side-brand-text,
+.wf-side.is-collapsed .wf-side-section-label,
+.wf-side.is-collapsed .wf-side-item-label,
+.wf-side.is-collapsed .wf-side-logout-label,
+.wf-side.is-collapsed .wf-side-user-info {
+  display: none;
+}
+
+.wf-side.is-collapsed .wf-side-brand {
+  justify-content: center;
+  padding: 4px 0 18px;
+  gap: 0;
+}
+
+.wf-side.is-collapsed .wf-side-collapse-btn {
+  position: absolute;
+  top: 16px;
+  inset-inline-start: 14px;
+  margin-inline-start: 0;
+}
+
+.wf-side.is-collapsed .wf-side-list {
+  margin-top: 32px;
+}
+
+.wf-side.is-collapsed .wf-side-item,
+.wf-side.is-collapsed .wf-side-logout {
+  justify-content: center;
+  padding: 9px 0;
+}
+
+.wf-side.is-collapsed .wf-side-item-icon {
+  width: auto;
+}
+
+.wf-side.is-collapsed .wf-side-logout {
+  width: 100%;
+}
+
+.wf-side.is-collapsed .wf-side-user {
+  justify-content: center;
+  padding: 6px 0;
+}
+
+/* Mobile drawer
+   The desktop "rail" collapse is intentionally ignored below 1024px —
+   on small screens the slide-in drawer covers the use case, and a 64px
+   rail eating screen real estate would be worse than the current
+   off-canvas pattern. The .is-collapsed class still appears on the
+   element (kept in sync by the same signal), but the rules below
+   override its width and reveal all text fragments again. */
 @media (max-width: 1024px) {
+
+  .wf-side.is-collapsed {
+    width: auto;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .wf-side.is-collapsed .wf-side-brand-text,
+  .wf-side.is-collapsed .wf-side-section-label,
+  .wf-side.is-collapsed .wf-side-item-label,
+  .wf-side.is-collapsed .wf-side-logout-label,
+  .wf-side.is-collapsed .wf-side-user-info {
+    display: revert;
+  }
+  .wf-side.is-collapsed .wf-side-brand {
+    justify-content: flex-start;
+    padding: 4px 8px 18px;
+    gap: 10px;
+  }
+  /* Hide the collapse toggle entirely on mobile — rail mode is a
+     desktop-only concept; the drawer uses the X close button instead. */
+  .wf-side-collapse-btn { display: none; }
+  .wf-side.is-collapsed .wf-side-list { margin-top: 4px; }
+  .wf-side.is-collapsed .wf-side-item,
+  .wf-side.is-collapsed .wf-side-logout { justify-content: flex-start; padding: 9px 10px; }
+  .wf-side.is-collapsed .wf-side-user { justify-content: flex-start; padding: 6px 4px; }
+
   .wf-side-toggle {
     display: inline-flex;
     align-items: center;

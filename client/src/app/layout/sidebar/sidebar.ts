@@ -2,8 +2,10 @@ import { Component, DestroyRef, effect, HostListener, inject, signal } from '@an
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { filter, map, } from 'rxjs';
+import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+const COLLAPSE_STORAGE_KEY = 'sidebar-collapsed';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,8 +19,13 @@ export class SidebarComponent {
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
-  isOpen = signal(false); // משתנה לניהול מצב התפריט במובייל
-  
+  /** Mobile-drawer open state (≤1024px viewports). */
+  isOpen = signal(false);
+
+  /** Desktop collapsed-rail state. Persisted to localStorage. Ignored on
+   *  mobile (the drawer behaviour above takes over below 1024px). */
+  isCollapsed = signal(this.readPersistedCollapsed());
+
   user$ = this.auth.currentUser$;
 
   menuItems = [
@@ -33,7 +40,7 @@ export class SidebarComponent {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.closeSidebar());
-    
+
     effect(() => {
       document.body.classList.toggle('sidebar-lock', this.isOpen());
     });
@@ -41,9 +48,21 @@ export class SidebarComponent {
   toggleSidebar() {
     this.isOpen.update(v => !v);
   }
-  
+
   closeSidebar() {
     this.isOpen.set(false);
+  }
+
+  /** Flip the desktop rail. Persisted to localStorage so the choice
+   *  survives refresh / login. */
+  toggleCollapsed() {
+    const next = !this.isCollapsed();
+    this.isCollapsed.set(next);
+    try {
+      localStorage.setItem(COLLAPSE_STORAGE_KEY, next ? '1' : '0');
+    } catch {
+      // ignore (private mode, quota)
+    }
   }
 
   @HostListener('document:keydown.escape')
@@ -53,5 +72,13 @@ export class SidebarComponent {
 
   logout() {
     this.auth.logout();
+  }
+
+  private readPersistedCollapsed(): boolean {
+    try {
+      return localStorage.getItem(COLLAPSE_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
   }
 }

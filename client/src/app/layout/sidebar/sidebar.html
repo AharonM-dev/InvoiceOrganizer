@@ -9,7 +9,10 @@
 
 <div class="wf-side-overlay" [class.show]="isOpen()" (click)="closeSidebar()"></div>
 
-<nav id="sidebar-nav" class="wf-side" [class.open]="isOpen()">
+<nav id="sidebar-nav"
+     class="wf-side"
+     [class.open]="isOpen()"
+     [class.is-collapsed]="isCollapsed()">
 
   <button class="wf-side-close" type="button" (click)="closeSidebar()" aria-label="סגור תפריט">
     <i class="pi pi-times"></i>
@@ -18,6 +21,14 @@
   <div class="wf-side-brand">
     <div class="wf-side-logo">IH</div>
     <span class="wf-side-brand-text">InvoiceHub</span>
+    <button type="button"
+            class="wf-side-collapse-btn"
+            (click)="toggleCollapsed()"
+            [attr.aria-pressed]="isCollapsed()"
+            [attr.aria-label]="isCollapsed() ? 'הרחב תפריט' : 'כווץ תפריט'"
+            [attr.title]="isCollapsed() ? 'הרחב תפריט' : 'כווץ תפריט'">
+      <i class="pi" [ngClass]="isCollapsed() ? 'pi-angle-left' : 'pi-angle-right'"></i>
+    </button>
   </div>
 
   <div class="wf-side-section-label">תפריט</div>
@@ -27,6 +38,7 @@
        [routerLink]="item.route"
        routerLinkActive="is-active"
        class="wf-side-item"
+       [attr.title]="isCollapsed() ? item.label : null"
        (click)="closeSidebar()">
       <i class="wf-side-item-icon" [ngClass]="item.icon" aria-hidden="true"></i>
       <span class="wf-side-item-label">{{ item.label }}</span>
@@ -34,14 +46,20 @@
   </div>
 
   <div class="wf-side-foot">
-    <button class="wf-side-logout" type="button" (click)="logout()">
+    <button class="wf-side-logout"
+            type="button"
+            (click)="logout()"
+            [attr.title]="isCollapsed() ? 'יציאה' : null"
+            [attr.aria-label]="'יציאה'">
       <i class="pi pi-sign-out"></i>
-      <span>יציאה</span>
+      <span class="wf-side-logout-label">יציאה</span>
     </button>
 
     <div class="wf-side-divider"></div>
 
-    <div class="wf-side-user" *ngIf="user$ | async as user">
+    <div class="wf-side-user"
+         *ngIf="user$ | async as user"
+         [attr.title]="isCollapsed() ? (user.username + ' · ' + user.email) : null">
       <div class="wf-side-avatar">{{ (user.username || '?').charAt(0) }}</div>
       <div class="wf-side-user-info">
         <span class="wf-side-user-name">{{ user.username }}</span>
