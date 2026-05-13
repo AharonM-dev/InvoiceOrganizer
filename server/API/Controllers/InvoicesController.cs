@@ -206,12 +206,15 @@ public class InvoicesController(AppDbContext db) : ControllerBase
         var start = new DateOnly(year, month, 1);
         var end = start.AddMonths(1);
 
-        var q = db.Invoices.AsNoTracking().Where(i => i.InvoiceDate >= start && i.InvoiceDate < end && i.UserId == userId);
+        var q = db.Invoices.AsNoTracking()
+            .Include(i => i.Supplier)
+            .Where(i => i.InvoiceDate >= start && i.InvoiceDate < end && i.UserId == userId);
         var data = await q
-            .GroupBy(i => i.SupplierId)
+            .GroupBy(i => new { i.SupplierId, SupplierName = i.Supplier != null ? i.Supplier.Name : null })
             .Select(g => new SupplierSummaryDto
             {
-                SupplierId = g.Key,
+                SupplierId = g.Key.SupplierId,
+                SupplierName = g.Key.SupplierName,
                 Count = g.Count(),
                 Total = g.Sum(i => i.Total)
             })
