@@ -6,6 +6,7 @@ import { UploadService } from '../../core/services/upload.service';
 import { OcrNotificationService } from '../../core/services/ocr-notification.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { TopBarComponent } from '../../layout/top-bar/top-bar';
 
 interface UploadStatus {
   fileName: string;
@@ -22,7 +23,7 @@ interface UploadStatus {
 @Component({
   selector: 'app-upload',
   standalone: true,
-  imports: [CommonModule, FileUpload],
+  imports: [CommonModule, FileUpload, TopBarComponent],
   templateUrl: './upload.html',
   styleUrl: './upload.css',
 })
@@ -170,26 +171,31 @@ export class Upload implements OnInit, OnDestroy {
   }
 
   getStatusClasses(status: UploadStatus['status']): string {
+    /* Returns wf-tag tone modifier classes (used alongside `.wf-tag`). */
     const map: Record<string, string> = {
-      pending: 'bg-gray-100 text-gray-600',
-      uploading: 'bg-blue-100 text-blue-700',
-      processing: 'bg-yellow-100 text-yellow-700',
-      PendingValidation: 'bg-purple-100 text-purple-700',
-      completed: 'bg-green-100 text-green-700',
-      error: 'bg-red-100 text-red-700',
+      pending: '',
+      uploading: 'wf-tag-accent',
+      processing: 'wf-tag-accent',
+      PendingValidation: 'wf-tag-warn',
+      completed: 'wf-tag-success',
+      error: 'wf-tag-danger',
     };
-    return map[status] ?? 'bg-gray-100 text-gray-600';
+    return map[status] ?? '';
   }
 
+  /* Returns a PrimeIcons class for the file kind. Previously used Font Awesome
+     classes; FA isn't actually loaded globally, so we use PrimeIcons here. */
   private getFileIcon(file: File): string {
-    if (file.type === 'application/pdf') return 'fa-file-pdf';
-    if (file.type.startsWith('image/')) return 'fa-file-image';
-    return 'fa-file';
+    if (file.type === 'application/pdf') return 'pi-file-pdf';
+    if (file.type.startsWith('image/')) return 'pi-image';
+    return 'pi-file';
   }
 
   private getFileIconColor(file: File): string {
-    if (file.type === 'application/pdf') return 'text-red-400';
-    if (file.type.startsWith('image/')) return 'text-blue-400';
-    return 'text-gray-400';
+    /* Kept on the interface so the upload-status row can colour-code icons,
+       but resolved via tokens rather than Tailwind utility classes. */
+    if (file.type === 'application/pdf') return 'fu-icon-pdf';
+    if (file.type.startsWith('image/')) return 'fu-icon-image';
+    return 'fu-icon-file';
   }
 }

@@ -1,13 +1,13 @@
 import { Component, computed, signal } from '@angular/core';
 import { Invoice, InvoiceStatus } from '../../core/models/invoice.model';
-import { NgFor , NgIf, NgClass, DecimalPipe } from '@angular/common';
+import { NgFor, NgIf, NgClass, DecimalPipe } from '@angular/common';
 import { InvoiceService } from '../../core/services/invoice.service';
-import { NgForm } from '@angular/forms';
+import { TopBarComponent } from '../../layout/top-bar/top-bar';
 
 @Component({
   selector: 'app-invoices-list',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, DecimalPipe],
+  imports: [NgFor, NgIf, NgClass, DecimalPipe, TopBarComponent],
   templateUrl: './invoices.html',
   styleUrl: './invoices.css',
 })
@@ -37,6 +37,18 @@ export class Invoices {
     });
   });
 
+  /* Counts for the summary chip row — derived only from allInvoices(). */
+  statusCounts = computed(() => {
+    const all = this.allInvoices();
+    return {
+      total: all.length,
+      verified: all.filter(i => i.status === InvoiceStatus.Verified).length,
+      processing: all.filter(i => i.status === InvoiceStatus.Processing).length,
+      pending: all.filter(i => i.status === InvoiceStatus.Pending).length,
+      error: all.filter(i => i.status === InvoiceStatus.Error).length,
+    };
+  });
+
   constructor(private invoiceService: InvoiceService) {
     // טעינה ראשונית
     this.loadInvoices();
@@ -58,6 +70,32 @@ export class Invoices {
       this.statusFilter.set('all');
     } else {
       this.statusFilter.set(value as InvoiceStatus);
+    }
+  }
+
+  /* Status filter pill click handler — toggles the chip on/off. */
+  setStatus(value: InvoiceStatus | 'all') {
+    this.statusFilter.set(value);
+  }
+
+  statusLabel(status: InvoiceStatus): string {
+    switch (status) {
+      case InvoiceStatus.Verified:   return 'מאומת';
+      case InvoiceStatus.Processing: return 'בעיבוד';
+      case InvoiceStatus.Pending:    return 'ממתין';
+      case InvoiceStatus.Processed:  return 'הושלם';
+      case InvoiceStatus.Error:      return 'שגיאה';
+      default: return status;
+    }
+  }
+
+  statusToneClass(status: InvoiceStatus): string {
+    switch (status) {
+      case InvoiceStatus.Verified:   return 'wf-tag-success';
+      case InvoiceStatus.Processing: return 'wf-tag-accent';
+      case InvoiceStatus.Pending:    return 'wf-tag-warn';
+      case InvoiceStatus.Error:      return 'wf-tag-danger';
+      default: return '';
     }
   }
 

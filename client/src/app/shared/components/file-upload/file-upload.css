@@ -1,1 +1,138 @@
-/* כל העיצוב מנוהל על-ידי Tailwind CSS בקובץ ה-HTML */
+:host { display: block; }
+
+.fu-dropzone {
+  border: 1.5px dashed var(--wf-border);
+  border-radius: 14px;
+  padding: 48px 24px;
+  background: color-mix(in oklab, var(--wf-accent) 3%, var(--wf-surface));
+  text-align: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fu-dropzone.is-dragover {
+  border-color: var(--wf-accent);
+  background: color-mix(in oklab, var(--wf-accent) 8%, var(--wf-surface));
+}
+
+.fu-dropzone-inner {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.fu-dropzone-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid var(--wf-border);
+  background: var(--wf-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wf-text-muted);
+  font-size: 20px;
+}
+
+.fu-dropzone-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--wf-text);
+}
+
+.fu-dropzone-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--wf-text-muted);
+}
+
+.fu-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--wf-accent);
+  cursor: pointer;
+  text-decoration: none;
+}
+.fu-link:hover { text-decoration: underline; }
+
+.fu-dropzone-ctas { display: flex; gap: 8px; }
+
+.fu-input { display: none; }
+
+/* Selected files */
+.fu-files {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.fu-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--wf-surface);
+  border: 1px solid var(--wf-border);
+  border-radius: 12px;
+}
+
+.fu-file-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--wf-surface-2);
+  border: 1px solid var(--wf-border);
+  color: var(--wf-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fu-file-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fu-file-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--wf-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fu-file-size {
+  font-size: 11px;
+  color: var(--wf-text-muted);
+}
+
+.fu-file-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--wf-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+.fu-file-remove:hover {
+  background: var(--wf-bg);
+  color: var(--wf-danger);
+  border-color: var(--wf-border);
+}

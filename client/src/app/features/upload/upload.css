@@ -1,1 +1,139 @@
-/* כל העיצוב מנוהל על-ידי Tailwind CSS בקובץ ה-HTML */
+.up { display: flex; flex-direction: column; gap: 18px; max-width: 880px; }
+
+.up-topbar-actions { display: flex; gap: 8px; }
+
+/* Validation errors */
+.up-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.up-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--wf-danger-dim);
+  color: var(--wf-danger);
+  border-radius: 10px;
+  background: transparent;
+  font-size: 13px;
+}
+
+.up-error-text { flex: 1; }
+
+.up-error-close {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  color: var(--wf-danger);
+  cursor: pointer;
+  border-radius: 6px;
+  opacity: 0.7;
+}
+.up-error-close:hover { opacity: 1; }
+
+/* Action row */
+.up-action { display: flex; justify-content: flex-start; }
+
+/* Status list */
+.up-statuses { display: flex; flex-direction: column; gap: 10px; }
+
+.up-statuses-head h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wf-text);
+}
+
+.up-status-list {
+  padding: 0;
+  overflow: hidden;
+}
+
+.up-status-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--wf-border);
+}
+.up-status-row.is-last { border-bottom: none; }
+
+.up-status-glyph {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--wf-surface-2);
+  border: 1px solid var(--wf-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--wf-text-muted);
+  font-size: 14px;
+}
+.up-status-glyph.is-pdf { color: var(--wf-danger); }
+.up-status-glyph.is-image { color: var(--wf-accent); }
+
+.up-status-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+
+.up-status-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.up-status-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--wf-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.up-tag-icon { font-size: 10px; }
+
+.up-progress { display: flex; flex-direction: column; gap: 6px; }
+
+.up-progress-bar {
+  height: 4px;
+  background: var(--wf-surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.up-progress-fill {
+  height: 100%;
+  background: var(--wf-accent);
+  transition: width 0.3s ease;
+}
+.up-progress-fill.is-success { background: var(--wf-success); }
+.up-progress-fill.is-error   { background: var(--wf-danger); }
+
+.up-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--wf-text-muted);
+}
+
+.up-progress-msg {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.up-status-actions { flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .up-status-row { flex-direction: column; align-items: stretch; }
+  .up-status-actions { align-self: flex-start; }
+}

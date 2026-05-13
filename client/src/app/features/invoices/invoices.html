@@ -1,86 +1,119 @@
- <h1 class="text-2xl font-semibold:text-center">חשבוניות</h1>
-<div class="space-y-4">
-  <!-- כותרת + חיפוש -->
-  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+<app-top-bar breadcrumb="חשבוניות" title="כל החשבוניות">
+  <div actions class="inv-topbar-actions">
+    <button class="wf-btn wf-btn-ghost" type="button">פילטרים</button>
+    <button class="wf-btn wf-btn-primary" type="button">+ חשבונית</button>
+  </div>
+</app-top-bar>
 
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<div class="wf-page inv">
+
+  <!-- Filter bar -->
+  <div class="inv-filterbar">
+    <div class="inv-search">
+      <i class="pi pi-search"></i>
       <input
         type="text"
-        placeholder="חיפוש לפי ספק / מספר חשבונית / קטגוריה"
-        class="border rounded-lg px-3 py-2 text-sm w-full sm:w-64"
+        placeholder="חיפוש לפי ספק · מספר חשבונית · קטגוריה"
+        class="inv-search-input"
         [value]="search()"
         (input)="onSearchChange($any($event.target).value)"
       />
-
-      <select
-        class="border rounded-lg px-2 py-2 text-sm"
-        [value]="statusFilter()"
-        (change)="onStatusChange($any($event.target).value)"
-      >
-        <option value="all">כל הסטטוסים</option>
-        <option [value]="InvoiceStatus.Pending">ממתין</option>
-        <option [value]="InvoiceStatus.Processing">בעיבוד</option>
-        <option [value]="InvoiceStatus.Processed">הושלם</option>
-        <option [value]="InvoiceStatus.Verified">מאומת</option>
-        <option [value]="InvoiceStatus.Error">שגיאה</option>
-      </select>
     </div>
+
+    <select
+      class="inv-select"
+      [value]="statusFilter()"
+      (change)="onStatusChange($any($event.target).value)"
+    >
+      <option value="all">כל הסטטוסים</option>
+      <option [value]="InvoiceStatus.Pending">ממתין</option>
+      <option [value]="InvoiceStatus.Processing">בעיבוד</option>
+      <option [value]="InvoiceStatus.Processed">הושלם</option>
+      <option [value]="InvoiceStatus.Verified">מאומת</option>
+      <option [value]="InvoiceStatus.Error">שגיאה</option>
+    </select>
   </div>
 
-  <!-- טבלה -->
-  <div class="overflow-x-auto bg-white border rounded-xl shadow-sm">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b">
+  <!-- Summary chips (counts derived from allInvoices) -->
+  <div class="inv-chips">
+    <button type="button" class="wf-tag inv-chip"
+            [class.is-active]="statusFilter() === 'all'"
+            (click)="setStatus('all')">
+      הכל · {{ statusCounts().total }}
+    </button>
+    <button type="button" class="wf-tag wf-tag-success inv-chip"
+            [class.is-active]="statusFilter() === InvoiceStatus.Verified"
+            (click)="setStatus(InvoiceStatus.Verified)">
+      מאומת · {{ statusCounts().verified }}
+    </button>
+    <button type="button" class="wf-tag wf-tag-accent inv-chip"
+            [class.is-active]="statusFilter() === InvoiceStatus.Processing"
+            (click)="setStatus(InvoiceStatus.Processing)">
+      בעיבוד · {{ statusCounts().processing }}
+    </button>
+    <button type="button" class="wf-tag wf-tag-warn inv-chip"
+            [class.is-active]="statusFilter() === InvoiceStatus.Pending"
+            (click)="setStatus(InvoiceStatus.Pending)">
+      ממתין · {{ statusCounts().pending }}
+    </button>
+    <button type="button" class="wf-tag wf-tag-danger inv-chip"
+            [class.is-active]="statusFilter() === InvoiceStatus.Error"
+            (click)="setStatus(InvoiceStatus.Error)">
+      שגיאה · {{ statusCounts().error }}
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="wf-surface inv-table-wrap">
+    <table class="inv-table">
+      <thead>
         <tr>
-          <th class="px-4 py-2 text-right font-medium">מס' חשבונית</th>
-          <th class="px-4 py-2 text-right font-medium">ספק</th>
-          <th class="px-4 py-2 text-right font-medium">תאריך</th>
-          <th class="px-4 py-2 text-right font-medium">קטגוריה</th>
-          <th class="px-4 py-2 text-right font-medium">סכום</th>
-          <th class="px-4 py-2 text-right font-medium">סטטוס</th>
-          <th class="px-4 py-2 text-right font-medium"></th>
+          <th class="inv-th">מס׳</th>
+          <th class="inv-th">ספק</th>
+          <th class="inv-th">קטגוריה</th>
+          <th class="inv-th">תאריך</th>
+          <th class="inv-th inv-th-amount">סכום</th>
+          <th class="inv-th">סטטוס</th>
+          <th class="inv-th" aria-hidden="true"></th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          *ngFor="let inv of filteredInvoices()"
-          class="border-b last:border-b-0 hover:bg-gray-50"
-        >
-          <td class="px-4 py-2">{{ inv.invoiceNumber }}</td>
-          <td class="px-4 py-2">{{ inv.vendor }}</td>
-          <td class="px-4 py-2">{{ inv.date }}</td>
-          <td class="px-4 py-2">{{ inv.category }}</td>
-          <td class="px-4 py-2">{{ inv.amount | number : '1.2-2' }} {{ inv.currency }}</td>
-          <td class="px-4 py-2">
-            <span
-              class="inline-flex items-center px-2 py-1 rounded-full text-xs"
-              [ngClass]="{
-                'bg-yellow-100 text-yellow-800': inv.status === InvoiceStatus.Pending,
-                'bg-blue-100 text-blue-800': inv.status === InvoiceStatus.Processing,
-                'bg-green-100 text-green-800': inv.status === InvoiceStatus.Verified,
-                'bg-gray-100 text-gray-700': inv.status === InvoiceStatus.Processed,
-                'bg-red-100 text-red-800': inv.status === InvoiceStatus.Error
-              }"
-            >
-              {{ inv.status }}
+        <tr *ngFor="let inv of filteredInvoices()" class="inv-row">
+          <td class="wf-num inv-cell-id">#{{ inv.invoiceNumber }}</td>
+          <td class="inv-cell-vendor">
+            <span class="inv-avatar">{{ (inv.vendor || '?').charAt(0) }}</span>
+            <span>{{ inv.vendor }}</span>
+          </td>
+          <td>{{ inv.category }}</td>
+          <td class="wf-num">{{ inv.date }}</td>
+          <td class="wf-num inv-cell-amount">
+            {{ inv.amount | number : '1.2-2' }} {{ inv.currency }}
+          </td>
+          <td>
+            <span class="wf-tag" [ngClass]="statusToneClass(inv.status)">
+              {{ statusLabel(inv.status) }}
             </span>
           </td>
-          <td class="px-4 py-2 text-left">
-            <button
-              class="text-xs text-red-600 hover:underline"
-              (click)="deleteInvoice(inv.id)"
-            >
-              מחיקה
+          <td class="inv-cell-actions">
+            <button class="inv-action" type="button"
+                    (click)="deleteInvoice(inv.id)"
+                    aria-label="מחיקה">
+              <i class="pi pi-trash"></i>
             </button>
           </td>
         </tr>
 
         <tr *ngIf="filteredInvoices().length === 0">
-          <td class="px-4 py-4 text-center text-gray-500" colspan="7">
-            אין חשבוניות תואמות לחיפוש.
-          </td>
+          <td class="inv-empty" colspan="7">אין חשבוניות תואמות לחיפוש.</td>
         </tr>
       </tbody>
     </table>
   </div>
+
+  <div class="inv-foot">
+    <span class="inv-foot-count">
+      מציג {{ filteredInvoices().length }} מתוך {{ statusCounts().total }} חשבוניות
+    </span>
+  </div>
+
 </div>
