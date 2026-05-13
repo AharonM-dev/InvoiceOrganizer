@@ -71,6 +71,12 @@
 
 .st-field { display: flex; flex-direction: column; gap: 6px; }
 .st-field label { display: block; }
+.st-field-hint {
+  display: block;
+  margin-top: 2px;
+  color: var(--wf-text-muted);
+  font-size: 10px;
+}
 
 .st-form-actions {
   display: flex;

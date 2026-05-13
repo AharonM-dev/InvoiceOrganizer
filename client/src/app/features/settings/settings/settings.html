@@ -40,29 +40,22 @@
           <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="st-form">
             <div class="st-form-grid">
               <div class="st-field">
-                <label for="set-fullname" class="wf-mono">שם מלא</label>
-                <input id="set-fullname" pInputText formControlName="fullName" placeholder="הכנס שם מלא" />
+                <label for="set-username" class="wf-mono">שם משתמש</label>
+                <input id="set-username" pInputText formControlName="username" placeholder="הכנס שם משתמש" autocomplete="username" />
               </div>
               <div class="st-field">
                 <label for="set-email" class="wf-mono">אימייל</label>
-                <input id="set-email" pInputText formControlName="email" placeholder="example@email.com" dir="ltr" />
-              </div>
-              <div class="st-field">
-                <label for="set-phone" class="wf-mono">טלפון</label>
-                <input id="set-phone" pInputText formControlName="phone" placeholder="050-0000000" dir="ltr" />
-              </div>
-              <div class="st-field">
-                <label for="set-address" class="wf-mono">כתובת</label>
-                <input id="set-address" pInputText formControlName="address" placeholder="רחוב, עיר, מיקוד" />
+                <input id="set-email" pInputText [value]="profileEmail" dir="ltr" readonly aria-readonly="true" />
+                <span class="st-field-hint wf-mono">לקריאה בלבד · לא ניתן לשינוי דרך מסך זה</span>
               </div>
             </div>
 
             <div class="st-form-actions">
-              <button type="submit" class="wf-btn wf-btn-primary">
-                <i class="pi pi-check"></i>
-                <span>שמור שינויים</span>
+              <button type="submit" class="wf-btn wf-btn-primary" [disabled]="isSavingProfile">
+                <i *ngIf="isSavingProfile" class="pi pi-spin pi-spinner"></i>
+                <i *ngIf="!isSavingProfile" class="pi pi-check"></i>
+                <span>{{ isSavingProfile ? 'שומר…' : 'שמור שינויים' }}</span>
               </button>
-              <button type="button" class="wf-btn wf-btn-quiet">ביטול</button>
             </div>
           </form>
         </section>

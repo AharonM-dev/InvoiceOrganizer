@@ -1,10 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { TopBarComponent } from '../../../layout/top-bar/top-bar';
-
-type SettingsTab = 'profile' | 'categories' | 'suppliers';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -17,12 +13,16 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 
+import { AuthService } from '../../../core/services/auth.service';
 import { SupplierService } from '../../../core/services/supplier.service';
 import { Supplier } from '../../../core/models/invoice.model';
 import { SupplierFormModal } from '../../../shared/components/supplier-form-modal/supplier-form-modal';
 import { CategoryService } from '../../../core/services/category.service';
 import { Category } from '../../../core/models/category.model';
 import { CategoryFormModal } from '../../../shared/components/category-form-modal/category-form-modal';
+import { TopBarComponent } from '../../../layout/top-bar/top-bar';
+
+type SettingsTab = 'profile' | 'categories' | 'suppliers';
 
 @Component({
   selector: 'app-settings',
@@ -48,13 +48,20 @@ import { CategoryFormModal } from '../../../shared/components/category-form-moda
   styleUrls: ['./settings.css']
 })
 export class Settings implements OnInit {
-    private fb = inject(FormBuilder);
+  private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
-  private http = inject(HttpClient);
+  private authService = inject(AuthService);
   private supplierService = inject(SupplierService);
   private categoryService = inject(CategoryService);
 
+  /* Profile form — limited to the two fields that actually exist on the
+     Users entity. Email is captured for display only (no update path). */
   profileForm!: FormGroup;
+  /** Read-only email derived from the auth state. Email cannot be changed
+   *  via this screen — that would require a separate re-auth flow. */
+  profileEmail = '';
+  profileId = '';
+  isSavingProfile = false;
 
   // Categories Data
   categories: Category[] = [];
@@ -73,60 +80,78 @@ export class Settings implements OnInit {
 
   ngOnInit() {
     this.initProfileForm();
-    this.loadProfileFromApi();
+    this.hydrateProfileFromAuthState();
+    this.refreshProfileFromServer();
     this.loadSuppliers();
     this.loadCategories();
   }
 
   initProfileForm() {
-    // Initialize empty form first
     this.profileForm = this.fb.group({
-      fullName: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', []],
-      address: ['', []]
+      username: ['', [Validators.required, Validators.minLength(1)]],
     });
   }
-  
-  loadProfileFromApi() {
-    this.http.get('http://localhost:5042/api/account/profile', { headers: this.getAuthHeaders() }).subscribe({
-      next: (data: any) => {
-        // Populate the form with data from the database
-        this.profileForm.patchValue({
-          fullName: data.fullName || '',
-          email: data.email || '',
-          phone: data.phone || '',
-          address: data.address || ''
-        });
+
+  /** Synchronous prefill — the auth state is already in localStorage by
+   *  the time the route guard lets the user in, so the form has values
+   *  before any HTTP round-trip. */
+  private hydrateProfileFromAuthState(): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+    this.profileId = user.id;
+    this.profileEmail = user.email;
+    this.profileForm.patchValue({ username: user.username });
+  }
+
+  /** Refreshes profile fields from the server (in case the user updated
+   *  the account from another device or the token's payload is stale). */
+  private refreshProfileFromServer(): void {
+    this.authService.getProfile().subscribe({
+      next: (profile) => {
+        this.profileId = profile.id;
+        this.profileEmail = profile.email;
+        this.profileForm.patchValue({ username: profile.username });
       },
       error: (err) => {
-        console.error('Failed to load profile from backend', err);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load profile details' });
+        // Don't blow away the values we already hydrated from auth state.
+        console.error('Failed to refresh profile from server', err);
       }
     });
   }
 
   saveProfile() {
-    if (this.profileForm.valid) {
-      this.http.put('http://localhost:5042/api/account/profile', this.profileForm.value, { headers: this.getAuthHeaders() }).subscribe({
-        next: (data: any) => {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Profile updated successfully' });
-                    
-          // Optionally update the stored username token info if needed overall
-          let userStored = JSON.parse(localStorage.getItem('user') || '{}');
-          if (userStored.token) {
-             userStored.username = data.username;
-             localStorage.setItem('user', JSON.stringify(userStored));
-          }
-        },
-        error: (err) => {
-          console.error('Failed to update profile backend', err);
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update profile' });
-        }
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      this.messageService.add({
+        severity: 'error',
+        summary: 'שגיאה',
+        detail: 'יש למלא שם משתמש תקין',
       });
-    } else {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please fill in all required fields' });
+      return;
     }
+
+    const newUsername = (this.profileForm.value.username as string).trim();
+    this.isSavingProfile = true;
+    this.authService.updateProfile(newUsername).subscribe({
+      next: (profile) => {
+        this.isSavingProfile = false;
+        this.profileForm.patchValue({ username: profile.username });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'נשמר',
+          detail: 'הפרופיל עודכן בהצלחה',
+        });
+      },
+      error: (err) => {
+        this.isSavingProfile = false;
+        console.error('Failed to update profile', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'שגיאה',
+          detail: 'עדכון הפרופיל נכשל',
+        });
+      }
+    });
   }
 
   // ── ניהול קטגוריות ──────────────────────────────────────────────────────
@@ -230,15 +255,5 @@ export class Settings implements OnInit {
         });
       },
     });
-  }
-
-  // ── Auth Headers (קיים) ──────────────────────────────────────────────────
-
-  private getAuthHeaders(): { [header: string]: string } {
-    const loggedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    if (loggedUser && loggedUser.token) {
-      return { 'Authorization': `Bearer ${loggedUser.token}` };
-    }
-    return {};
   }
 }
