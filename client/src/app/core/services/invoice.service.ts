@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Invoice, InvoiceStatus } from '../models/invoice.model';
+import { Invoice } from '../models/invoice.model';
 
 @Injectable({
   providedIn: 'root',
@@ -26,22 +26,19 @@ export class InvoiceService {
     }
 
     return this.http.get<any[]>(this.apiUrl, { params }).pipe(
-      map(backendInvoices => backendInvoices.map(this.mapBackendToFrontend))
+      map(backendInvoices => backendInvoices.map(b => this.mapListItem(b)))
     );
   }
 
   getById(id: number): Observable<Invoice> {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      map(this.mapBackendToFrontend)
+      map(b => this.mapDetail(b))
     );
   }
 
   create(invoice: Partial<Invoice>): Observable<Invoice> {
-    // For now, we might need to adapt frontend model back to backend DTO if they differ significantly
-    // But basic fields might match. Let's send what we have for now or adapt if specific DTO is known.
-    // Based on Controller: expects Invoice entity.
     return this.http.post<any>(this.apiUrl, invoice).pipe(
-        map(this.mapBackendToFrontend)
+      map(b => this.mapDetail(b))
     );
   }
 
@@ -53,23 +50,32 @@ export class InvoiceService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // Adapter method
-  private mapBackendToFrontend(backendInvoice: any): Invoice {
+  /* List endpoint mapper. Reads ONLY fields present on InvoiceListDto:
+       id, invoiceNumber, invoiceDate, total, supplierName, filePath.
+     No invented status / category / currency / timestamps. */
+  private mapListItem(b: any): Invoice {
     return {
-      id: backendInvoice.id,
-      invoiceNumber: backendInvoice.invoiceNumber ? backendInvoice.invoiceNumber.toString() : '',
-      vendor: backendInvoice.supplier ? backendInvoice.supplier.name : 'Unknown Vendor',
-      vendorId: backendInvoice.supplierId,
-      date: backendInvoice.invoiceDate,
-      amount: backendInvoice.total,
-      currency: 'ILS', // Default as backend doesn't seem to have currency
-      category: 'General', // List endpoint doesn't return items to deduce category
-      status: InvoiceStatus.Verified, // Default as backend doesn't have status
-      confidence: 1,
-      month: backendInvoice.invoiceDate ? backendInvoice.invoiceDate.split('-')[1] : '',
-      year: backendInvoice.invoiceDate ? parseInt(backendInvoice.invoiceDate.split('-')[0]) : 0,
-      createdAt: new Date(), // Not in backend response
-      updatedAt: new Date(), // Not in backend response
+      id: b.id,
+      invoiceNumber: b.invoiceNumber != null ? String(b.invoiceNumber) : '',
+      vendor: b.supplierName ?? '',
+      date: b.invoiceDate,
+      amount: b.total,
+      filePath: b.filePath,
+    };
+  }
+
+  /* Detail endpoint mapper. The full Invoice entity is returned with
+     Items, Supplier, User. Surface the additional fields when present. */
+  private mapDetail(b: any): Invoice {
+    return {
+      id: b.id,
+      invoiceNumber: b.invoiceNumber != null ? String(b.invoiceNumber) : '',
+      vendor: b.supplier?.name ?? b.supplierName ?? '',
+      vendorId: b.supplierId,
+      date: b.invoiceDate,
+      amount: b.total,
+      filePath: b.filePath,
+      items: b.items,
     };
   }
 }
