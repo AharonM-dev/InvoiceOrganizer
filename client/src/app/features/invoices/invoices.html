@@ -1,66 +1,23 @@
 <app-top-bar breadcrumb="חשבוניות" title="כל החשבוניות">
   <div actions class="inv-topbar-actions">
-    <button class="wf-btn wf-btn-ghost" type="button">פילטרים</button>
     <button class="wf-btn wf-btn-primary" type="button">+ חשבונית</button>
   </div>
 </app-top-bar>
 
 <div class="wf-page inv">
 
-  <!-- Filter bar -->
+  <!-- Search bar -->
   <div class="inv-filterbar">
     <div class="inv-search">
       <i class="pi pi-search"></i>
       <input
         type="text"
-        placeholder="חיפוש לפי ספק · מספר חשבונית · קטגוריה"
+        placeholder="חיפוש לפי ספק או מספר חשבונית"
         class="inv-search-input"
         [value]="search()"
         (input)="onSearchChange($any($event.target).value)"
       />
     </div>
-
-    <select
-      class="inv-select"
-      [value]="statusFilter()"
-      (change)="onStatusChange($any($event.target).value)"
-    >
-      <option value="all">כל הסטטוסים</option>
-      <option [value]="InvoiceStatus.Pending">ממתין</option>
-      <option [value]="InvoiceStatus.Processing">בעיבוד</option>
-      <option [value]="InvoiceStatus.Processed">הושלם</option>
-      <option [value]="InvoiceStatus.Verified">מאומת</option>
-      <option [value]="InvoiceStatus.Error">שגיאה</option>
-    </select>
-  </div>
-
-  <!-- Summary chips (counts derived from allInvoices) -->
-  <div class="inv-chips">
-    <button type="button" class="wf-tag inv-chip"
-            [class.is-active]="statusFilter() === 'all'"
-            (click)="setStatus('all')">
-      הכל · {{ statusCounts().total }}
-    </button>
-    <button type="button" class="wf-tag wf-tag-success inv-chip"
-            [class.is-active]="statusFilter() === InvoiceStatus.Verified"
-            (click)="setStatus(InvoiceStatus.Verified)">
-      מאומת · {{ statusCounts().verified }}
-    </button>
-    <button type="button" class="wf-tag wf-tag-accent inv-chip"
-            [class.is-active]="statusFilter() === InvoiceStatus.Processing"
-            (click)="setStatus(InvoiceStatus.Processing)">
-      בעיבוד · {{ statusCounts().processing }}
-    </button>
-    <button type="button" class="wf-tag wf-tag-warn inv-chip"
-            [class.is-active]="statusFilter() === InvoiceStatus.Pending"
-            (click)="setStatus(InvoiceStatus.Pending)">
-      ממתין · {{ statusCounts().pending }}
-    </button>
-    <button type="button" class="wf-tag wf-tag-danger inv-chip"
-            [class.is-active]="statusFilter() === InvoiceStatus.Error"
-            (click)="setStatus(InvoiceStatus.Error)">
-      שגיאה · {{ statusCounts().error }}
-    </button>
   </div>
 
   <!-- Table -->
@@ -70,10 +27,8 @@
         <tr>
           <th class="inv-th">מס׳</th>
           <th class="inv-th">ספק</th>
-          <th class="inv-th">קטגוריה</th>
           <th class="inv-th">תאריך</th>
           <th class="inv-th inv-th-amount">סכום</th>
-          <th class="inv-th">סטטוס</th>
           <th class="inv-th" aria-hidden="true"></th>
         </tr>
       </thead>
@@ -82,17 +37,11 @@
           <td class="wf-num inv-cell-id">#{{ inv.invoiceNumber }}</td>
           <td class="inv-cell-vendor">
             <span class="inv-avatar">{{ (inv.vendor || '?').charAt(0) }}</span>
-            <span>{{ inv.vendor }}</span>
+            <span>{{ inv.vendor || '—' }}</span>
           </td>
-          <td>{{ inv.category }}</td>
           <td class="wf-num">{{ inv.date }}</td>
           <td class="wf-num inv-cell-amount">
-            {{ inv.amount | number : '1.2-2' }} {{ inv.currency }}
-          </td>
-          <td>
-            <span class="wf-tag" [ngClass]="statusToneClass(inv.status)">
-              {{ statusLabel(inv.status) }}
-            </span>
+            {{ inv.amount | number : '1.2-2' }}
           </td>
           <td class="inv-cell-actions">
             <button class="inv-action" type="button"
@@ -104,7 +53,7 @@
         </tr>
 
         <tr *ngIf="filteredInvoices().length === 0">
-          <td class="inv-empty" colspan="7">אין חשבוניות תואמות לחיפוש.</td>
+          <td class="inv-empty" colspan="5">אין חשבוניות תואמות לחיפוש.</td>
         </tr>
       </tbody>
     </table>
@@ -112,7 +61,7 @@
 
   <div class="inv-foot">
     <span class="inv-foot-count">
-      מציג {{ filteredInvoices().length }} מתוך {{ statusCounts().total }} חשבוניות
+      מציג {{ filteredInvoices().length }} מתוך {{ totalCount() }} חשבוניות
     </span>
   </div>
 
