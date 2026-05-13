@@ -10,7 +10,9 @@ export interface UserDto {
   email: string;
   username: string;
   token: string;
-  isAdmin: boolean;
+  /** Backend currently omits IsAdmin from the login/register UserDto;
+   *  kept optional so older payloads without it don't break the type. */
+  isAdmin?: boolean;
 }
 
 interface StoredUser {
@@ -18,7 +20,14 @@ interface StoredUser {
   email: string;
   username: string;
   token: string;
-  isAdmin: boolean;
+  isAdmin?: boolean;
+}
+
+/** Server payload from GET /api/account/profile. */
+export interface ProfileDto {
+  id: string;
+  email: string;
+  username: string;
 }
 
 @Injectable({
@@ -28,7 +37,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private apiUrl = `${environment.apiUrl}/account`;
-  
+
   private currentUserSubject = new BehaviorSubject<StoredUser | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -61,6 +70,25 @@ export class AuthService {
     return user ? user.token : null;
   }
 
+  /**
+   * Loads the latest profile from the server. Returns the response and
+   * merges the fresh `username` + `email` into the stored user so other
+   * subscribers (e.g. sidebar) stay in sync.
+   */
+  getProfile(): Observable<ProfileDto> {
+    return this.http.get<ProfileDto>(`${this.apiUrl}/profile`)
+      .pipe(tap(profile => this.mergeProfileIntoStoredUser(profile)));
+  }
+
+  /**
+   * Persists username changes. Updates the cached user on success so
+   * the new name appears everywhere it's bound without needing a logout.
+   */
+  updateProfile(username: string): Observable<ProfileDto> {
+    return this.http.put<ProfileDto>(`${this.apiUrl}/profile`, { username })
+      .pipe(tap(profile => this.mergeProfileIntoStoredUser(profile)));
+  }
+
   private setCurrentUser(user: UserDto): void {
     const loggedUser: StoredUser = {
       id: user.id,
@@ -72,6 +100,21 @@ export class AuthService {
     localStorage.setItem('user', JSON.stringify(loggedUser));
     this.currentUserSubject.next(loggedUser);
   }
+
+  /** Keeps the token intact; only refreshes the profile fields. */
+  private mergeProfileIntoStoredUser(profile: ProfileDto): void {
+    const current = this.currentUserSubject.value;
+    if (!current) return;
+    const merged: StoredUser = {
+      ...current,
+      id: profile.id,
+      email: profile.email,
+      username: profile.username,
+    };
+    localStorage.setItem('user', JSON.stringify(merged));
+    this.currentUserSubject.next(merged);
+  }
+
   getCurrentUserId(): string | null {
   const user = this.getCurrentUser();
   return user ? user.id : null;
