@@ -15,6 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { TopBarComponent } from '../../layout/top-bar/top-bar';
+import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
 
 @Component({
   selector: 'app-dashboard',
@@ -112,16 +113,19 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  /* Wireframe palette: accent + muted + success + warn + border. One brand
-     color, the rest are token grayscale/state tones — keeps the donut quiet. */
-  private chartPalette = [
-    '#c8a76d', // accent
-    '#b8b8bf', // text-secondary
-    '#6fa890', // success
-    '#c89860', // warn
-    '#c47878', // danger
-    '#72727a', // text-muted
-  ];
+  /* Wireframe palette — one brand color plus tonal grays/state hues. The
+     hex values are read from CSS variables at chart-init time so the
+     chart adopts whatever the active theme set on document.documentElement. */
+  private get chartPalette(): string[] {
+    return [
+      cssVar('--wf-accent', '#c8a76d'),
+      cssVar('--wf-text-secondary', '#b8b8bf'),
+      cssVar('--wf-success', '#6fa890'),
+      cssVar('--wf-warn', '#c89860'),
+      cssVar('--wf-danger', '#c47878'),
+      cssVar('--wf-text-muted', '#72727a'),
+    ];
+  }
 
   processCategoryData(summaryData: any[]) {
     let labels: string[] = [];
@@ -131,7 +135,7 @@ export class DashboardComponent implements OnInit {
     if (!summaryData || summaryData.length === 0) {
       labels = ['אין הוצאות מקוטלגות'];
       data = [1];
-      bgColors = ['#26262c']; // border tone for empty state
+      bgColors = [cssVar('--wf-border', '#26262c')]; // border tone, themed
       this.topCategoryName = null;
       this.topCategoryTotal = 0;
     } else {
@@ -153,7 +157,7 @@ export class DashboardComponent implements OnInit {
       datasets: [{
         data: data,
         backgroundColor: bgColors,
-        borderColor: '#131316',
+        borderColor: cssVar('--wf-surface', '#131316'),
         borderWidth: 2,
         hoverOffset: 8,
       }]
@@ -197,7 +201,14 @@ export class DashboardComponent implements OnInit {
   }
 
   initCharts() {
-    // Token palette: accent line + muted dashed reference
+    // Read live tokens — themed automatically per active data-theme.
+    const accent       = cssVar('--wf-accent', '#c8a76d');
+    const accentFill   = cssVarWithAlpha('--wf-accent', 0.12, '#c8a76d');
+    const textMuted    = cssVar('--wf-text-muted', '#72727a');
+    const textSec      = cssVar('--wf-text-secondary', '#b8b8bf');
+    const surface      = cssVar('--wf-surface', '#131316');
+    const gridColor    = cssVarWithAlpha('--wf-border', 0.6, '#26262c');
+
     this.expenseTrendChart = {
       labels: [],
       datasets: [
@@ -205,8 +216,8 @@ export class DashboardComponent implements OnInit {
           label: 'הוצאות בפועל',
           data: [],
           fill: true,
-          borderColor: '#c8a76d',
-          backgroundColor: 'rgba(200, 167, 109, 0.12)',
+          borderColor: accent,
+          backgroundColor: accentFill,
           tension: 0.4,
           pointRadius: 0,
           borderWidth: 2,
@@ -215,7 +226,7 @@ export class DashboardComponent implements OnInit {
           label: 'תקציב יעד',
           data: [],
           fill: false,
-          borderColor: '#72727a',
+          borderColor: textMuted,
           borderDash: [5, 5],
           pointRadius: 0,
           borderWidth: 1.2,
@@ -229,12 +240,12 @@ export class DashboardComponent implements OnInit {
         legend: {
           position: 'top',
           align: 'end',
-          labels: { usePointStyle: true, color: '#b8b8bf', font: { size: 11 } }
+          labels: { usePointStyle: true, color: textSec, font: { size: 11 } }
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#72727a', font: { size: 11 } } },
-        y: { grid: { color: 'rgba(38, 38, 44, 0.6)' }, ticks: { color: '#72727a', font: { size: 11 } } }
+        x: { grid: { display: false }, ticks: { color: textMuted, font: { size: 11 } } },
+        y: { grid: { color: gridColor }, ticks: { color: textMuted, font: { size: 11 } } }
       }
     };
 
@@ -244,7 +255,7 @@ export class DashboardComponent implements OnInit {
         {
           data: [],
           backgroundColor: this.chartPalette,
-          borderColor: '#131316',
+          borderColor: surface,
           borderWidth: 2,
           hoverOffset: 8,
         }

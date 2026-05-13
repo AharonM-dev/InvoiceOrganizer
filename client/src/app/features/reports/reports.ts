@@ -15,6 +15,7 @@ import { forkJoin } from 'rxjs';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { TopBarComponent } from '../../layout/top-bar/top-bar';
+import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
 
 @Component({
   selector: 'app-reports',
@@ -182,11 +183,18 @@ export class Reports implements OnInit {
       let data = [];
       let bgColors = [];
 
-      const palette = ['#c8a76d', '#b8b8bf', '#6fa890', '#c89860', '#c47878', '#72727a'];
+      const palette = [
+        cssVar('--wf-accent', '#c8a76d'),
+        cssVar('--wf-text-secondary', '#b8b8bf'),
+        cssVar('--wf-success', '#6fa890'),
+        cssVar('--wf-warn', '#c89860'),
+        cssVar('--wf-danger', '#c47878'),
+        cssVar('--wf-text-muted', '#72727a'),
+      ];
       if (!categories || categories.length === 0) {
           labels = ['אין הוצאות מקוטלגות'];
           data = [1];
-          bgColors = ['#26262c']; // border tone for empty state
+          bgColors = [cssVar('--wf-border', '#26262c')]; // border tone, themed
       } else {
           labels = categories.map(c => c.categoryName || 'אחר');
           data = categories.map(c => c.total || 0);
@@ -236,15 +244,25 @@ export class Reports implements OnInit {
   }
 
   initCharts() {
-    // Token palette: one warm accent + tonal grays + state hues
-    const accent       = '#c8a76d';
-    const accentDim    = 'rgba(200, 167, 109, 0.18)';
-    const text         = '#ececef';
-    const textMuted    = '#72727a';
-    const textSec      = '#b8b8bf';
-    const border       = 'rgba(38, 38, 44, 0.6)';
-    const surface      = '#131316';
-    const donutPalette = ['#c8a76d', '#b8b8bf', '#6fa890', '#c89860', '#c47878', '#72727a'];
+    // Read live theme tokens — values come from CSS variables on
+    // document.documentElement, so charts respect dark or light theme.
+    const accent       = cssVar('--wf-accent', '#c8a76d');
+    const accentDim    = cssVarWithAlpha('--wf-accent', 0.18, '#c8a76d');
+    const accentClear  = cssVarWithAlpha('--wf-accent', 0, '#c8a76d');
+    const text         = cssVar('--wf-text', '#ececef');
+    const textMuted    = cssVar('--wf-text-muted', '#72727a');
+    const textSec      = cssVar('--wf-text-secondary', '#b8b8bf');
+    const border       = cssVarWithAlpha('--wf-border', 0.6, '#26262c');
+    const borderSolid  = cssVar('--wf-border', '#26262c');
+    const surface      = cssVar('--wf-surface', '#131316');
+    const donutPalette = [
+      cssVar('--wf-accent', '#c8a76d'),
+      cssVar('--wf-text-secondary', '#b8b8bf'),
+      cssVar('--wf-success', '#6fa890'),
+      cssVar('--wf-warn', '#c89860'),
+      cssVar('--wf-danger', '#c47878'),
+      cssVar('--wf-text-muted', '#72727a'),
+    ];
 
     // 1. Monthly Trends (Line Chart)
     this.monthlyTrendData = {
@@ -260,7 +278,7 @@ export class Reports implements OnInit {
             const ctx = context.chart.ctx;
             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
             gradient.addColorStop(0, accentDim);
-            gradient.addColorStop(1, 'rgba(200, 167, 109, 0)');
+            gradient.addColorStop(1, accentClear);
             return gradient;
           },
           borderWidth: 2,
@@ -284,7 +302,7 @@ export class Reports implements OnInit {
             backgroundColor: surface,
             titleColor: text,
             bodyColor: textSec,
-            borderColor: '#26262c',
+            borderColor: borderSolid,
             borderWidth: 1,
             padding: 10,
             displayColors: false
@@ -353,7 +371,7 @@ export class Reports implements OnInit {
                 backgroundColor: surface,
                 titleColor: text,
                 bodyColor: textSec,
-                borderColor: '#26262c',
+                borderColor: borderSolid,
                 borderWidth: 1
             }
         },
