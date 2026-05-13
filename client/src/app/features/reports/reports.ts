@@ -81,10 +81,11 @@ export class Reports implements OnInit {
     const labels = this.categoryData?.labels ?? [];
     const data = this.categoryData?.datasets?.[0]?.data ?? [];
     const colors = this.categoryData?.datasets?.[0]?.backgroundColor ?? [];
+    const fallback = cssVar('--wf-border', '#26262c');
     return labels.map((name: string, i: number) => ({
       name,
       value: data[i] ?? 0,
-      color: colors[i] ?? '#26262c',
+      color: colors[i] ?? fallback,
     }));
   }
   
