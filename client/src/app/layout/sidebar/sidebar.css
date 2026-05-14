@@ -244,20 +244,19 @@
 }
 
 .wf-side.is-collapsed .wf-side-brand {
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: 4px 0 18px;
-  gap: 0;
+  padding: 4px 0 12px;
+  gap: 6px;
 }
 
 .wf-side.is-collapsed .wf-side-collapse-btn {
-  position: absolute;
-  top: 16px;
-  inset-inline-start: 14px;
   margin-inline-start: 0;
 }
 
 .wf-side.is-collapsed .wf-side-list {
-  margin-top: 32px;
+  margin-top: 4px;
 }
 
 .wf-side.is-collapsed .wf-side-item,
