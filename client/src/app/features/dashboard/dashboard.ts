@@ -84,14 +84,9 @@ export class DashboardComponent implements OnInit {
     const loggedUser = JSON.parse(userStr);
     const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
 
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
-    sixMonthsAgo.setDate(1);
-    const fromDate = this.formatLocalDate(sixMonthsAgo);
-
     // ביצוע שתי קריאות במקביל
     forkJoin({
-      invoices: this.http.get<any[]>(`http://localhost:5042/api/Invoices?fromDate=${fromDate}`, { headers }),
+      invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
       categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers }),
       profile: this.authService.getProfile()
     }).subscribe({
@@ -217,13 +212,6 @@ export class DashboardComponent implements OnInit {
   private parseDateOnlyLocal(dateOnly: string): Date {
     const [year, month, day] = dateOnly.split('-').map(Number);
     return new Date(year, month - 1, day);
-  }
-
-  private formatLocalDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 
   initCharts() {
