@@ -4,10 +4,6 @@
       <i class="pi pi-download"></i>
       <span>Excel</span>
     </button>
-    <button class="wf-btn wf-btn-ghost" type="button" (click)="exportToPDF()">
-      <i class="pi pi-download"></i>
-      <span>PDF</span>
-    </button>
   </div>
 </app-top-bar>
 
@@ -46,7 +42,7 @@
       <div class="rp-date">
         <span class="wf-mono">טווח</span>
         <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true"
-                      placeholder="01/01/2025 — 30/09/2025" />
+                      placeholder="בחר טווח תאריכים" />
       </div>
     </div>
 
@@ -55,17 +51,17 @@
       <div class="wf-surface rp-kpi">
         <span class="wf-mono">סה"כ הוצאות</span>
         <div class="rp-kpi-value wf-num">{{ totalSpend | currency:'ILS':'symbol':'1.0-0' }}</div>
-        <span class="wf-tag wf-tag-accent">+2.5% מהחודש שעבר</span>
+        <span class="wf-tag">סך כל החשבוניות</span>
       </div>
       <div class="wf-surface rp-kpi">
         <span class="wf-mono">ממוצע חודשי</span>
         <div class="rp-kpi-value wf-num">{{ monthlyAverage | currency:'ILS':'symbol':'1.0-0' }}</div>
-        <span class="wf-tag">מחושב שנתית</span>
+        <span class="wf-tag">ממוצע לחודש פעיל</span>
       </div>
       <div class="wf-surface rp-kpi">
         <span class="wf-mono">קטגוריה מובילה</span>
         <div class="rp-kpi-value rp-kpi-value-text">{{ topCategory }}</div>
-        <span class="wf-tag wf-tag-accent">מובילה החודש</span>
+        <span class="wf-tag">לאורך כל התקופה</span>
       </div>
       <div class="wf-surface rp-kpi">
         <span class="wf-mono">יתרת תקציב</span>
@@ -80,11 +76,11 @@
     <section class="wf-surface rp-chart-card">
       <header class="rp-card-head">
         <div>
-          <h3 class="rp-card-title">מגמת הוצאות שנתית</h3>
-          <p class="rp-card-sub">פירוט הוצאות חודשי מתחילת השנה הנוכחית</p>
+          <h3 class="rp-card-title">מגמת הוצאות — 6 חודשים אחרונים</h3>
+          <p class="rp-card-sub">סך ההוצאות בכל אחד מ-6 החודשים האחרונים</p>
         </div>
         <div class="rp-legend">
-          <span><i class="rp-legend-line"></i><span class="wf-mono">השנה</span></span>
+          <span><i class="rp-legend-line"></i><span class="wf-mono">הוצאות</span></span>
         </div>
       </header>
       <div class="rp-chart-body">
@@ -116,7 +112,7 @@
       <section class="wf-surface rp-donut-card">
         <header>
           <h3 class="rp-card-title">התפלגות קטגוריות</h3>
-          <p class="rp-card-sub">חצי שנה אחרונה</p>
+          <p class="rp-card-sub">פילוח לפי פריטי החשבוניות — כלל התקופה (עשוי להיות שונה מסך החשבוניות)</p>
         </header>
         <div class="rp-donut-body">
           <div class="rp-donut-chart">

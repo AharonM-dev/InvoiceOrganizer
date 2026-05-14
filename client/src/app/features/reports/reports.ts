@@ -127,7 +127,11 @@ export class Reports implements OnInit {
             
             this.cd.detectChanges();
         },
-        error: (err) => console.error("Error loading report data", err)
+        error: (err) => {
+            console.error("Error loading report data", err);
+            this.hasData = false;
+            this.cd.detectChanges();
+        }
     });
   }
 
@@ -136,7 +140,10 @@ export class Reports implements OnInit {
       this.totalSpend = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
 
       // 2. Monthly Average — based on unique months with data
-      const uniqueMonthsSet = new Set(invoices.map(inv => new Date(inv.invoiceDate).getMonth() + '-' + new Date(inv.invoiceDate).getFullYear()));
+      const uniqueMonthsSet = new Set(invoices.map(inv => {
+          const d = this.parseDateOnlyLocal(inv.invoiceDate);
+          return d.getMonth() + '-' + d.getFullYear();
+      }));
       const uniqueMonths = uniqueMonthsSet.size;
       this.monthlyAverage = uniqueMonths > 0 ? Math.round(this.totalSpend / uniqueMonths) : 0;
 
@@ -177,13 +184,13 @@ export class Reports implements OnInit {
   
           // סיכום חשבוניות לחודש זה
           const monthlyTotal = invoices.reduce((sum, inv) => {
-              const invDate = new Date(inv.invoiceDate);
+              const invDate = this.parseDateOnlyLocal(inv.invoiceDate);
               if (invDate.getMonth() === d.getMonth() && invDate.getFullYear() === d.getFullYear()) {
                   return sum + (inv.total || 0);
               }
               return sum;
           }, 0);
-  
+
           data.push(monthlyTotal);
       }
 
@@ -195,6 +202,14 @@ export class Reports implements OnInit {
               data: data
           }]
       };
+  }
+
+  /* Parse a backend DateOnly string ("YYYY-MM-DD") as a LOCAL date.
+     new Date("YYYY-MM-DD") parses as UTC midnight, which shifts a day/month
+     in negative-offset timezones and mis-buckets invoices. */
+  private parseDateOnlyLocal(dateOnly: string): Date {
+      const [year, month, day] = dateOnly.split('-').map(Number);
+      return new Date(year, month - 1, day);
   }
 
   updateCategoryChart(categories: any[]) {
@@ -283,13 +298,13 @@ export class Reports implements OnInit {
       cssVar('--wf-text-muted', '#72727a'),
     ];
 
-    // 1. Monthly Trends (Line Chart)
+    // 1. Monthly Trends (Line Chart) — seeded empty; real data fills it in fetchData()
     this.monthlyTrendData = {
-      labels: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר'],
+      labels: [],
       datasets: [
         {
           label: 'הוצאות',
-          data: [2200, 3100, 2800, 4500, 2400, 3800, 4100, 3600, 4520],
+          data: [],
           fill: true,
           borderColor: accent,
           tension: 0.4,
@@ -344,12 +359,12 @@ export class Reports implements OnInit {
       interaction: { mode: 'nearest', axis: 'x', intersect: false }
     };
 
-    // 2. Category Distribution (Doughnut Chart)
+    // 2. Category Distribution (Doughnut Chart) — seeded empty; real data fills it in fetchData()
     this.categoryData = {
-      labels: ['מגורים', 'מזון', 'תחבורה', 'בילויים', 'שונות'],
+      labels: [],
       datasets: [
         {
-          data: [1200, 800, 450, 300, 150],
+          data: [],
           backgroundColor: donutPalette.slice(0, 5),
           borderColor: surface,
           borderWidth: 2,
@@ -366,13 +381,13 @@ export class Reports implements OnInit {
       }
     };
 
-    // 3. Top Vendors (Horizontal Bar Chart)
+    // 3. Top Vendors (Horizontal Bar Chart) — seeded empty; real data fills it in fetchData()
     this.topVendorsData = {
-      labels: ['רמי לוי', 'חשמל', 'סלקום', 'דלק', 'אמזון'],
+      labels: [],
       datasets: [
         {
           label: 'הוצאה חודשית',
-          data: [2500, 1800, 1200, 900, 600],
+          data: [],
           backgroundColor: accent,
           borderRadius: 4,
           barThickness: 14
@@ -444,10 +459,5 @@ export class Reports implements OnInit {
           const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           FileSaver.saveAs(blob, `Reports_Summary_${new Date().getTime()}.xlsx`);
       });
-  }
-
-  exportToPDF() {
-    console.log('Exporting to PDF...');
-    // Implementation would use jspdf here
   }
 }
