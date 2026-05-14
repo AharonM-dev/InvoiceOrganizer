@@ -5,10 +5,8 @@ import { RouterLink } from '@angular/router';
 
 // PrimeNG Imports
 import { ChartModule } from 'primeng/chart';
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
-import { TableModule } from 'primeng/table';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
@@ -17,6 +15,7 @@ import * as FileSaver from 'file-saver';
 import { TopBarComponent } from '../../layout/top-bar/top-bar';
 import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
 import { AuthService } from '../../core/services/auth.service';
+import { InvoiceListDto, CategorySummaryDto } from '../../core/models/invoice.model';
 
 @Component({
   selector: 'app-reports',
@@ -26,10 +25,8 @@ import { AuthService } from '../../core/services/auth.service';
     FormsModule,
     RouterLink,
     ChartModule,
-    CardModule,
     ButtonModule,
     DatePickerModule,
-    TableModule,
     TopBarComponent,
   ],
   templateUrl: './reports.html',
@@ -124,8 +121,8 @@ export class Reports implements OnInit {
     const dateQuery = this.buildDateRangeQuery();
 
     forkJoin({
-        invoices: this.http.get<any[]>(`http://localhost:5042/api/Invoices${dateQuery.invoices}`, { headers }),
-        categorySummary: this.http.get<any[]>(`http://localhost:5042/api/Invoices/summary/by-category${dateQuery.category}`, { headers }),
+        invoices: this.http.get<InvoiceListDto[]>(`http://localhost:5042/api/Invoices${dateQuery.invoices}`, { headers }),
+        categorySummary: this.http.get<CategorySummaryDto[]>(`http://localhost:5042/api/Invoices/summary/by-category${dateQuery.category}`, { headers }),
         profile: this.authService.getProfile()
     }).subscribe({
         next: (response) => {
@@ -284,7 +281,7 @@ export class Reports implements OnInit {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
   }
 
-  processKPIs(invoices: any[], categories: any[]) {
+  processKPIs(invoices: InvoiceListDto[], categories: CategorySummaryDto[]) {
       // 1. Total Spend
       this.totalSpend = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
 
@@ -327,7 +324,7 @@ export class Reports implements OnInit {
       return new Date(year, month - 1, day);
   }
 
-  updateCategoryChart(categories: any[]) {
+  updateCategoryChart(categories: CategorySummaryDto[]) {
       let labels = [];
       let data = [];
       let bgColors = [];
@@ -361,7 +358,7 @@ export class Reports implements OnInit {
       };
   }
 
-  updateTopVendorsChart(invoices: any[]) {
+  updateTopVendorsChart(invoices: InvoiceListDto[]) {
       // קיבוץ לפי ספק.
       // InvoiceListDto exposes supplierName (the real field). The previous
       // implementation read inv.vendorName / inv.supplier?.name which do not
