@@ -32,7 +32,10 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class DashboardComponent implements OnInit {
 
-  isLoading: boolean = true;
+  /** Single source of truth for which screen renders.
+   *  'empty' = a successful load with zero invoices (genuinely new user);
+   *  'error' is kept distinct so a failed load never shows the welcome screen. */
+  state: 'loading' | 'error' | 'empty' | 'ready' = 'loading';
 
   expenses: Expense[] = [];
   expenseTrendChart: any;
@@ -76,9 +79,13 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData() {
+    this.state = 'loading';
+
     const userStr = localStorage.getItem("user");
     if (!userStr) {
       console.error('No user found in localStorage');
+      this.state = 'error';
+      this.cd.detectChanges();
       return;
     }
     const loggedUser = JSON.parse(userStr);
@@ -110,12 +117,13 @@ export class DashboardComponent implements OnInit {
         // 4. Update the trend line from the same invoices list
         this.updateTrendChart(response.invoices ?? []);
 
-        this.isLoading = false;
+        // 'empty' only on a *successful* load with no invoices — a real new user.
+        this.state = this.expenses.length > 0 ? 'ready' : 'empty';
         this.cd.detectChanges();
       },
       error: (err) => {
         console.error("שגיאה בטעינת נתונים", err);
-        this.isLoading = false;
+        this.state = 'error';
         this.cd.detectChanges();
       }
     });

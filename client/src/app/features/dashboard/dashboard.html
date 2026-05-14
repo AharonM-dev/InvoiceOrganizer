@@ -14,13 +14,25 @@
 <div class="wf-page dash">
 
   <!-- Loading -->
-  <div class="dash-state" *ngIf="isLoading">
+  <div class="dash-state" *ngIf="state === 'loading'">
     <i class="pi pi-spin pi-spinner"></i>
     <span>טוען נתונים…</span>
   </div>
 
-  <!-- Empty -->
-  <div class="wf-surface dash-empty" *ngIf="!isLoading && (!expenses || expenses.length === 0)">
+  <!-- Error — distinct from the empty/new-user state so a failed load never
+       tells a user with data that they are brand new. -->
+  <div class="wf-surface dash-empty" *ngIf="state === 'error'">
+    <i class="pi pi-exclamation-triangle"></i>
+    <h2>טעינת הנתונים נכשלה</h2>
+    <p>אירעה שגיאה בעת טעינת נתוני לוח הבקרה. בדוק את החיבור לשרת ונסה שוב.</p>
+    <button type="button" class="wf-btn wf-btn-primary" (click)="loadDashboardData()">
+      <i class="pi pi-refresh"></i>
+      <span>נסה שוב</span>
+    </button>
+  </div>
+
+  <!-- Empty — only after a successful load with zero invoices (real new user) -->
+  <div class="wf-surface dash-empty" *ngIf="state === 'empty'">
     <i class="pi pi-receipt"></i>
     <h2>ברוך הבא למערכת</h2>
     <p>עדיין לא העלית חשבוניות. הוסף חשבונית ראשונה כדי שנוכל להתחיל לנתח עבורך את הנתונים.</p>
@@ -30,7 +42,7 @@
     </a>
   </div>
 
-  <ng-container *ngIf="!isLoading && expenses && expenses.length > 0">
+  <ng-container *ngIf="state === 'ready'">
 
     <!-- KPI strip — every value has a real data source: invoice list +
          category-summary endpoint. No status-based tiles (no such field). -->
