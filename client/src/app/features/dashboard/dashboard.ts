@@ -16,6 +16,7 @@ import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { TopBarComponent } from '../../layout/top-bar/top-bar';
 import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -43,8 +44,11 @@ export class DashboardComponent implements OnInit {
   topCategoryName: string | null = null;
   topCategoryTotal = 0;
 
+  monthlyBudget = 0;
+
   private http = inject(HttpClient);
   private cd = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
 
   /* ── KPI getters — derived only from the real list payload + the
         by-category summary. No invented statuses. ─────────────────────── */
@@ -83,7 +87,8 @@ export class DashboardComponent implements OnInit {
     // ביצוע שתי קריאות במקביל
     forkJoin({
       invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
-      categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers })
+      categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers }),
+      profile: this.authService.getProfile()
     }).subscribe({
       next: (response) => {
         // 1. Map list items into a UI shape using ONLY fields the
@@ -96,10 +101,13 @@ export class DashboardComponent implements OnInit {
           amount: inv.total,
         }));
 
-        // 2. Process the category summary for the donut + top-category KPI
+        // 2. Set monthly budget before updating charts
+        this.monthlyBudget = response.profile?.budget ?? 0;
+
+        // 3. Process the category summary for the donut + top-category KPI
         this.processCategoryData(response.categorySummary);
 
-        // 3. Update the trend line from the same invoices list
+        // 4. Update the trend line from the same invoices list
         this.updateTrendChart(response.invoices ?? []);
 
         this.isLoading = false;
@@ -189,12 +197,13 @@ export class DashboardComponent implements OnInit {
     }
 
     if (this.expenseTrendChart) {
+      const budgetData = labels.map(() => this.monthlyBudget);
       this.expenseTrendChart = {
         ...this.expenseTrendChart,
         labels: labels,
         datasets: [
           { ...this.expenseTrendChart.datasets[0], data: data },
-          this.expenseTrendChart.datasets[1] // budget/target line
+          { ...this.expenseTrendChart.datasets[1], data: budgetData }
         ]
       };
     }
