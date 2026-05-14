@@ -44,6 +44,9 @@
         <p-datepicker [(ngModel)]="dateRange" (ngModelChange)="onDateRangeChange()"
                       selectionMode="range" [readonlyInput]="true"
                       placeholder="בחר טווח תאריכים" />
+        <button *ngIf="dateRange?.[0]" type="button" class="wf-btn wf-btn-ghost" (click)="clearDateRange()" title="נקה טווח">
+          <i class="pi pi-times"></i>
+        </button>
       </div>
     </div>
 
@@ -77,8 +80,8 @@
     <section class="wf-surface rp-chart-card">
       <header class="rp-card-head">
         <div>
-          <h3 class="rp-card-title">מגמת הוצאות — 6 חודשים אחרונים</h3>
-          <p class="rp-card-sub">סך ההוצאות בכל אחד מ-6 החודשים האחרונים</p>
+          <h3 class="rp-card-title">{{ trendTitle }}</h3>
+          <p class="rp-card-sub">{{ trendSubtitle }}</p>
         </div>
         <div class="rp-legend">
           <span><i class="rp-legend-line"></i><span class="wf-mono">הוצאות</span></span>

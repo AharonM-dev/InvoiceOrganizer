@@ -92,6 +92,29 @@ export class Reports implements OnInit {
     }));
   }
   
+  /* Dynamic trend chart header — reflects the active grain and date window. */
+  get trendTitle(): string {
+    const grainLabel: Record<string, string> = { daily: 'יומי', weekly: 'שבועי', monthly: 'חודשי', yearly: 'שנתי' };
+    if (this.dateRange?.[0] && this.dateRange?.[1]) {
+      const fmt = (d: Date) => d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      return `מגמת הוצאות — ${fmt(this.dateRange[0])} עד ${fmt(this.dateRange[1])}`;
+    }
+    return `מגמת הוצאות — תצוגה ${grainLabel[this.range]}`;
+  }
+
+  get trendSubtitle(): string {
+    const defaultWindows: Record<string, string> = {
+      daily:   '30 הימים האחרונים',
+      weekly:  '12 השבועות האחרונים',
+      monthly: '6 החודשים האחרונים',
+      yearly:  '5 השנים האחרונות',
+    };
+    if (this.dateRange?.[0] && this.dateRange?.[1]) {
+      return 'סך ההוצאות לפי טווח התאריכים שנבחר';
+    }
+    return `סך ההוצאות ב${defaultWindows[this.range]}`;
+  }
+
   ngOnInit() {
     this.initCharts();
     this.fetchData();
@@ -99,14 +122,21 @@ export class Reports implements OnInit {
   }
 
   /* Refetch everything when the date-range picker changes. PrimeNG range mode
-     emits on each pick, so act only once both ends are set, or when cleared. */
+     emits [start, null] after the first pick — act only when both ends are set. */
   onDateRangeChange() {
-    const hasFullRange = !!(this.dateRange?.[0] && this.dateRange?.[1]);
-    const cleared = !this.dateRange || this.dateRange.length === 0;
-    if (hasFullRange || cleared) {
+    const start = this.dateRange?.[0];
+    const end = this.dateRange?.[1];
+    if (start instanceof Date && end instanceof Date) {
       this.fetchData();
       this.loadTrendChart();
     }
+  }
+
+  /* Explicit clear — resets the filter and reloads all-time data. */
+  clearDateRange() {
+    this.dateRange = undefined;
+    this.fetchData();
+    this.loadTrendChart();
   }
 
   fetchData() {
@@ -120,6 +150,10 @@ export class Reports implements OnInit {
 
     const dateQuery = this.buildDateRangeQuery();
 
+    // A filter-active result returning 0 invoices means "no invoices in that range",
+    // not "user has no invoices at all" — only update hasData from unfiltered results.
+    const isFiltered = !!(this.dateRange?.[0] && this.dateRange?.[1]);
+
     forkJoin({
         invoices: this.http.get<InvoiceListDto[]>(`http://localhost:5042/api/Invoices${dateQuery.invoices}`, { headers }),
         categorySummary: this.http.get<CategorySummaryDto[]>(`http://localhost:5042/api/Invoices/summary/by-category${dateQuery.category}`, { headers }),
@@ -128,20 +162,23 @@ export class Reports implements OnInit {
         next: (response) => {
             this.monthlyBudget = response.profile?.budget ?? 0;
 
-            if (response.invoices && response.invoices.length > 0) {
-                this.hasData = true;
-                this.processKPIs(response.invoices, response.categorySummary);
-                this.updateCategoryChart(response.categorySummary);
-                this.updateTopVendorsChart(response.invoices);
-            } else {
-                this.hasData = false;
+            if (!isFiltered) {
+                this.hasData = !!(response.invoices && response.invoices.length > 0);
+            }
+
+            if (this.hasData) {
+                this.processKPIs(response.invoices ?? [], response.categorySummary ?? []);
+                this.updateCategoryChart(response.categorySummary ?? []);
+                this.updateTopVendorsChart(response.invoices ?? []);
             }
 
             this.cd.detectChanges();
         },
         error: (err) => {
             console.error("Error loading report data", err);
-            this.hasData = false;
+            if (!isFiltered) {
+                this.hasData = false;
+            }
             this.cd.detectChanges();
         }
     });
