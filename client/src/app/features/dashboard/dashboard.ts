@@ -17,6 +17,7 @@ import * as FileSaver from 'file-saver';
 import { TopBarComponent } from '../../layout/top-bar/top-bar';
 import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -95,13 +96,12 @@ export class DashboardComponent implements OnInit {
       this.cd.detectChanges();
       return;
     }
-    const loggedUser = JSON.parse(userStr);
-    const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
 
-    // ביצוע שתי קריאות במקביל
+    // The registered authInterceptor attaches the Authorization header and
+    // handles 401 → logout, so no manual token/header handling is needed here.
     forkJoin({
-      invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
-      categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers }),
+      invoices: this.http.get<any[]>(`${environment.apiUrl}/Invoices`),
+      categorySummary: this.http.get<any[]>(`${environment.apiUrl}/Invoices/summary/by-category`),
       profile: this.authService.getProfile()
     }).subscribe({
       next: (response) => {
