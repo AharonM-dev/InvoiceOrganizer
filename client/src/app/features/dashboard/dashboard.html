@@ -78,8 +78,9 @@
         <header class="dash-card-head">
           <div>
             <h3 class="dash-card-title">מגמת הוצאות</h3>
-            <p class="dash-card-sub">שישה חודשים אחרונים</p>
+            <p class="dash-card-sub">מבט מהיר — שישה חודשים אחרונים</p>
           </div>
+          <a routerLink="/reports" class="dash-card-link">לדוחות מפורטים ←</a>
         </header>
         <div class="dash-chart-body">
           <p-chart type="line" [data]="expenseTrendChart" [options]="expenseTrendOptions" height="240px"></p-chart>

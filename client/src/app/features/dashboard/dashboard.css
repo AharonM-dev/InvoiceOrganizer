@@ -101,6 +101,14 @@
   color: var(--wf-text-muted);
 }
 
+.dash-card-link {
+  font-size: 12px;
+  color: var(--wf-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dash-card-link:hover { color: var(--wf-text); }
+
 .dash-chart-body { height: 240px; }
 
 .dash-chart-note {
