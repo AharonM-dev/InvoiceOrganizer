@@ -16,6 +16,7 @@ import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { TopBarComponent } from '../../layout/top-bar/top-bar';
 import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-reports',
@@ -37,11 +38,14 @@ import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
 export class Reports implements OnInit {
   private http = inject(HttpClient);
   private cd = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
+
    // KPI Data
   totalSpend = 0;
   monthlyAverage = 0;
   topCategory = '-';
-  savings = 0; // נשאיר כרגע סטטי או נחשב אם יש נתוני תקציב
+  savings = 0;
+  monthlyBudget = 0;
   
   hasData = false; // Add flag to track if user has any invoices
 
@@ -105,11 +109,12 @@ export class Reports implements OnInit {
 
     forkJoin({
         invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
-        categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers })
+        categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers }),
+        profile: this.authService.getProfile()
     }).subscribe({
         next: (response) => {
-            console.log('Reports Data:', response);
-            
+            this.monthlyBudget = response.profile?.budget ?? 0;
+
             if (response.invoices && response.invoices.length > 0) {
                 this.hasData = true;
                 this.processKPIs(response.invoices, response.categorySummary);
@@ -130,9 +135,9 @@ export class Reports implements OnInit {
       // 1. Total Spend
       this.totalSpend = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
 
-      // 2. Monthly Average (simple calc based on unique months found or just 12?)
-      // נחשב ממוצע לפי מספר החודשים שיש בהם נתונים בפועל
-      const uniqueMonths = new Set(invoices.map(inv => new Date(inv.invoiceDate).getMonth() + '-' + new Date(inv.invoiceDate).getFullYear())).size;
+      // 2. Monthly Average — based on unique months with data
+      const uniqueMonthsSet = new Set(invoices.map(inv => new Date(inv.invoiceDate).getMonth() + '-' + new Date(inv.invoiceDate).getFullYear()));
+      const uniqueMonths = uniqueMonthsSet.size;
       this.monthlyAverage = uniqueMonths > 0 ? Math.round(this.totalSpend / uniqueMonths) : 0;
 
       // 3. Top Category
@@ -140,9 +145,22 @@ export class Reports implements OnInit {
           const top = categories.reduce((prev, current) => (prev.total > current.total) ? prev : current);
           this.topCategory = top.categoryName || 'Unknown';
       }
-      
-      // 4. Savings (Placeholder logic: assume 20% savings target or just static for now)
-      this.savings = Math.round(this.totalSpend * 0.1); 
+
+      // 4. Budget balance: totalBudgetForPeriod - totalSpend
+      let monthsCount: number;
+      if (this.dateRange?.[0] && this.dateRange?.[1]) {
+          const start = this.dateRange[0];
+          const end = this.dateRange[1];
+          const diff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+          monthsCount = diff > 0 ? diff : 0;
+      } else {
+          monthsCount = uniqueMonths;
+      }
+      if (this.monthlyBudget > 0 && monthsCount > 0) {
+          this.savings = this.monthlyBudget * monthsCount - this.totalSpend;
+      } else {
+          this.savings = 0;
+      }
   }
 
   updateMonthlyTrendChart(invoices: any[]) {

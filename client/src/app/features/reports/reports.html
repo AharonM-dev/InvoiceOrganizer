@@ -68,9 +68,11 @@
         <span class="wf-tag wf-tag-accent">מובילה החודש</span>
       </div>
       <div class="wf-surface rp-kpi">
-        <span class="wf-mono">חיסכון משוער</span>
+        <span class="wf-mono">יתרת תקציב</span>
         <div class="rp-kpi-value wf-num">{{ savings | currency:'ILS':'symbol':'1.0-0' }}</div>
-        <span class="wf-tag wf-tag-success">מצב מצוין</span>
+        <span *ngIf="monthlyBudget <= 0" class="wf-tag">לא הוגדר תקציב</span>
+        <span *ngIf="monthlyBudget > 0 && savings >= 0" class="wf-tag wf-tag-success">נותר בתקציב</span>
+        <span *ngIf="monthlyBudget > 0 && savings < 0" class="wf-tag wf-tag-danger">חריגה מהתקציב</span>
       </div>
     </div>
 
