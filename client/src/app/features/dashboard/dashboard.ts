@@ -84,9 +84,14 @@ export class DashboardComponent implements OnInit {
     const loggedUser = JSON.parse(userStr);
     const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
 
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    const fromDate = this.formatLocalDate(sixMonthsAgo);
+
     // ביצוע שתי קריאות במקביל
     forkJoin({
-      invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
+      invoices: this.http.get<any[]>(`http://localhost:5042/api/Invoices?fromDate=${fromDate}`, { headers }),
       categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers }),
       profile: this.authService.getProfile()
     }).subscribe({
@@ -186,7 +191,7 @@ export class DashboardComponent implements OnInit {
       labels.push(monthName);
 
       const monthlyTotal = invoices.reduce((sum, inv) => {
-        const invDate = new Date(inv.invoiceDate);
+        const invDate = this.parseDateOnlyLocal(inv.invoiceDate);
         if (invDate.getMonth() === d.getMonth() && invDate.getFullYear() === d.getFullYear()) {
           return sum + (inv.total || 0);
         }
@@ -207,6 +212,18 @@ export class DashboardComponent implements OnInit {
         ]
       };
     }
+  }
+
+  private parseDateOnlyLocal(dateOnly: string): Date {
+    const [year, month, day] = dateOnly.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   initCharts() {
