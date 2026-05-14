@@ -62,11 +62,13 @@ export class Reports implements OnInit {
   // Filters
   dateRange: Date[] | undefined;
 
-  /* Segment control state — UI-only placeholder per the design plan.
-     Changing this does NOT refire data aggregation; it just toggles the
-     active pill in the segmented control matching the wireframe. */
+  /* Segment control state — drives the granularity of the trend chart.
+     Changing it reloads the trend chart from the matching summary endpoint. */
   range: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'monthly';
-  setRange(v: 'daily' | 'weekly' | 'monthly' | 'yearly') { this.range = v; }
+  setRange(v: 'daily' | 'weekly' | 'monthly' | 'yearly') {
+    this.range = v;
+    this.loadTrendChart();
+  }
 
   /* Derived top-5 vendors list for the bar-list legend below the chart. */
   get topVendorsList(): Array<{ name: string; value: number; pct: number }> {
@@ -96,8 +98,20 @@ export class Reports implements OnInit {
   ngOnInit() {
     this.initCharts();
     this.fetchData();
+    this.loadTrendChart();
   }
-  
+
+  /* Refetch everything when the date-range picker changes. PrimeNG range mode
+     emits on each pick, so act only once both ends are set, or when cleared. */
+  onDateRangeChange() {
+    const hasFullRange = !!(this.dateRange?.[0] && this.dateRange?.[1]);
+    const cleared = !this.dateRange || this.dateRange.length === 0;
+    if (hasFullRange || cleared) {
+      this.fetchData();
+      this.loadTrendChart();
+    }
+  }
+
   fetchData() {
     const userStr = localStorage.getItem("user");
     if (!userStr) {
@@ -107,9 +121,11 @@ export class Reports implements OnInit {
     const loggedUser = JSON.parse(userStr);
     const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
 
+    const dateQuery = this.buildDateRangeQuery();
+
     forkJoin({
-        invoices: this.http.get<any[]>("http://localhost:5042/api/Invoices", { headers }),
-        categorySummary: this.http.get<any[]>("http://localhost:5042/api/Invoices/summary/by-category", { headers }),
+        invoices: this.http.get<any[]>(`http://localhost:5042/api/Invoices${dateQuery.invoices}`, { headers }),
+        categorySummary: this.http.get<any[]>(`http://localhost:5042/api/Invoices/summary/by-category${dateQuery.category}`, { headers }),
         profile: this.authService.getProfile()
     }).subscribe({
         next: (response) => {
@@ -118,13 +134,12 @@ export class Reports implements OnInit {
             if (response.invoices && response.invoices.length > 0) {
                 this.hasData = true;
                 this.processKPIs(response.invoices, response.categorySummary);
-                this.updateMonthlyTrendChart(response.invoices);
                 this.updateCategoryChart(response.categorySummary);
                 this.updateTopVendorsChart(response.invoices);
             } else {
                 this.hasData = false;
             }
-            
+
             this.cd.detectChanges();
         },
         error: (err) => {
@@ -133,6 +148,140 @@ export class Reports implements OnInit {
             this.cd.detectChanges();
         }
     });
+  }
+
+  /* Build query strings that scope the invoice list + category summary to the
+     selected date range. /api/Invoices uses an inclusive toDate; by-category
+     uses an exclusive upper bound, so the end date is shifted +1 day there. */
+  private buildDateRangeQuery(): { invoices: string; category: string } {
+    if (this.dateRange?.[0] && this.dateRange?.[1]) {
+      const from = this.formatDateLocal(this.dateRange[0]);
+      const toInclusive = this.formatDateLocal(this.dateRange[1]);
+      const toExclusive = this.formatDateLocal(this.addDays(this.dateRange[1], 1));
+      return {
+        invoices: `?fromDate=${from}&toDate=${toInclusive}`,
+        category: `?from=${from}&to=${toExclusive}`,
+      };
+    }
+    return { invoices: '', category: '' };
+  }
+
+  /* The window the trend chart covers: the picked date range if set,
+     otherwise a sensible trailing window per the selected granularity. */
+  private getTrendWindow(): { from: Date; to: Date } {
+    if (this.dateRange?.[0] && this.dateRange?.[1]) {
+      return { from: this.dateRange[0], to: this.dateRange[1] };
+    }
+    const today = new Date();
+    let from: Date;
+    switch (this.range) {
+      case 'daily':   from = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29); break;
+      case 'weekly':  from = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7 * 11); break;
+      case 'monthly': from = new Date(today.getFullYear(), today.getMonth() - 5, 1); break;
+      case 'yearly':  from = new Date(today.getFullYear() - 4, 0, 1); break;
+    }
+    return { from: from!, to: today };
+  }
+
+  /* Load the trend chart from the summary endpoint matching the selected
+     granularity, scoped to the active window. */
+  loadTrendChart() {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
+        return;
+    }
+    const loggedUser = JSON.parse(userStr);
+    const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
+
+    const { from, to } = this.getTrendWindow();
+    const fromStr = this.formatDateLocal(from);
+    const toStr = this.formatDateLocal(this.addDays(to, 1)); // inclusive end → exclusive bound
+
+    const base = "http://localhost:5042/api/Invoices/summary";
+    let url: string;
+    switch (this.range) {
+      case 'daily':   url = `${base}/by-day?from=${fromStr}&to=${toStr}`; break;
+      case 'weekly':  url = `${base}/by-week?from=${fromStr}&to=${toStr}`; break;
+      case 'monthly': url = `${base}/by-month?from=${fromStr}&to=${toStr}`; break;
+      case 'yearly':  url = `${base}/by-year?from=${fromStr}&to=${toStr}`; break;
+    }
+
+    this.http.get<any[]>(url!, { headers }).subscribe({
+      next: (rows) => {
+        this.applyTrendData(rows ?? []);
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error("Error loading trend data", err)
+    });
+  }
+
+  /* Map a summary-endpoint response onto the trend chart. The bucket sequence
+     is generated client-side from the window so gaps with no invoices still
+     render as zero rather than collapsing the axis. */
+  private applyTrendData(rows: any[]) {
+    const { from, to } = this.getTrendWindow();
+    const labels: string[] = [];
+    const data: number[] = [];
+
+    if (this.range === 'daily') {
+      const map = new Map<string, number>();
+      rows.forEach(r => map.set(r.date, r.total || 0));
+      let d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+      const last = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+      while (d <= last) {
+        labels.push(d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }));
+        data.push(map.get(this.formatDateLocal(d)) || 0);
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+      }
+    } else if (this.range === 'weekly') {
+      const map = new Map<string, number>();
+      rows.forEach(r => map.set(r.weekStart, r.total || 0));
+      let d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+      d = new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay()); // back to Sunday
+      const last = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+      while (d <= last) {
+        labels.push(d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }));
+        data.push(map.get(this.formatDateLocal(d)) || 0);
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7);
+      }
+    } else if (this.range === 'monthly') {
+      const map = new Map<string, number>();
+      rows.forEach(r => map.set(`${r.year}-${r.month}`, r.total || 0));
+      let d = new Date(from.getFullYear(), from.getMonth(), 1);
+      const last = new Date(to.getFullYear(), to.getMonth(), 1);
+      while (d <= last) {
+        labels.push(d.toLocaleString('he-IL', { month: 'long', year: 'numeric' }));
+        data.push(map.get(`${d.getFullYear()}-${d.getMonth() + 1}`) || 0);
+        d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      }
+    } else { // yearly
+      const map = new Map<number, number>();
+      rows.forEach(r => map.set(r.year, r.total || 0));
+      for (let y = from.getFullYear(); y <= to.getFullYear(); y++) {
+        labels.push(String(y));
+        data.push(map.get(y) || 0);
+      }
+    }
+
+    this.monthlyTrendData = {
+      ...this.monthlyTrendData,
+      labels,
+      datasets: [{
+        ...this.monthlyTrendData.datasets[0],
+        data
+      }]
+    };
+  }
+
+  private formatDateLocal(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  private addDays(d: Date, n: number): Date {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
   }
 
   processKPIs(invoices: any[], categories: any[]) {
@@ -168,40 +317,6 @@ export class Reports implements OnInit {
       } else {
           this.savings = 0;
       }
-  }
-
-  updateMonthlyTrendChart(invoices: any[]) {
-      const labels: string[] = [];
-      const data: number[] = [];
-      const today = new Date(); // תאריך נוכחי
-  
-      // יצירת תוויות ונתונים ל-6 החודשים האחרונים (כולל הנוכחי)
-      for (let i = 5; i >= 0; i--) {
-          const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-          // שמות חודשים בעברית
-          const monthName = d.toLocaleString('he-IL', { month: 'long' });
-          labels.push(monthName);
-  
-          // סיכום חשבוניות לחודש זה
-          const monthlyTotal = invoices.reduce((sum, inv) => {
-              const invDate = this.parseDateOnlyLocal(inv.invoiceDate);
-              if (invDate.getMonth() === d.getMonth() && invDate.getFullYear() === d.getFullYear()) {
-                  return sum + (inv.total || 0);
-              }
-              return sum;
-          }, 0);
-
-          data.push(monthlyTotal);
-      }
-
-      this.monthlyTrendData = {
-          ...this.monthlyTrendData,
-          labels: labels,
-          datasets: [{
-              ...this.monthlyTrendData.datasets[0],
-              data: data
-          }]
-      };
   }
 
   /* Parse a backend DateOnly string ("YYYY-MM-DD") as a LOCAL date.

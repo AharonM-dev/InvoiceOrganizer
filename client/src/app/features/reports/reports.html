@@ -41,7 +41,8 @@
 
       <div class="rp-date">
         <span class="wf-mono">טווח</span>
-        <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true"
+        <p-datepicker [(ngModel)]="dateRange" (ngModelChange)="onDateRangeChange()"
+                      selectionMode="range" [readonlyInput]="true"
                       placeholder="בחר טווח תאריכים" />
       </div>
     </div>

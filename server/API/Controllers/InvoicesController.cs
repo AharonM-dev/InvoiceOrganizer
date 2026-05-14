@@ -172,13 +172,34 @@ public class InvoicesController(AppDbContext db) : ControllerBase
 
     [HttpGet("summary/by-month")]
     public async Task<ActionResult<IEnumerable<MonthSummaryDto>>> SummaryByYear(
-        [FromQuery, Range(1, 9999)] int year,
+        [FromQuery, Range(1, 9999)] int? year,
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
         [FromQuery] int? supplierId
     )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var start = new DateOnly(year, 1, 1);
-        var end = start.AddYears(1);
+
+        // year still works for existing callers; from/to is the new range form.
+        DateOnly start, end;
+        if (year.HasValue)
+        {
+            start = new DateOnly(year.Value, 1, 1);
+            end = start.AddYears(1);
+        }
+        else if (from.HasValue || to.HasValue)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            start = from ?? new DateOnly(today.Year, 1, 1);
+            end = to ?? today.AddDays(1);
+        }
+        else
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            start = new DateOnly(today.Year, 1, 1);
+            end = start.AddYears(1);
+        }
+
         var q = db.Invoices.AsNoTracking().Where(i => i.InvoiceDate >= start && i.InvoiceDate < end && i.UserId == userId);
         if (supplierId.HasValue)
             q = q.Where(i => i.SupplierId == supplierId.Value);
@@ -191,8 +212,73 @@ public class InvoicesController(AppDbContext db) : ControllerBase
                 Count = g.Count(),
                 Total = g.Sum(i => i.Total)
             })
-            .OrderBy(ms => ms.Month)
+            .OrderBy(ms => ms.Year).ThenBy(ms => ms.Month)
             .ToListAsync();
+        return Ok(data);
+    }
+
+    [HttpGet("summary/by-day")]
+    public async Task<ActionResult<IEnumerable<DaySummaryDto>>> SummaryByDay(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        [FromQuery] int? supplierId
+    )
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var q = db.Invoices.AsNoTracking().Where(i => i.UserId == userId);
+        if (supplierId.HasValue)
+            q = q.Where(i => i.SupplierId == supplierId.Value);
+        if (from.HasValue)
+            q = q.Where(i => i.InvoiceDate >= from.Value);
+        if (to.HasValue)
+            q = q.Where(i => i.InvoiceDate < to.Value);
+
+        var data = await q
+            .GroupBy(i => i.InvoiceDate)
+            .Select(g => new DaySummaryDto
+            {
+                Date = g.Key,
+                Count = g.Count(),
+                Total = g.Sum(i => i.Total)
+            })
+            .OrderBy(d => d.Date)
+            .ToListAsync();
+        return Ok(data);
+    }
+
+    [HttpGet("summary/by-week")]
+    public async Task<ActionResult<IEnumerable<WeekSummaryDto>>> SummaryByWeek(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        [FromQuery] int? supplierId
+    )
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var q = db.Invoices.AsNoTracking().Where(i => i.UserId == userId);
+        if (supplierId.HasValue)
+            q = q.Where(i => i.SupplierId == supplierId.Value);
+        if (from.HasValue)
+            q = q.Where(i => i.InvoiceDate >= from.Value);
+        if (to.HasValue)
+            q = q.Where(i => i.InvoiceDate < to.Value);
+
+        // SQLite has no week-grouping function — materialize the user-scoped,
+        // date-filtered rows then bucket by week-start (Sunday) in memory.
+        // Per-user invoice volumes make this safe.
+        var rows = await q
+            .Select(i => new { i.InvoiceDate, i.Total })
+            .ToListAsync();
+
+        var data = rows
+            .GroupBy(r => r.InvoiceDate.AddDays(-(int)r.InvoiceDate.DayOfWeek))
+            .Select(g => new WeekSummaryDto
+            {
+                WeekStart = g.Key,
+                Count = g.Count(),
+                Total = g.Sum(r => r.Total)
+            })
+            .OrderBy(w => w.WeekStart)
+            .ToList();
         return Ok(data);
     }
 
