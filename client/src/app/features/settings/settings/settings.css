@@ -12,6 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .st-subnav-item {
@@ -45,6 +46,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .st-card-title {
@@ -124,12 +126,17 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  flex: 1;
 }
 
 .st-list-name {
   font-size: 13px;
   font-weight: 500;
   color: var(--wf-text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .st-list-sub {
@@ -165,6 +172,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .st-theme-switch {
@@ -208,10 +216,47 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 @media (max-width: 960px) {
   .st-grid { grid-template-columns: 1fr; }
-  .st-subnav { flex-direction: row; overflow-x: auto; }
+  .st-subnav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .st-subnav-item {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
   .st-form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .st-card { padding: 16px; }
+
+  .st-card-head-row,
+  .st-appearance-row,
+  .st-danger-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .st-card-head-row .wf-btn,
+  .st-danger-row .wf-btn,
+  .st-theme-switch {
+    width: 100%;
+  }
+
+  .st-theme-option {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .st-form-actions .wf-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

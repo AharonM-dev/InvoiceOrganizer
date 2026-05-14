@@ -1,4 +1,10 @@
-.up { display: flex; flex-direction: column; gap: 18px; max-width: 880px; }
+.up {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 880px;
+  width: 100%;
+}
 
 .up-topbar-actions { display: flex; gap: 8px; }
 
@@ -21,7 +27,11 @@
   font-size: 13px;
 }
 
-.up-error-text { flex: 1; }
+.up-error-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 
 .up-error-close {
   width: 24px;
@@ -46,6 +56,7 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--wf-text);
+  line-height: 1.5;
 }
 
 .up-status-list {
@@ -85,6 +96,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
 }
 
 .up-status-name {
@@ -135,5 +147,19 @@
 
 @media (max-width: 640px) {
   .up-status-row { flex-direction: column; align-items: stretch; }
-  .up-status-actions { align-self: flex-start; }
+  .up-status-row-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .up-progress-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .up-status-actions { align-self: stretch; }
+  .up-status-actions .wf-btn,
+  .up-action .wf-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

@@ -21,6 +21,7 @@
   flex-direction: column;
   align-items: center;
   gap: 14px;
+  max-width: 100%;
 }
 
 .fu-dropzone-icon {
@@ -47,6 +48,7 @@
   margin: 4px 0 0;
   font-size: 13px;
   color: var(--wf-text-muted);
+  line-height: 1.6;
 }
 
 .fu-link {
@@ -135,4 +137,35 @@
   background: var(--wf-bg);
   color: var(--wf-danger);
   border-color: var(--wf-border);
+}
+
+@media (max-width: 640px) {
+  .fu-dropzone {
+    padding: 32px 18px;
+  }
+
+  .fu-dropzone-inner,
+  .fu-dropzone-ctas,
+  .fu-dropzone-ctas .wf-btn {
+    width: 100%;
+  }
+
+  .fu-dropzone-title {
+    font-size: 16px;
+  }
+
+  .fu-dropzone-ctas .wf-btn {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .fu-dropzone {
+    padding: 26px 14px;
+  }
+
+  .fu-file {
+    padding: 10px 12px;
+    gap: 10px;
+  }
 }

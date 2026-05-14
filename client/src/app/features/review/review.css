@@ -50,6 +50,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.rv-preview-head .wf-mono {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .rv-zoom {
   display: flex;
@@ -57,6 +65,7 @@
   font-family: var(--wf-mono);
   font-size: 11px;
   color: var(--wf-text-muted);
+  flex-shrink: 0;
 }
 
 .rv-preview-body {
@@ -98,6 +107,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .rv-fields-title {
@@ -143,13 +154,22 @@
   border: 1px solid var(--wf-accent-dim);
   border-radius: 8px;
   background: color-mix(in oklab, var(--wf-accent) 6%, transparent);
+  min-width: 0;
 }
-.rv-hint-strong { color: var(--wf-text); font-weight: 500; }
+.rv-hint-strong {
+  color: var(--wf-text);
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .rv-pick {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 .rv-pick .rv-select-host { flex: 1; min-width: 0; }
 .rv-pick-add { flex-shrink: 0; white-space: nowrap; }
@@ -173,6 +193,7 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--wf-text);
+  overflow-wrap: anywhere;
 }
 
 .rv-item-detail { font-size: 11px; color: var(--wf-text-muted); }
@@ -182,6 +203,7 @@
   align-items: center;
   gap: 6px;
   min-width: 220px;
+  flex: 0 1 280px;
 }
 
 .rv-pick-add-mini {
@@ -213,6 +235,35 @@
 
 @media (max-width: 640px) {
   .rv-row-grid { grid-template-columns: 1fr; }
+  .rv-topbar-actions .wf-btn {
+    justify-content: center;
+  }
+  .rv-preview-body {
+    min-height: 280px;
+    padding: 16px;
+  }
+  .rv-page { padding: 18px; }
+  .rv-fields { padding: 16px; }
+  .rv-fields-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .rv-hint {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .rv-pick {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .rv-pick-add {
+    width: 100%;
+    justify-content: center;
+  }
   .rv-item { flex-direction: column; align-items: stretch; }
-  .rv-item-cat { width: 100%; }
+  .rv-item-cat {
+    width: 100%;
+    min-width: 0;
+    flex-basis: auto;
+  }
 }
