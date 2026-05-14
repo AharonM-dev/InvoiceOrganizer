@@ -57,6 +57,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 .dash-kpi-value {
   font-size: 24px;
@@ -92,6 +93,7 @@
   align-items: center;
   margin-bottom: 12px;
   gap: 12px;
+  min-width: 0;
 }
 
 .dash-card-title {
@@ -112,6 +114,7 @@
   color: var(--wf-text-muted);
   text-decoration: none;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .dash-card-link:hover { color: var(--wf-text); }
 
@@ -155,6 +158,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 .dash-legend-dot {
   width: 8px;
@@ -166,10 +170,16 @@
   flex: 1;
   font-size: 12px;
   color: var(--wf-text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .dash-legend-amount {
   font-size: 12px;
   color: var(--wf-text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* Table card */
@@ -183,6 +193,8 @@
   font-size: 12px;
   color: var(--wf-text-muted);
   text-decoration: none;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .dash-table-link:hover { color: var(--wf-text); }
 
@@ -191,9 +203,20 @@
   align-items: center;
   gap: 10px;
   color: var(--wf-text);
+  min-width: 0;
 }
 
-.dash-amount { color: var(--wf-text); }
+.dash-vendor span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-amount {
+  color: var(--wf-text);
+  white-space: nowrap;
+}
 
 /* Avatar override scoped to this view */
 :host ::ng-deep .dash-vendor .p-avatar {
@@ -211,4 +234,7 @@
 @media (max-width: 640px) {
   .dash-kpi-row { grid-template-columns: 1fr; }
   .dash-card-head { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .dash-table-head {
+    align-items: flex-start;
+  }
 }
