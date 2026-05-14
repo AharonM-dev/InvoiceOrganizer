@@ -186,7 +186,7 @@ export class DashboardComponent implements OnInit {
       labels.push(monthName);
 
       const monthlyTotal = invoices.reduce((sum, inv) => {
-        const invDate = new Date(inv.invoiceDate);
+        const invDate = this.parseDateOnlyLocal(inv.invoiceDate);
         if (invDate.getMonth() === d.getMonth() && invDate.getFullYear() === d.getFullYear()) {
           return sum + (inv.total || 0);
         }
@@ -207,6 +207,11 @@ export class DashboardComponent implements OnInit {
         ]
       };
     }
+  }
+
+  private parseDateOnlyLocal(dateOnly: string): Date {
+    const [year, month, day] = dateOnly.split('-').map(Number);
+    return new Date(year, month - 1, day);
   }
 
   initCharts() {
