@@ -180,6 +180,7 @@ html, body {
   display: flex;
   gap: 8px;
   justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 /* Tag chip — border only with a 5px tone dot */
@@ -470,6 +471,8 @@ input.p-inputtext:focus { border-color: var(--wf-accent); box-shadow: none; }
   border-radius: 14px;
   color: var(--wf-text);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
 }
 .p-dialog .p-dialog-header {
   background: transparent;
@@ -483,6 +486,7 @@ input.p-inputtext:focus { border-color: var(--wf-accent); box-shadow: none; }
   background: transparent;
   color: var(--wf-text-secondary);
   padding: 20px;
+  overflow-y: auto;
 }
 .p-dialog .p-dialog-footer {
   background: transparent;
@@ -491,6 +495,7 @@ input.p-inputtext:focus { border-color: var(--wf-accent); box-shadow: none; }
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 .p-dialog-mask { background: rgba(0, 0, 0, 0.5); }
 
@@ -526,6 +531,25 @@ input.p-inputtext:focus { border-color: var(--wf-accent); box-shadow: none; }
   color: var(--wf-text);
 }
 .p-datepicker input { background: var(--wf-bg); border-color: var(--wf-border); color: var(--wf-text); }
+
+@media (max-width: 480px) {
+  .wf-modal-actions,
+  .p-dialog .p-dialog-footer {
+    width: 100%;
+  }
+
+  .wf-modal-actions .p-button,
+  .p-dialog .p-dialog-footer .p-button {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .p-dialog .p-dialog-header,
+  .p-dialog .p-dialog-content,
+  .p-dialog .p-dialog-footer {
+    padding-inline: 16px;
+  }
+}
 
 /* Progress bar */
 .p-progressbar {
