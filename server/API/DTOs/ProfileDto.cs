@@ -11,6 +11,7 @@ public class ProfileDto
     public required string Id { get; set; }
     public required string Username { get; set; }
     public required string Email { get; set; }
+    public decimal Budget { get; set; }
 }
 
 /// <summary>
@@ -23,4 +24,7 @@ public class UpdateProfileRequest
     [Required]
     [MinLength(1)]
     public string Username { get; set; } = "";
+
+    [Range(0, double.MaxValue)]
+    public decimal Budget { get; set; } = 0;
 }

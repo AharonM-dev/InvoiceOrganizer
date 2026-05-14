@@ -75,7 +75,8 @@ public class AccountController(AppDbContext context, ITokenService tokenService)
         {
             Id = user.Id,
             Username = user.Username,
-            Email = user.Email
+            Email = user.Email,
+            Budget = user.MonthlyBudget
         };
     }
 
@@ -99,13 +100,15 @@ public class AccountController(AppDbContext context, ITokenService tokenService)
             return BadRequest(new { message = "Username is required" });
 
         user.Username = newUsername;
+        user.MonthlyBudget = req.Budget;
         await context.SaveChangesAsync();
 
         return new ProfileDto
         {
             Id = user.Id,
             Username = user.Username,
-            Email = user.Email
+            Email = user.Email,
+            Budget = user.MonthlyBudget
         };
     }
 }

@@ -10,4 +10,5 @@ public class Users
     public required byte[] PasswordHash { get; set; }
     public required byte[] PasswordSalt { get; set; }
     public bool IsAdmin { get; set; } = false;
+    public decimal MonthlyBudget { get; set; } = 0;
 }
