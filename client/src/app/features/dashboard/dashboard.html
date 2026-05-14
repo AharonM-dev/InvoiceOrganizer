@@ -80,16 +80,13 @@
             <h3 class="dash-card-title">מגמת הוצאות</h3>
             <p class="dash-card-sub">שישה חודשים אחרונים</p>
           </div>
-          <div class="dash-segment" aria-hidden="true">
-            <span>שבוע</span>
-            <span class="is-active">חודש</span>
-            <span>רבעון</span>
-            <span>שנה</span>
-          </div>
         </header>
         <div class="dash-chart-body">
           <p-chart type="line" [data]="expenseTrendChart" [options]="expenseTrendOptions" height="240px"></p-chart>
         </div>
+        <p class="dash-chart-note" *ngIf="!trendHasRecentActivity">
+          אין פעילות בששת החודשים האחרונים — החשבוניות הקיימות מתוארכות לתקופה מוקדמת יותר.
+        </p>
       </section>
 
       <section class="wf-surface dash-donut-card">
@@ -97,19 +94,27 @@
           <h3 class="dash-card-title">התפלגות קטגוריות</h3>
           <p class="dash-card-sub">לפי פריטי חשבונית</p>
         </header>
-        <div class="dash-donut-body">
-          <p-chart type="doughnut" [data]="categoryChart" [options]="categoryOptions" height="180px"></p-chart>
+
+        <ng-container *ngIf="!categoryEmpty">
+          <div class="dash-donut-body">
+            <p-chart type="doughnut" [data]="categoryChart" [options]="categoryOptions" height="180px"></p-chart>
+          </div>
+          <ul class="dash-legend" *ngIf="categoryChart?.labels?.length">
+            <li *ngFor="let label of categoryChart.labels; let i = index">
+              <span class="dash-legend-dot"
+                    [style.background]="categoryChart.datasets[0].backgroundColor[i]"></span>
+              <span class="dash-legend-label">{{ label }}</span>
+              <span class="dash-legend-amount wf-num">
+                {{ categoryChart.datasets[0].data[i] | currency:'ILS':'symbol':'1.0-0' }}
+              </span>
+            </li>
+          </ul>
+        </ng-container>
+
+        <div class="dash-donut-empty" *ngIf="categoryEmpty">
+          <i class="pi pi-tags"></i>
+          <p>אין עדיין פריטים מקוטלגים בחשבוניות שלך. הוסף קטגוריות לפריטים כדי לראות את ההתפלגות.</p>
         </div>
-        <ul class="dash-legend" *ngIf="categoryChart?.labels?.length">
-          <li *ngFor="let label of categoryChart.labels; let i = index">
-            <span class="dash-legend-dot"
-                  [style.background]="categoryChart.datasets[0].backgroundColor[i]"></span>
-            <span class="dash-legend-label">{{ label }}</span>
-            <span class="dash-legend-amount wf-num">
-              {{ categoryChart.datasets[0].data[i] | currency:'ILS':'symbol':'1.0-0' }}
-            </span>
-          </li>
-        </ul>
       </section>
     </div>
 

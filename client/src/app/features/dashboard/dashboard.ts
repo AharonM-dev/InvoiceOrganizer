@@ -49,6 +49,13 @@ export class DashboardComponent implements OnInit {
 
   monthlyBudget = 0;
 
+  /** False when invoices exist but none fall in the last 6 months —
+   *  drives the "no recent activity" note on the trend chart. */
+  trendHasRecentActivity = true;
+  /** True when there are no categorized invoice items to chart —
+   *  drives an honest empty message instead of a fake placeholder slice. */
+  categoryEmpty = false;
+
   private http = inject(HttpClient);
   private cd = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
@@ -144,29 +151,28 @@ export class DashboardComponent implements OnInit {
   }
 
   processCategoryData(summaryData: any[]) {
-    let labels: string[] = [];
-    let data: number[] = [];
-    let bgColors: string[] = [];
-
     if (!summaryData || summaryData.length === 0) {
-      labels = ['אין הוצאות מקוטלגות'];
-      data = [1];
-      bgColors = [cssVar('--wf-border', '#26262c')]; // border tone, themed
+      // No categorized items — render an honest empty message in the donut
+      // card instead of a fake placeholder slice.
+      this.categoryEmpty = true;
       this.topCategoryName = null;
       this.topCategoryTotal = 0;
-    } else {
-      // CategorySummaryDto: { categoryId, categoryName, count, total }
-      labels = summaryData.map(x => x.categoryName ?? 'אחר');
-      data = summaryData.map(x => Number(x.total) || 0);
-      bgColors = labels.map((_, i) => this.chartPalette[i % this.chartPalette.length]);
-
-      const top = summaryData.reduce(
-        (a, b) => ((b.total ?? 0) > (a.total ?? 0) ? b : a),
-        summaryData[0],
-      );
-      this.topCategoryName = top.categoryName ?? 'אחר';
-      this.topCategoryTotal = Number(top.total) || 0;
+      return;
     }
+
+    this.categoryEmpty = false;
+
+    // CategorySummaryDto: { categoryId, categoryName, count, total }
+    const labels = summaryData.map(x => x.categoryName ?? 'אחר');
+    const data = summaryData.map(x => Number(x.total) || 0);
+    const bgColors = labels.map((_, i) => this.chartPalette[i % this.chartPalette.length]);
+
+    const top = summaryData.reduce(
+      (a, b) => ((b.total ?? 0) > (a.total ?? 0) ? b : a),
+      summaryData[0],
+    );
+    this.topCategoryName = top.categoryName ?? 'אחר';
+    this.topCategoryTotal = Number(top.total) || 0;
 
     this.categoryChart = {
       labels: labels,
@@ -203,6 +209,10 @@ export class DashboardComponent implements OnInit {
 
       data.push(monthlyTotal);
     }
+
+    // Distinguish "invoices exist but none in the last 6 months" from a
+    // genuinely broken/empty chart.
+    this.trendHasRecentActivity = data.some(v => v > 0);
 
     if (this.expenseTrendChart) {
       const budgetData = labels.map(() => this.monthlyBudget);
