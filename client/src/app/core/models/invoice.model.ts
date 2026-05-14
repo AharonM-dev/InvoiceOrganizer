@@ -86,3 +86,47 @@ export interface ExtractedData {
   invoiceNumber?: number;
   items: ExtractedItemDto[];
 }
+
+/* ── Report/summary contracts — mirror the backend DTOs exactly.
+   DateOnly fields serialize as "YYYY-MM-DD" strings; decimals as numbers. */
+
+export interface InvoiceListDto {
+  id: number;
+  invoiceNumber: number;
+  invoiceDate: string;
+  total: number;
+  supplierName: string | null;
+  filePath: string | null;
+}
+
+export interface CategorySummaryDto {
+  categoryId: number;
+  categoryName: string | null;
+  count: number;
+  total: number;
+}
+
+export interface DaySummaryDto {
+  date: string;
+  count: number;
+  total: number;
+}
+
+export interface WeekSummaryDto {
+  weekStart: string;
+  count: number;
+  total: number;
+}
+
+export interface MonthSummaryDto {
+  year: number;
+  month: number;
+  count: number;
+  total: number;
+}
+
+export interface YearSummaryDto {
+  year: number;
+  count: number;
+  total: number;
+}
