@@ -214,3 +214,19 @@
   .auth-form { padding: 40px 28px; }
   .auth-visual { display: none; }
 }
+
+@media (max-width: 480px) {
+  .auth { padding: 10px; }
+  .auth-grid { border-radius: 12px; }
+  .auth-form {
+    gap: 20px;
+    justify-content: flex-start;
+    min-height: calc(100vh - 20px);
+    padding: 34px 20px;
+  }
+  .auth-heading h2 { font-size: 28px; }
+  .auth-field-head {
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

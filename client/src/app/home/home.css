@@ -311,8 +311,36 @@
 }
 
 @media (max-width: 540px) {
-  .home-nav-links { gap: 12px; }
+  .home-nav {
+    padding: 14px 18px;
+    gap: 14px;
+  }
+
+  .home-nav-links {
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-start;
+  }
   .home-nav-link:not(.wf-btn) { display: none; }
+  .home-hero {
+    padding: 28px 18px;
+    gap: 26px;
+  }
   .home-hero-title { font-size: 30px; }
+  .home-hero-sub { font-size: 14px; }
+  .home-hero-ctas .wf-btn {
+    flex: 1 1 150px;
+    justify-content: center;
+  }
+  .home-hero-logos { gap: 12px; }
+  .home-peek { padding: 14px; }
+  .home-peek-amount { font-size: 24px; }
+  .home-peek-chart {
+    height: 120px;
+    margin-top: 14px;
+  }
+  .home-features { padding: 44px 18px; }
   .home-features-title { font-size: 24px; }
+  .home-feature-card { padding: 18px; }
+  .home-footer { padding: 28px 18px 18px; }
 }

@@ -36,6 +36,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .rp-segment {
@@ -74,6 +75,7 @@
   background: var(--wf-surface);
   font-size: 12px;
   color: var(--wf-text-secondary);
+  min-width: 0;
 }
 
 /* KPI strip */
@@ -88,6 +90,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 .rp-kpi-value {
   font-size: 22px;
@@ -95,6 +98,12 @@
   color: var(--wf-text);
 }
 .rp-kpi-value-text { font-size: 18px; }
+.rp-kpi-value,
+.rp-kpi-value-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .rp-kpi .wf-tag { align-self: flex-start; margin-top: 6px; }
 
 /* Card head shared */
@@ -155,6 +164,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 .rp-vendor-name {
   width: 90px;
@@ -181,6 +191,7 @@
   text-align: left;
   font-size: 11px;
   color: var(--wf-text-secondary);
+  flex-shrink: 0;
 }
 .rp-vendors-empty {
   text-align: center;
@@ -223,10 +234,16 @@
   flex: 1;
   font-size: 12px;
   color: var(--wf-text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .rp-donut-value {
   font-size: 11px;
   color: var(--wf-text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 @media (max-width: 1100px) {
@@ -236,9 +253,45 @@
 
 @media (max-width: 640px) {
   .rp-kpi-row { grid-template-columns: 1fr; }
-  .rp-segment { width: 100%; justify-content: space-between; }
+  .rp-controls { align-items: stretch; }
+  .rp-segment {
+    width: 100%;
+    justify-content: space-between;
+    overflow-x: auto;
+  }
+  .rp-segment > button {
+    flex: 1 0 auto;
+    padding-inline: 12px;
+  }
+  .rp-date {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .rp-date p-datepicker {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+  .rp-chart-card,
+  .rp-vendors-card,
+  .rp-donut-card { padding: 16px; }
+  .rp-chart-body { height: 280px; }
   .rp-donut-body { flex-direction: column; align-items: stretch; }
   .rp-donut-chart { width: 100%; }
-  .rp-vendor-name { width: 70px; }
-  .rp-vendor-value { width: 78px; }
+  .rp-vendors li {
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  .rp-vendor-name {
+    flex: 1 1 45%;
+    width: auto;
+  }
+  .rp-vendor-value {
+    width: auto;
+    flex: 0 0 auto;
+  }
+  .rp-vendor-bar {
+    flex-basis: 100%;
+    order: 3;
+  }
 }
