@@ -44,31 +44,35 @@
 
   <ng-container *ngIf="state === 'ready'">
 
-    <!-- KPI strip — every value has a real data source: invoice list +
-         category-summary endpoint. No status-based tiles (no such field). -->
+    <!-- KPI strip — scoped to the current calendar month. The invoice-list
+         KPIs are filtered client-side; the leading category comes from the
+         month-scoped by-category summary. -->
+    <p class="dash-kpi-note" *ngIf="!monthHasActivity">
+      אין עדיין פעילות בחודש הנוכחי — הגרף והחשבוניות האחרונות עדיין מציגים פעילות קודמת.
+    </p>
     <div class="dash-kpi-row">
       <div class="wf-surface dash-kpi">
-        <span class="wf-mono">סה"כ הוצאות</span>
-        <div class="dash-kpi-value wf-num">{{ totalAmount | currency:'ILS':'symbol':'1.0-0' }}</div>
-        <span class="wf-tag wf-tag-accent">{{ invoiceCount }} חשבוניות</span>
+        <span class="wf-mono">סה"כ הוצאות החודש</span>
+        <div class="dash-kpi-value wf-num">{{ monthTotal | currency:'ILS':'symbol':'1.0-0' }}</div>
+        <span class="wf-tag wf-tag-accent">{{ currentMonthLabel }}</span>
       </div>
       <div class="wf-surface dash-kpi">
-        <span class="wf-mono">ממוצע לחשבונית</span>
-        <div class="dash-kpi-value wf-num">{{ averageAmount | currency:'ILS':'symbol':'1.0-0' }}</div>
-        <span class="wf-tag">לפי {{ invoiceCount }} חשבוניות</span>
+        <span class="wf-mono">חשבוניות החודש</span>
+        <div class="dash-kpi-value wf-num">{{ monthInvoiceCount }}</div>
+        <span class="wf-tag">התקבלו החודש</span>
       </div>
       <div class="wf-surface dash-kpi">
-        <span class="wf-mono">ספקים פעילים</span>
-        <div class="dash-kpi-value wf-num">{{ supplierCount }}</div>
-        <span class="wf-tag">ייחודיים</span>
+        <span class="wf-mono">ספקים פעילים החודש</span>
+        <div class="dash-kpi-value wf-num">{{ monthSupplierCount }}</div>
+        <span class="wf-tag">פעילים החודש</span>
       </div>
       <div class="wf-surface dash-kpi">
-        <span class="wf-mono">קטגוריה מובילה</span>
+        <span class="wf-mono">קטגוריה מובילה החודש</span>
         <div class="dash-kpi-value dash-kpi-value-text">{{ topCategoryName || '—' }}</div>
         <span class="wf-tag wf-tag-accent" *ngIf="topCategoryName">
           {{ topCategoryTotal | currency:'ILS':'symbol':'1.0-0' }}
         </span>
-        <span class="wf-tag" *ngIf="!topCategoryName">אין נתונים</span>
+        <span class="wf-tag" *ngIf="!topCategoryName">אין נתונים החודש</span>
       </div>
     </div>
 
@@ -93,7 +97,7 @@
       <section class="wf-surface dash-donut-card">
         <header>
           <h3 class="dash-card-title">התפלגות קטגוריות</h3>
-          <p class="dash-card-sub">לפי פריטי חשבונית</p>
+          <p class="dash-card-sub">לפי פריטי חשבונית — החודש הנוכחי</p>
         </header>
 
         <ng-container *ngIf="!categoryEmpty">
@@ -114,7 +118,7 @@
 
         <div class="dash-donut-empty" *ngIf="categoryEmpty">
           <i class="pi pi-tags"></i>
-          <p>אין עדיין פריטים מקוטלגים בחשבוניות שלך. הוסף קטגוריות לפריטים כדי לראות את ההתפלגות.</p>
+          <p>אין פריטים מקוטלגים בחשבוניות החודש. הוסף קטגוריות לפריטים כדי לראות את ההתפלגות.</p>
         </div>
       </section>
     </div>

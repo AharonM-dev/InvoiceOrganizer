@@ -61,24 +61,39 @@ export class DashboardComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
 
-  /* ── KPI getters — derived only from the real list payload + the
-        by-category summary. No invented statuses. ─────────────────────── */
-  get totalAmount(): number {
-    return this.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  /* ── KPI getters — scoped to the current calendar month. The invoice-list
+        KPIs are filtered client-side (the list fetch stays unfiltered so the
+        trend chart + recent-invoices table keep the full history); the leading
+        category comes from the month-scoped by-category summary. ─────────── */
+  private get currentMonthExpenses(): Expense[] {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    return this.expenses.filter(e => {
+      if (!e.date) return false;
+      const d = this.parseDateOnlyLocal(e.date);
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
   }
-  get invoiceCount(): number {
-    return this.expenses.length;
+  get monthTotal(): number {
+    return this.currentMonthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
   }
-  get averageAmount(): number {
-    return this.invoiceCount > 0 ? this.totalAmount / this.invoiceCount : 0;
+  get monthInvoiceCount(): number {
+    return this.currentMonthExpenses.length;
   }
-  get supplierCount(): number {
+  get monthSupplierCount(): number {
     const seen = new Set<string>();
-    for (const e of this.expenses) {
+    for (const e of this.currentMonthExpenses) {
       const v = (e.vendor || '').trim();
       if (v) seen.add(v);
     }
     return seen.size;
+  }
+  get monthHasActivity(): boolean {
+    return this.monthInvoiceCount > 0;
+  }
+  get currentMonthLabel(): string {
+    return new Date().toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
   }
 
   ngOnInit() {
@@ -99,9 +114,16 @@ export class DashboardComponent implements OnInit {
 
     // The registered authInterceptor attaches the Authorization header and
     // handles 401 → logout, so no manual token/header handling is needed here.
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
     forkJoin({
+      // Invoice list stays unfiltered — the 6-month trend chart and the
+      // recent-invoices table need the full history. KPI month-scoping is
+      // done client-side. Only the by-category summary is scoped to the month.
       invoices: this.http.get<any[]>(`${environment.apiUrl}/Invoices`),
-      categorySummary: this.http.get<any[]>(`${environment.apiUrl}/Invoices/summary/by-category`),
+      categorySummary: this.http.get<any[]>(`${environment.apiUrl}/Invoices/summary/by-category?year=${year}&month=${month}`),
       profile: this.authService.getProfile()
     }).subscribe({
       next: (response) => {

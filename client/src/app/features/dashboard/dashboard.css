@@ -40,6 +40,12 @@
 }
 
 /* KPI strip */
+.dash-kpi-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--wf-text-muted);
+}
+
 .dash-kpi-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
