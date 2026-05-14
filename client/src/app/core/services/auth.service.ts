@@ -28,6 +28,7 @@ export interface ProfileDto {
   id: string;
   email: string;
   username: string;
+  budget: number;
 }
 
 @Injectable({
@@ -84,8 +85,8 @@ export class AuthService {
    * Persists username changes. Updates the cached user on success so
    * the new name appears everywhere it's bound without needing a logout.
    */
-  updateProfile(username: string): Observable<ProfileDto> {
-    return this.http.put<ProfileDto>(`${this.apiUrl}/profile`, { username })
+  updateProfile(username: string, budget: number): Observable<ProfileDto> {
+    return this.http.put<ProfileDto>(`${this.apiUrl}/profile`, { username, budget })
       .pipe(tap(profile => this.mergeProfileIntoStoredUser(profile)));
   }
 

@@ -44,6 +44,18 @@
                 <input id="set-username" pInputText formControlName="username" placeholder="הכנס שם משתמש" autocomplete="username" />
               </div>
               <div class="st-field">
+                <label for="set-budget" class="wf-mono">תקציב יעד חודשי (₪)</label>
+                <input id="set-budget"
+                       pInputText
+                       type="number"
+                       min="0"
+                       formControlName="budget"
+                       placeholder="לדוגמה: 5000" />
+                <span class="st-field-hint wf-mono" *ngIf="profileForm.get('budget')?.invalid">
+                  ערך חייב להיות 0 ומעלה
+                </span>
+              </div>
+              <div class="st-field">
                 <label for="set-email" class="wf-mono">אימייל</label>
                 <input id="set-email" pInputText [value]="profileEmail" dir="ltr" readonly aria-readonly="true" />
                 <span class="st-field-hint wf-mono">לקריאה בלבד · לא ניתן לשינוי דרך מסך זה</span>

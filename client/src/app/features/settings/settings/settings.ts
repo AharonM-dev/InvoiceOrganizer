@@ -95,6 +95,7 @@ export class Settings implements OnInit {
   initProfileForm() {
     this.profileForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(1)]],
+      budget: [0, [Validators.min(0)]],
     });
   }
 
@@ -116,7 +117,7 @@ export class Settings implements OnInit {
       next: (profile) => {
         this.profileId = profile.id;
         this.profileEmail = profile.email;
-        this.profileForm.patchValue({ username: profile.username });
+        this.profileForm.patchValue({ username: profile.username, budget: profile.budget ?? 0 });
       },
       error: (err) => {
         // Don't blow away the values we already hydrated from auth state.
@@ -137,11 +138,13 @@ export class Settings implements OnInit {
     }
 
     const newUsername = (this.profileForm.value.username as string).trim();
+    const rawBudget = Number(this.profileForm.value.budget ?? 0);
+    const safeBudget = isNaN(rawBudget) ? 0 : rawBudget;
     this.isSavingProfile = true;
-    this.authService.updateProfile(newUsername).subscribe({
+    this.authService.updateProfile(newUsername, safeBudget).subscribe({
       next: (profile) => {
         this.isSavingProfile = false;
-        this.profileForm.patchValue({ username: profile.username });
+        this.profileForm.patchValue({ username: profile.username, budget: profile.budget ?? 0 });
         this.messageService.add({
           severity: 'success',
           summary: 'נשמר',
