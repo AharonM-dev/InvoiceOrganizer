@@ -161,7 +161,8 @@ public class InvoicesController(AppDbContext db) : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var invoice = await db.Invoices.FindAsync(id);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var invoice = await db.Invoices.FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
         if (invoice is null)
             return NotFound();
 

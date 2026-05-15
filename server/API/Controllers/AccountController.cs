@@ -38,13 +38,13 @@ public class AccountController(AppDbContext context, ITokenService tokenService)
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
         var user = await context.Users.SingleOrDefaultAsync(x => x.Email == loginDto.Email);
-        if (user == null) return Unauthorized("Invalid email");
+        if (user == null) return Unauthorized("Invalid credentials");
 
         using var hmac = new HMACSHA512(user.PasswordSalt);
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
         for (int i = 0; i < computedHash.Length; i++)
         {
-            if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
+            if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid credentials");
         }
         return user.ToDto(tokenService);
 
