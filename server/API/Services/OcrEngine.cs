@@ -62,7 +62,7 @@ public class OcrEngine : IOcrEngine
             // מספר חשבונית
             if (document.Fields.TryGetValue("InvoiceId", out var invoiceIdField))
             {
-                var invoiceIdStr = invoiceIdField.Content;
+                var invoiceIdStr = invoiceIdField?.Content;
                 if (!string.IsNullOrWhiteSpace(invoiceIdStr) && int.TryParse(invoiceIdStr, out var invoiceNumber))
                 {
                     extractedData.InvoiceNumber = invoiceNumber;
@@ -72,7 +72,7 @@ public class OcrEngine : IOcrEngine
             // פרטי ספק
             if (document.Fields.TryGetValue("VendorName", out var vendorNameField))
             {
-                extractedData.SupplierName = vendorNameField.Content;
+                extractedData.SupplierName = vendorNameField?.Content;
             }
 
             // 4. מספר ספק (חילוץ משופר)

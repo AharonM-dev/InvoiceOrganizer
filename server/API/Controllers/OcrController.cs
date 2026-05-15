@@ -223,7 +223,15 @@ namespace API.Controllers
             if (string.IsNullOrWhiteSpace(doc.ExtractedJson))
                 return BadRequest("No extracted draft found for this document");
 
-            var extracted = JsonSerializer.Deserialize<ExtractedData>(doc.ExtractedJson);
+            ExtractedData? extracted;
+            try
+            {
+                extracted = JsonSerializer.Deserialize<ExtractedData>(doc.ExtractedJson);
+            }
+            catch (JsonException)
+            {
+                return BadRequest("Draft data is corrupted");
+            }
 
             if (extracted == null)
                 return BadRequest("Draft data is invalid");

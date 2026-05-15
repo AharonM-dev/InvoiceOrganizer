@@ -94,8 +94,8 @@ namespace API.Services
                         await _hubContext.Clients.Group(doc.UserId).SendAsync("OcrFinished", new
                         {
                             documentId = doc.Id,
-                            OcrStatus = "Failed",
-                            ProcessingError = ex.Message
+                            status = "Failed",
+                            processingError = ex.Message
                         }, ct);
                     }
                 }
