@@ -25,26 +25,18 @@
     <!-- Range + date filter -->
     <div class="rp-controls">
       <div class="rp-segment" role="tablist" aria-label="טווח דיווח">
-        <button type="button"
-                [class.is-active]="range === 'daily'"
-                (click)="setRange('daily')">יומי</button>
-        <button type="button"
-                [class.is-active]="range === 'weekly'"
-                (click)="setRange('weekly')">שבועי</button>
-        <button type="button"
-                [class.is-active]="range === 'monthly'"
-                (click)="setRange('monthly')">חודשי</button>
-        <button type="button"
-                [class.is-active]="range === 'yearly'"
-                (click)="setRange('yearly')">שנתי</button>
+        <button type="button" [class.is-active]="range === 'daily'" (click)="setRange('daily')">יומי</button>
+        <button type="button" [class.is-active]="range === 'weekly'" (click)="setRange('weekly')">שבועי</button>
+        <button type="button" [class.is-active]="range === 'monthly'" (click)="setRange('monthly')">חודשי</button>
+        <button type="button" [class.is-active]="range === 'yearly'" (click)="setRange('yearly')">שנתי</button>
       </div>
 
       <div class="rp-date">
         <span class="wf-mono">טווח</span>
-        <p-datepicker [(ngModel)]="dateRange" (ngModelChange)="onDateRangeChange()"
-                      selectionMode="range" [readonlyInput]="true"
-                      placeholder="בחר טווח תאריכים" />
-        <button *ngIf="dateRange?.[0]" type="button" class="wf-btn wf-btn-ghost" (click)="clearDateRange()" title="נקה טווח">
+        <p-datepicker [(ngModel)]="dateRange" (ngModelChange)="onDateRangeChange()" selectionMode="range"
+          [readonlyInput]="true" appendTo="body" [showButtonBar]="true" placeholder="בחר טווח תאריכים" />
+        <button *ngIf="dateRange?.[0]" type="button" class="wf-btn wf-btn-ghost" (click)="clearDateRange()"
+          title="נקה טווח">
           <i class="pi pi-times"></i>
         </button>
       </div>
