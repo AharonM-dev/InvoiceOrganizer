@@ -1,6 +1,13 @@
-.rp { display: flex; flex-direction: column; gap: 14px; }
+.rp {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-.rp-topbar-actions { display: flex; gap: 8px; }
+.rp-topbar-actions {
+  display: flex;
+  gap: 8px;
+}
 
 /* Empty */
 .rp-empty {
@@ -11,7 +18,7 @@
   align-items: center;
   gap: 12px;
 }
-.rp-empty .pi {
+.rp-empty > .pi {
   font-size: 36px;
   color: var(--wf-accent);
   margin-bottom: 4px;
@@ -56,9 +63,13 @@
   border: 1px solid transparent;
   cursor: pointer;
   font-family: var(--wf-sans);
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
-.rp-segment > button:hover { color: var(--wf-text); }
+.rp-segment > button:hover {
+  color: var(--wf-text);
+}
 .rp-segment > button.is-active {
   background: var(--wf-surface-2);
   color: var(--wf-text);
@@ -97,14 +108,19 @@
   font-weight: 600;
   color: var(--wf-text);
 }
-.rp-kpi-value-text { font-size: 18px; }
+.rp-kpi-value-text {
+  font-size: 18px;
+}
 .rp-kpi-value,
 .rp-kpi-value-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.rp-kpi .wf-tag { align-self: flex-start; margin-top: 6px; }
+.rp-kpi .wf-tag {
+  align-self: flex-start;
+  margin-top: 6px;
+}
 
 /* Card head shared */
 .rp-card-head {
@@ -129,8 +145,16 @@
   color: var(--wf-text-muted);
 }
 
-.rp-legend { display: flex; gap: 14px; align-items: center; }
-.rp-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.rp-legend {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.rp-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .rp-legend-line {
   width: 12px;
   height: 2px;
@@ -139,8 +163,12 @@
 }
 
 /* Chart card */
-.rp-chart-card { padding: 20px; }
-.rp-chart-body { height: 320px; }
+.rp-chart-card {
+  padding: 20px;
+}
+.rp-chart-body {
+  height: 320px;
+}
 
 /* Bottom grid */
 .rp-bottom-grid {
@@ -150,7 +178,9 @@
 }
 
 .rp-vendors-card,
-.rp-donut-card { padding: 20px; }
+.rp-donut-card {
+  padding: 20px;
+}
 
 .rp-vendors {
   list-style: none;
@@ -247,13 +277,21 @@
 }
 
 @media (max-width: 1100px) {
-  .rp-kpi-row { grid-template-columns: repeat(2, 1fr); }
-  .rp-bottom-grid { grid-template-columns: 1fr; }
+  .rp-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .rp-bottom-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
-  .rp-kpi-row { grid-template-columns: 1fr; }
-  .rp-controls { align-items: stretch; }
+  .rp-kpi-row {
+    grid-template-columns: 1fr;
+  }
+  .rp-controls {
+    align-items: stretch;
+  }
   .rp-segment {
     width: 100%;
     justify-content: space-between;
@@ -273,10 +311,19 @@
   }
   .rp-chart-card,
   .rp-vendors-card,
-  .rp-donut-card { padding: 16px; }
-  .rp-chart-body { height: 280px; }
-  .rp-donut-body { flex-direction: column; align-items: stretch; }
-  .rp-donut-chart { width: 100%; }
+  .rp-donut-card {
+    padding: 16px;
+  }
+  .rp-chart-body {
+    height: 280px;
+  }
+  .rp-donut-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .rp-donut-chart {
+    width: 100%;
+  }
   .rp-vendors li {
     align-items: stretch;
     flex-wrap: wrap;
