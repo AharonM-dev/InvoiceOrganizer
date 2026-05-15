@@ -15,6 +15,7 @@ import * as FileSaver from 'file-saver';
 import { TopBarComponent } from '../../layout/top-bar/top-bar';
 import { cssVar, cssVarWithAlpha } from '../../core/theme/theme-tokens';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 import { InvoiceListDto, CategorySummaryDto } from '../../core/models/invoice.model';
 
 @Component({
@@ -140,14 +141,6 @@ export class Reports implements OnInit {
   }
 
   fetchData() {
-    const userStr = localStorage.getItem("user");
-    if (!userStr) {
-        console.error('No user found in localStorage');
-        return;
-    }
-    const loggedUser = JSON.parse(userStr);
-    const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
-
     const dateQuery = this.buildDateRangeQuery();
 
     // A filter-active result returning 0 invoices means "no invoices in that range",
@@ -155,8 +148,8 @@ export class Reports implements OnInit {
     const isFiltered = !!(this.dateRange?.[0] && this.dateRange?.[1]);
 
     forkJoin({
-        invoices: this.http.get<InvoiceListDto[]>(`http://localhost:5042/api/Invoices${dateQuery.invoices}`, { headers }),
-        categorySummary: this.http.get<CategorySummaryDto[]>(`http://localhost:5042/api/Invoices/summary/by-category${dateQuery.category}`, { headers }),
+        invoices: this.http.get<InvoiceListDto[]>(`${environment.apiUrl}/Invoices${dateQuery.invoices}`),
+        categorySummary: this.http.get<CategorySummaryDto[]>(`${environment.apiUrl}/Invoices/summary/by-category${dateQuery.category}`),
         profile: this.authService.getProfile()
     }).subscribe({
         next: (response) => {
@@ -220,18 +213,11 @@ export class Reports implements OnInit {
   /* Load the trend chart from the summary endpoint matching the selected
      granularity, scoped to the active window. */
   loadTrendChart() {
-    const userStr = localStorage.getItem("user");
-    if (!userStr) {
-        return;
-    }
-    const loggedUser = JSON.parse(userStr);
-    const headers = { 'Authorization': `Bearer ${loggedUser.token}` };
-
     const { from, to } = this.getTrendWindow();
     const fromStr = this.formatDateLocal(from);
     const toStr = this.formatDateLocal(this.addDays(to, 1)); // inclusive end → exclusive bound
 
-    const base = "http://localhost:5042/api/Invoices/summary";
+    const base = `${environment.apiUrl}/Invoices/summary`;
     let url: string;
     switch (this.range) {
       case 'daily':   url = `${base}/by-day?from=${fromStr}&to=${toStr}`; break;
@@ -240,7 +226,7 @@ export class Reports implements OnInit {
       case 'yearly':  url = `${base}/by-year?from=${fromStr}&to=${toStr}`; break;
     }
 
-    this.http.get<any[]>(url!, { headers }).subscribe({
+    this.http.get<any[]>(url!).subscribe({
       next: (rows) => {
         this.applyTrendData(rows ?? []);
         this.cd.detectChanges();

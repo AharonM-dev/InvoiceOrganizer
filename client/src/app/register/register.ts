@@ -38,10 +38,8 @@ export class RegisterComponent {
         const { username, email, password } = this.registerForm.value;
         this.authService.register(username!, email!, password!)
         .subscribe({
-          next: (data:any) => {
+          next: (_data: any) => {
             this.successMessage = 'ההרשמה בוצעה בהצלחה! מועבר למערכת...';
-            let loggedUser = {username:data.username, token:data.token }
-            localStorage.setItem("user", JSON.stringify(loggedUser));
             setTimeout(() => {
             this.router.navigate(['/dashboard']);
           }, 1500);
