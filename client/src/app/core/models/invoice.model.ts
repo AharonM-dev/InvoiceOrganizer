@@ -83,7 +83,7 @@ export interface ExtractedData {
   supplierName?: string;
   supplierSupNum?: number;
   invoiceDate?: string;
-  invoiceNumber?: number;
+  invoiceNumber?: string;
   items: ExtractedItemDto[];
 }
 
@@ -92,7 +92,7 @@ export interface ExtractedData {
 
 export interface InvoiceListDto {
   id: number;
-  invoiceNumber: number;
+  invoiceNumber: string;
   invoiceDate: string;
   total: number;
   supplierName: string | null;

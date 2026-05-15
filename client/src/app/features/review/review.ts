@@ -44,6 +44,11 @@ export class Review implements OnInit {
   isSaving = false;
   errorMessage = '';
   successMessage = '';
+  fieldErrors: Record<string, string> = {};
+
+  getFieldError(field: string): string {
+    return this.fieldErrors[field] ?? '';
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -139,6 +144,7 @@ export class Review implements OnInit {
 
     this.errorMessage = '';
     this.successMessage = '';
+    this.fieldErrors = {};
     this.isSaving = true;
 
     // הגדרת supplierId מפורש — הבאק-אנד ישתמש בו ישירות
@@ -158,6 +164,17 @@ export class Review implements OnInit {
             Items: 'פריטים',
             Supplier: 'ספק',
           };
+          const inlineFields = new Set(['InvoiceNumber', 'InvoiceDate']);
+          const fieldMap: Record<string, string> = {};
+
+          for (const e of result.errors) {
+            if (inlineFields.has(e.field)) {
+              fieldMap[e.field] = e.message;
+            }
+          }
+
+          this.fieldErrors = fieldMap;
+          // All errors remain in the global summary as a guaranteed-visible fallback
           this.errorMessage = result.errors
             .map((e: any) => `${fieldLabels[e.field] ?? e.field}: ${e.message}`)
             .join(' | ');

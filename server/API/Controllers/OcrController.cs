@@ -70,8 +70,10 @@ namespace API.Controllers
             if (data.InvoiceDate == null)
                 result.Errors.Add(new ValidationErrorDto { Field = "InvoiceDate", Message = "Invoice date is required" });
 
-            if (data.InvoiceNumber == null)
+            if (string.IsNullOrWhiteSpace(data.InvoiceNumber))
                 result.Errors.Add(new ValidationErrorDto { Field = "InvoiceNumber", Message = "Invoice number is required" });
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(data.InvoiceNumber.Trim(), @"^\d+$"))
+                result.Errors.Add(new ValidationErrorDto { Field = "InvoiceNumber", Message = "Invoice number must contain digits only" });
 
             if (data.Items == null || data.Items.Count == 0)
                 result.Errors.Add(new ValidationErrorDto { Field = "Items", Message = "At least one item is required" });
@@ -178,7 +180,7 @@ namespace API.Controllers
                 UserId = doc.UserId ?? string.Empty,
                 //InvoiceNumber = data.InvoiceNumber!.Value,
                 //InvoiceDate = data.InvoiceDate!.Value,
-                InvoiceNumber = data.InvoiceNumber ?? 0,
+                InvoiceNumber = data.InvoiceNumber!.Trim(),
                 InvoiceDate = data.InvoiceDate ?? DateOnly.FromDateTime(DateTime.Now),
                 FilePath = doc.FilePath
             };

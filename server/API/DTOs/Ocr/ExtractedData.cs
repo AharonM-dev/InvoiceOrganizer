@@ -14,7 +14,7 @@ public class ExtractedData
     public string? Address { get; set; }
 
     public DateOnly? InvoiceDate { get; set; }
-    public int? InvoiceNumber { get; set; }
+    public string? InvoiceNumber { get; set; }
 
     public List<ExtractedItemDto> Items { get; set; } = new List<ExtractedItemDto>();
 }

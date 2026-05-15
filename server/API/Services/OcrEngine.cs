@@ -62,10 +62,11 @@ public class OcrEngine : IOcrEngine
             // מספר חשבונית
             if (document.Fields.TryGetValue("InvoiceId", out var invoiceIdField))
             {
-                var invoiceIdStr = invoiceIdField?.Content;
-                if (!string.IsNullOrWhiteSpace(invoiceIdStr) && int.TryParse(invoiceIdStr, out var invoiceNumber))
+                var invoiceIdStr = invoiceIdField?.Content?.Trim();
+                if (!string.IsNullOrWhiteSpace(invoiceIdStr) &&
+                    System.Text.RegularExpressions.Regex.IsMatch(invoiceIdStr, @"^\d+$"))
                 {
-                    extractedData.InvoiceNumber = invoiceNumber;
+                    extractedData.InvoiceNumber = invoiceIdStr;
                 }
             }
 
