@@ -79,11 +79,14 @@
         <div class="rv-row-grid">
           <div class="rv-row">
             <label class="wf-mono">מספר חשבונית</label>
-            <div class="rv-value wf-num">{{ draft.invoiceNumber ?? '—' }}</div>
+            <input type="number" class="rv-value wf-num rv-input"
+                   [(ngModel)]="draft.invoiceNumber"
+                   placeholder="הכנס מספר חשבונית" />
           </div>
           <div class="rv-row">
             <label class="wf-mono">תאריך</label>
-            <div class="rv-value wf-num">{{ draft.invoiceDate ?? '—' }}</div>
+            <input type="date" class="rv-value wf-num rv-input"
+                   [(ngModel)]="draft.invoiceDate" />
           </div>
         </div>
 

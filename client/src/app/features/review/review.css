@@ -142,6 +142,17 @@
   color: var(--wf-text);
 }
 
+.rv-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.rv-input::-webkit-outer-spin-button,
+.rv-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.rv-input:focus { border-color: var(--wf-accent); }
+
 .rv-section { display: flex; flex-direction: column; gap: 8px; }
 
 .rv-hint {

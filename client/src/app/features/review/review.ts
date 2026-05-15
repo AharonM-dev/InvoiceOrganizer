@@ -152,8 +152,14 @@ export class Review implements OnInit {
           this.cdr.detectChanges();
           setTimeout(() => this.router.navigate(['/invoices']), 2000);
         } else {
+          const fieldLabels: Record<string, string> = {
+            InvoiceNumber: 'מספר חשבונית',
+            InvoiceDate: 'תאריך חשבונית',
+            Items: 'פריטים',
+            Supplier: 'ספק',
+          };
           this.errorMessage = result.errors
-            .map((e: any) => `${e.field}: ${e.message}`)
+            .map((e: any) => `${fieldLabels[e.field] ?? e.field}: ${e.message}`)
             .join(' | ');
           this.cdr.detectChanges();
         }
